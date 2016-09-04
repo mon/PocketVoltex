@@ -1,0 +1,15 @@
+Hardware/History/
+Hardware/__Previews/
+*.d
+*.sym
+*.o
+*.lss
+*.map
+*.eep
+*.bin
+*.elf
+Firmware/Bootloader/
+*.hex
+Firmware/LUFA/
+Hardware/Project Outputs for SDVX_Mini/
+Hardware/Project Logs for SDVX_Mini/
