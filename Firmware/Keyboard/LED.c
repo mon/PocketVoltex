@@ -1,5 +1,4 @@
 #include "LED.h"
-//#include <util/delay.h>
 
 #define BRIGHTNESS_LEVELS 64
 #define GND_COUNT 4
@@ -21,18 +20,9 @@
 #define G 1
 #define B 0
 
-//typedef struct {
-//    uint8_t gnd;
-//    uint8_t brightness;
-//} matrix_t;
-
-// Arranged left to right, bottom to top
-static volatile uint8_t leds[LED_COUNT][3];
-//volatile matrix_t current;
-volatile uint8_t currentGnd;
-// This saves us doing a costly dynamic _BV()
-volatile uint8_t currentGndMask;
-volatile uint8_t currentBright;
+// Arranged left to right, top to bottom
+// LED order is BGR...BGR
+static volatile uint8_t leds[LED_COUNT * 3];
 
 void led_init() {
     // all GNDs low level for high impedence or gnd
@@ -40,20 +30,13 @@ void led_init() {
     // all GNDs input
     GND_DDR &= ~GND_MASK;
     
-    // Because we roll over on each loop and want to start at 0
-    currentBright = BRIGHTNESS_LEVELS - 1;
-    currentGnd = GND_COUNT - 1;
-    currentGndMask = _BV(GND_OFFSET);
-    
     // all LEDs off
     LED_PORT &= ~LED_MASK;
     // all LEDs output
     LED_DDR |= LED_MASK;
     
-    for(uint8_t i = 0; i < LED_COUNT; i++) {
-        leds[i][R] = 0;
-        leds[i][G] = 0;
-        leds[i][B] = 0;
+    for(uint8_t i = 0; i < LED_COUNT * 3; i++) {
+        leds[i] = 0;
     }
     
     // 64 light levels * 60Hz update * 4 different GND pins = 15360Hz
@@ -63,68 +46,73 @@ void led_init() {
     // clk/8 prescaler
     TCCR0B = _BV(CS01);
     // 0.16% error on above calculation
-    OCR0A = 128;//64; DEBUG SLOWER
+    OCR0A = 64;
     // Enable interrupt on OCR0A
     TIMSK0 = _BV(OCIE0A);
     // Clear interrupt
     TIFR0 = _BV(OCF0A);
-    
-    /*debug shit
-    sei();
-    while(1) {
-        led_set(0, 32, 0, 0);
-        _delay_ms(500);
-        led_set(0, 0, 0, 0);
-        _delay_ms(500);
-        
-        currentGnd++;
-        currentGnd %= GND_COUNT;
-        GND_ENABLE(currentGnd);
-        LED_PORT &= ~LED_MASK;
-        LED_PORT |= 0b100010 << 2;
-        _delay_ms(500);
-        LED_PORT &= ~LED_MASK;
-        LED_PORT |= 0b010001 << 2;
-        _delay_ms(500);
-        LED_PORT &= ~LED_MASK;
-        LED_PORT |= 0b001100 << 2;
-        _delay_ms(500);
-        GND_DISABLE(currentGnd);
-    }*/
 }
 
 void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
-    leds[num][R] = r;
-    leds[num][G] = g;
-    leds[num][B] = b;
+    uint8_t offset = num * 3;
+    leds[offset+R] = r;
+    leds[offset+G] = g;
+    leds[offset+B] = b;
 }
-//if(leds[(currentGnd << 1) + side][colour] <= currentBright)
-#define LED_SET(side, colour, outPin) \
-    if(leds[offset + side][colour] > currentBright) \
-        out |= _BV(outPin)
 
-// This function takes about 279 clock cycles. Could be improved :(
+/* Straight voodoo magic, consult the Inline Assembler Cookbook
+   Equivalent to:
+   if(*led++ > brightness)
+       out |= _BV(outPin)
+*/
+#define LED_PIN_SET(led, outPin)                                   \
+    __asm__ volatile(                                              \
+        "ld __tmp_reg__, %a["#led"]+                           \n\t\
+         cp %[bright], __tmp_reg__                             \n\t\
+         brcc skip%=                                           \n\t\
+         ori %[out], (1 << "#outPin")                          \n\t\
+         skip%=:"                                                  \
+        : [out] "=r" (out), "=z" (led)              /* outputs */  \
+        : "r" (out), [led] "z" (led), [bright] "r" (brightness) /* inputs */ )
+
+// This function once took about 279 clock cycles.
 // Optimised GND accesses got it to 157
+// Optimised variables to static, got it to 100
+// Made LED setter assembly, got it to 90
 ISR(TIMER0_COMPA_vect) {
+    /* Why are these static here instead of at the top of file?
+       The compiler won't optimise 2 consecutive operations to use a register,
+       and instead will perform a costly lds-sts every time. Making them
+       static here will cache them in a local register.
+    */
+    // Because we roll over on each loop and want to start at 0 this starts at max
+    static uint8_t currentGnd = GND_COUNT - 1;
+    // This saves us doing a costly dynamic _BV()
+    static uint8_t currentGndMask = 0;
+    static uint8_t brightness = BRIGHTNESS_LEVELS - 1;
+    static volatile uint8_t* offset = &leds[0];
+    
     uint8_t out = 0;
     
     currentGnd++;
     currentGndMask >>= 1;
     if(currentGnd >= GND_COUNT) {
         currentGnd = 0;
+        // Because we work backwards start at the high end and shift down
         currentGndMask = _BV(7);
-        ++currentBright;
-        currentBright %= BRIGHTNESS_LEVELS;
+        offset = &leds[0];
+        ++brightness;
+        brightness %= BRIGHTNESS_LEVELS;
     }
-    
-    uint8_t offset = currentGnd * 2;
+
     // Faster than loops
-    LED_SET(0, 0, 2);
-    LED_SET(0, 1, 3);
-    LED_SET(0, 2, 4);
-    LED_SET(1, 0, 5);
-    LED_SET(1, 1, 6);
-    LED_SET(1, 2, 7);
+    // NOTE: ASM MACRO INCREMENTS OFFSET
+    LED_PIN_SET(offset, 2);
+    LED_PIN_SET(offset, 3);
+    LED_PIN_SET(offset, 4);
+    LED_PIN_SET(offset, 5);
+    LED_PIN_SET(offset, 6);
+    LED_PIN_SET(offset, 7);
     
     // Turn off before switch
     LED_PORT &= ~LED_MASK;
