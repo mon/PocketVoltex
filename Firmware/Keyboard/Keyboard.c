@@ -1,46 +1,9 @@
-/*
-             LUFA Library
-     Copyright (C) Dean Camera, 2014.
-
-  dean [at] fourwalledcubicle [dot] com
-           www.lufa-lib.org
-*/
-
-/*
-  Copyright 2014  Dean Camera (dean [at] fourwalledcubicle [dot] com)
-
-  Permission to use, copy, modify, distribute, and sell this
-  software and its documentation for any purpose is hereby granted
-  without fee, provided that the above copyright notice appear in
-  all copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting
-  documentation, and that the name of the author not be used in
-  advertising or publicity pertaining to distribution of the
-  software without specific, written prior permission.
-
-  The author disclaims all warranties with regard to this
-  software, including all implied warranties of merchantability
-  and fitness.  In no event shall the author be liable for any
-  special, indirect or consequential damages or any damages
-  whatsoever resulting from loss of use, data or profits, whether
-  in an action of contract, negligence or other tortious action,
-  arising out of or in connection with the use or performance of
-  this software.
-*/
-
-/** \file
- *
- *  Main source file for the Keyboard demo. This file contains the main tasks of
- *  the demo and is responsible for the initial application hardware configuration.
- */
-
 #include "Keyboard.h"
 #include "Config.h"
 #include "Encoder.h"
+#include "LED.h"
 
 #define READ_SWITCH(x) (!(*pins[switches[x].switchPort] & _BV(switches[x].switchPin)))
-#define SET_LED(x) (*ports[switches[x].lightPort] |= _BV(switches[x].lightPin))
-#define CLEAR_LED(x) (*ports[switches[x].lightPort] &= ~_BV(switches[x].lightPin))
 
 typedef struct
 {
@@ -125,21 +88,19 @@ static volatile uint8_t *ddrs[] = {&DDRB, &DDRC, &DDRD};
 typedef struct {
     port_t switchPort;
     uint8_t switchPin;
-    port_t lightPort;
-    uint8_t lightPin;
     uint8_t state;
     uint8_t lastReport;
     uint8_t debounce;
 } switch_t;
 
 static switch_t switches[SWITCH_COUNT] = {
-    {C, 7, C, 6}, // A
-    {B, 4, B, 5}, // B
-    {B, 2, B, 3}, // C
-    {D, 6, D, 7}, // D
-    {B, 6, B, 7}, // FX L
-    {B, 0, B, 1}, // FX R
-    {D, 5, D, 4} // START
+    {B, 1}, // A
+    {D, 7}, // B
+    {D, 5}, // C
+    {D, 4}, // D
+    {B, 0}, // FX L
+    {D, 6}, // FX R
+    {C, 2} // START
 };
 static uint8_t switchesChanged = 1;
 
@@ -174,13 +135,7 @@ void update_switches(void) {
     uint8_t i, newState;
     
     for(i = 0; i < SWITCH_COUNT; i++) {
-        // The I2C data starts at the 6th bit and goes down
         newState = READ_SWITCH(i);
-        if(newState) {
-            SET_LED(i);
-        } else {
-            CLEAR_LED(i);
-        }
         if(!switches[i].debounce && newState != switches[i].lastReport) {
             switches[i].state = newState;
             switches[i].debounce = sdvxConfig.debounce;
@@ -189,32 +144,25 @@ void update_switches(void) {
     }
 }
 
-/** Main program entry point. This routine contains the overall program flow, including initial
- *  setup of all components and the main program loop.
- */
 int main(void)
 {
     GlobalInterruptDisable();
     
-    uint8_t i;
-    
     InitConfig();
     
 	SetupHardware();
-    
-    // FX_L held while plugging in
-    if(READ_SWITCH(4)) {
-        RebootToBootloader();
-    }
-    
-    // Blink to show we're not in bootloader
-    for(i = 0; i < SWITCH_COUNT; i++) {
-        *ports[switches[i].lightPort] |= _BV(switches[i].lightPin);
-        _delay_ms(50);
-        *ports[switches[i].lightPort] &= ~_BV(switches[i].lightPin);
-    }
 
 	GlobalInterruptEnable();
+    
+    // Blink to show we're not in bootloader
+    for(uint8_t i = 0; i < LED_COUNT; i++) {
+        led_set(i, 32, 0, 0);
+        _delay_ms(1000);
+        led_set(i, 0, 0, 0);
+    }
+    
+    // Not in SetupHardware so we don't time out
+	USB_Init();
 
 	for (;;)
 	{
@@ -225,7 +173,7 @@ int main(void)
 	}
 }
 
-/** Configures the board hardware and chip peripherals for the demo's functionality. */
+/** Configures the board hardware and chip peripherals */
 void SetupHardware()
 {
     uint8_t i;
@@ -242,15 +190,16 @@ void SetupHardware()
         *ddrs[switches[i].switchPort] &= ~_BV(switches[i].switchPin);
         // with internal pullups
         *ports[switches[i].switchPort] |= _BV(switches[i].switchPin);
-        // setup LEDs to be outputs
-        *ddrs[switches[i].lightPort] |= _BV(switches[i].lightPin);
-        // off by default
-        *ports[switches[i].lightPort] &= ~_BV(switches[i].lightPin);
+    }
+    
+    // FX_L held while plugging in
+    if(READ_SWITCH(4)) {
+        RebootToBootloader();
     }
 
 	/* Hardware Initialization */
     encoder_init();
-	USB_Init();
+    led_init();
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
