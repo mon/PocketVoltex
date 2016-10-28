@@ -42,6 +42,7 @@
 		#include <LUFA/Drivers/USB/USB.h>
         
         #include "Config.h"
+        #include "LED.h"
 
 	/* Type Defines: */
 		/** Type define for the device configuration descriptor structure. This must be defined in the
@@ -66,6 +67,11 @@
 			USB_Descriptor_Interface_t            HID3_Interface;
 			USB_HID_Descriptor_HID_t              HID3_VendorHID;
 			USB_Descriptor_Endpoint_t             HID3_ReportINEndpoint;
+            
+            // LED HID Interface for pretty lights
+			USB_Descriptor_Interface_t            HID4_Interface;
+			USB_HID_Descriptor_HID_t              HID4_LEDHID;
+			USB_Descriptor_Endpoint_t             HID4_ReportOUTEndpoint;
 		} USB_Descriptor_Configuration_t;
 
 		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
@@ -76,7 +82,8 @@
 		{
 			INTERFACE_ID_Keyboard = 0, /**< Keyboard interface descriptor ID */
             INTERFACE_ID_Mouse    = 1, /**< Mouse interface descriptor ID */
-            INTERFACE_ID_Generic  = 2  /**< Generic interface descriptor ID  */
+            INTERFACE_ID_Generic  = 2, /**< Generic interface descriptor ID  */
+            INTERFACE_ID_LED      = 3  /**< LED interface descriptor ID  */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
@@ -88,21 +95,23 @@
 			STRING_ID_Language     = 0, /**< Supported Languages string descriptor ID (must be zero) */
 			STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
 			STRING_ID_Product      = 2, /**< Product string ID */
-			STRING_ID_Config       = 3 /**< Config string ID */
+			STRING_ID_Config       = 3, /**< Config string ID */
+            STRING_ID_LED          = 4  /**< LED string ID */
 		};
 
 	/* Macros: */
-		/** Endpoint address of the Keyboard HID reporting IN endpoint. */
 		#define KEYBOARD_EPADDR              (ENDPOINT_DIR_IN | 1)
         
         #define MOUSE_IN_EPADDR              (ENDPOINT_DIR_IN | 2)
         
         #define GENERIC_EPADDR               (ENDPOINT_DIR_IN | 3)
+        
+        #define LED_EPADDR                   (ENDPOINT_DIR_OUT | 4)
 
-		/** Size in bytes of the Keyboard HID reporting IN endpoint. */
 		#define KEYBOARD_EPSIZE              8
         #define MOUSE_EPSIZE                 8
 		#define GENERIC_EPSIZE               CONFIG_BYTES
+        #define LED_EPSIZE                   LED_COUNT
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,

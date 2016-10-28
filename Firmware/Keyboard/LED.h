@@ -9,5 +9,6 @@
 
 void led_init(void);
 void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
+void led_set_indiv(uint8_t num, uint8_t val);
 
 #endif

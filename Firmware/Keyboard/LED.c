@@ -60,6 +60,10 @@ void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
     leds[offset+B] = b;
 }
 
+void led_set_indiv(uint8_t num, uint8_t val) {
+    leds[num] = val;
+}
+
 /* Straight voodoo magic, consult the Inline Assembler Cookbook
    Equivalent to:
    if(*led++ > brightness)

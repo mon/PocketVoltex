@@ -16,6 +16,7 @@ typedef struct
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(Keyboard_Report_t)];
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
 static uint8_t PrevGenericHIDReportBuffer[CONFIG_BYTES];
+static uint8_t PrevLEDHIDReportBuffer[LED_COUNT];
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -71,6 +72,22 @@ USB_ClassInfo_HID_Device_t Generic_HID_Interface =
                 },
             .PrevReportINBuffer           = PrevGenericHIDReportBuffer,
             .PrevReportINBufferSize       = sizeof(PrevGenericHIDReportBuffer),
+        },
+};
+
+USB_ClassInfo_HID_Device_t LED_HID_Interface =
+{
+    .Config =
+        {
+            .InterfaceNumber              = INTERFACE_ID_LED,
+            .ReportINEndpoint             =
+                {
+                    .Address              = LED_EPADDR,
+                    .Size                 = LED_EPSIZE,
+                    .Banks                = 1,
+                },
+            .PrevReportINBuffer           = PrevLEDHIDReportBuffer,
+            .PrevReportINBufferSize       = sizeof(PrevLEDHIDReportBuffer),
         },
 };
 
@@ -157,7 +174,7 @@ int main(void)
     // Blink to show we're not in bootloader
     for(uint8_t i = 0; i < LED_COUNT; i++) {
         led_set(i, 32, 0, 0);
-        _delay_ms(1000);
+        _delay_ms(100);
         led_set(i, 0, 0, 0);
     }
     
@@ -169,6 +186,7 @@ int main(void)
 		HID_Device_USBTask(&Keyboard_HID_Interface);
         HID_Device_USBTask(&Mouse_HID_Interface);
 		HID_Device_USBTask(&Generic_HID_Interface);
+		HID_Device_USBTask(&LED_HID_Interface);
 		USB_USBTask();
 	}
 }
@@ -289,6 +307,9 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
             RebootToBootloader();
         }
         SetConfig(ConfigReport);
+    } else if(HIDInterfaceInfo == &LED_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
+        uint8_t* LEDReport = (uint8_t*)ReportData;
+        led_set_indiv(0, LEDReport[0]);
     }
 }
 
@@ -311,6 +332,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 	HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
     HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
 	HID_Device_ConfigureEndpoints(&Generic_HID_Interface);
+	HID_Device_ConfigureEndpoints(&LED_HID_Interface);
 
 	USB_Device_EnableSOFEvents();
 }
@@ -321,6 +343,7 @@ void EVENT_USB_Device_ControlRequest(void)
 	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
     HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
 	HID_Device_ProcessControlRequest(&Generic_HID_Interface);
+	HID_Device_ProcessControlRequest(&LED_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
@@ -329,6 +352,7 @@ void EVENT_USB_Device_StartOfFrame(void)
 	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
     HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
 	HID_Device_MillisecondElapsed(&Generic_HID_Interface);
+	HID_Device_MillisecondElapsed(&LED_HID_Interface);
     
     for(int i = 0; i < SWITCH_COUNT; i++) {
         if(switches[i].debounce) {

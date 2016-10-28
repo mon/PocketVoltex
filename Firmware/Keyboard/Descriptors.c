@@ -34,6 +34,63 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
 	HID_RI_END_COLLECTION(0),
 };
 
+const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
+{
+	HID_RI_USAGE_PAGE(16, 0xFFDE), /* Vendor Page 0xDC */
+	HID_RI_USAGE(8, 0xFE), /* Vendor Usage 0xFB */
+	HID_RI_COLLECTION(8, 0x03), /* Vendor Usage 1 */
+		HID_RI_USAGE(8, 0x04), /* Vendor Usage 2 */
+		HID_RI_LOGICAL_MINIMUM(8, 0x00),
+		HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
+		HID_RI_REPORT_SIZE(8, 8),
+		HID_RI_REPORT_COUNT(8, CONFIG_BYTES),
+		HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+        
+        HID_RI_USAGE(8, 0x04), /* Vendor Usage 2 */
+		HID_RI_LOGICAL_MINIMUM(8, 0x00),
+		HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
+		HID_RI_REPORT_SIZE(8, 8),
+		HID_RI_REPORT_COUNT(8, CONFIG_BYTES),
+		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+	HID_RI_END_COLLECTION(0),
+    //HID_RI_USAGE_PAGE(16, 0xFF00), 
+	//		HID_RI_USAGE(8, 0x01),           
+	//		HID_RI_COLLECTION(8, 0x01), 
+	//			HID_RI_USAGE(8, 0x02),          
+	//			HID_RI_LOGICAL_MINIMUM(8, 0),        
+	//			HID_RI_LOGICAL_MAXIMUM(8, 64),        
+	//			HID_RI_REPORT_SIZE(8, 8),            
+	//			HID_RI_REPORT_COUNT(8, 1),       
+	//			HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+    //            
+    //            HID_RI_USAGE(8, 0x02),          
+	//			HID_RI_LOGICAL_MINIMUM(8, 0),        
+	//			HID_RI_LOGICAL_MAXIMUM(8, 64),        
+	//			HID_RI_REPORT_SIZE(8, 8),            
+	//			HID_RI_REPORT_COUNT(8, 1),       
+	//			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+	//		HID_RI_END_COLLECTION(0)
+	//HID_RI_USAGE_PAGE(8, 0x08), /* LEDs */
+	//HID_RI_USAGE(8, 0x4b), /* Generic indicator */
+	//HID_RI_COLLECTION(8, 0x01), /* Application */
+    //    // Lights aren't the full 256 shades
+    //    HID_RI_USAGE(8, 0x4B), /* Generic indicator 1 */
+    //    HID_RI_LOGICAL_MINIMUM(8, 0),
+	//	HID_RI_LOGICAL_MAXIMUM(8, 64),
+	//	HID_RI_USAGE_PAGE(8, 0x0A), /* Ordinals */
+    //    
+    //    HID_RI_USAGE(8, 1), /* Instance 1 */
+    //    HID_RI_COLLECTION(8, 0x02), /* Logical */
+    //        HID_RI_USAGE_PAGE(8, 0x08), /* LEDs */
+    //        
+    //        HID_RI_REPORT_SIZE(8, 8),
+    //        HID_RI_REPORT_COUNT(8, 8),
+    //        HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+    //    HID_RI_END_COLLECTION(0),
+    //    
+	//HID_RI_END_COLLECTION(0),
+};
+
 /** HID class report descriptor. This is a special descriptor constructed with values from the
  *  USBIF HID class specification to describe the reports and capabilities of the HID device. This
  *  descriptor is parsed by the host and its contents used to determine what data (and in what encoding)
@@ -107,14 +164,14 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-			.TotalInterfaces        = 3,
+			.TotalInterfaces        = 4,
 
 			.ConfigurationNumber    = 1,
-			.ConfigurationStrIndex  = NO_DESCRIPTOR,
+			.ConfigurationStrIndex  = STRING_ID_Product,
 
 			.ConfigAttributes       = USB_CONFIG_ATTR_RESERVED,
 
-			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
+			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(500)
 		},
 
 	.HID1_Interface =
@@ -130,7 +187,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.SubClass               = HID_CSCP_NonBootSubclass,
 			.Protocol               = HID_CSCP_NonBootProtocol,
 
-			.InterfaceStrIndex      = STRING_ID_Product
+			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
 
 	.HID1_KeyboardHID =
@@ -167,7 +224,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.SubClass               = HID_CSCP_BootSubclass,
 			.Protocol               = HID_CSCP_MouseBootProtocol,
 
-			.InterfaceStrIndex      = STRING_ID_Product
+			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
 
 	.HID2_MouseHID =
@@ -227,6 +284,43 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.EndpointSize           = GENERIC_EPSIZE,
 			.PollingIntervalMS      = 255
 		},
+        
+	.HID4_Interface =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
+
+			.InterfaceNumber        = INTERFACE_ID_LED,
+			.AlternateSetting       = 0x00,
+
+			.TotalEndpoints         = 1,
+
+			.Class                  = HID_CSCP_HIDClass,
+			.SubClass               = HID_CSCP_NonBootSubclass,
+			.Protocol               = HID_CSCP_NonBootProtocol,
+
+			.InterfaceStrIndex      = STRING_ID_LED
+		},
+
+	.HID4_LEDHID =
+		{
+			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
+
+			.HIDSpec                = VERSION_BCD(1,1,1),
+			.CountryCode            = 0x00,
+			.TotalReportDescriptors = 1,
+			.HIDReportType          = HID_DTYPE_Report,
+			.HIDReportLength        = sizeof(LEDReport)
+		},
+
+	.HID4_ReportOUTEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = LED_EPADDR,
+			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = LED_EPSIZE,
+			.PollingIntervalMS      = 15
+		},
 };
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -246,9 +340,8 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR
  *  Descriptor.
  */
 const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Pocket Voltex");
-
-
-const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"SDVX Config");
+const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Config");
+const USB_Descriptor_String_t PROGMEM LEDString = USB_STRING_DESCRIPTOR(L"Pocket Voltex LEDs");
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given
@@ -295,6 +388,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &ConfigString;
 					Size    = pgm_read_byte(&ConfigString.Header.Size);
 					break;
+                case STRING_ID_LED:
+                    Address = &LEDString;
+					Size    = pgm_read_byte(&LEDString.Header.Size);
+					break;
 			}
 
 			break;
@@ -309,6 +406,9 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					break;
 				case INTERFACE_ID_Generic:
 					Address = &ConfigurationDescriptor.HID3_VendorHID;
+					break;
+				case INTERFACE_ID_LED:
+					Address = &ConfigurationDescriptor.HID4_LEDHID;
 					break;
 			}
 			break;
@@ -325,6 +425,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 				case INTERFACE_ID_Generic:
 					Address = &GenericReport;
 					Size    = sizeof(GenericReport);
+					break;
+                case INTERFACE_ID_LED:
+					Address = &LEDReport;
+					Size    = sizeof(LEDReport);
 					break;
 			}
 			break;
