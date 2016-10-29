@@ -3,7 +3,7 @@
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 
-#define MAGIC_NUMBER 43
+#define MAGIC_NUMBER 42
 
 static sdvx_config_t defaults PROGMEM = {
     .switches = {

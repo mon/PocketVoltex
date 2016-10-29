@@ -1,6 +1,5 @@
 #include "LED.h"
 
-#define BRIGHTNESS_LEVELS 64
 #define GND_COUNT 4
 // RGB * 2
 #define LED_PINS 6
@@ -20,10 +19,6 @@
 #define G 1
 #define B 0
 
-// Arranged left to right, top to bottom
-// LED order is BGR...BGR
-static volatile uint8_t leds[LED_COUNT * 3];
-
 void led_init() {
     // all GNDs low level for high impedence or gnd
     GND_PORT &= ~GND_MASK;
@@ -35,9 +30,7 @@ void led_init() {
     // all LEDs output
     LED_DDR |= LED_MASK;
     
-    for(uint8_t i = 0; i < LED_COUNT * 3; i++) {
-        leds[i] = 0;
-    }
+    memset((uint8_t*)leds, 0, LED_RAW_COUNT);
     
     // 64 light levels * 60Hz update * 4 different GND pins = 15360Hz
     // 520 clock cycles for our interrupt handler
@@ -46,7 +39,9 @@ void led_init() {
     // clk/8 prescaler
     TCCR0B = _BV(CS01);
     // 0.16% error on above calculation
-    OCR0A = 64;
+    //OCR0A = 64; // 60Hz
+    OCR0A = 77; // 50Hz
+    //OCR0A = 48; // 80Hz
     // Enable interrupt on OCR0A
     TIMSK0 = _BV(OCIE0A);
     // Clear interrupt

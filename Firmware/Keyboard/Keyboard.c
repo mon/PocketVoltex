@@ -12,11 +12,17 @@ typedef struct
     uint8_t KeyCode[SWITCH_COUNT]; // Length determined by the number of keys that can be reported
 } Keyboard_Report_t;
 
+typedef struct
+{
+    uint8_t mainLights[LED_RAW_COUNT];
+    uint8_t btFx[6];
+} LED_Report_t;
+
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(Keyboard_Report_t)];
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
-static uint8_t PrevGenericHIDReportBuffer[CONFIG_BYTES];
-static uint8_t PrevLEDHIDReportBuffer[LED_COUNT];
+static uint8_t PrevGenericHIDReportBuffer[sizeof(sdvx_config_t)];
+static uint8_t PrevLEDHIDReportBuffer[sizeof(LED_Report_t)];
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -172,11 +178,22 @@ int main(void)
 	GlobalInterruptEnable();
     
     // Blink to show we're not in bootloader
-    for(uint8_t i = 0; i < LED_COUNT; i++) {
-        led_set(i, 32, 0, 0);
-        _delay_ms(100);
-        led_set(i, 0, 0, 0);
+    for(uint8_t flash = 0; flash < BRIGHTNESS_LEVELS; flash++) {
+        for(uint8_t i = 0; i < LED_COUNT; i++) {
+            uint8_t bright = ledLogCurve[flash];
+            led_set(i, bright, bright/2, 0);
+            _delay_us(500);
+        }
     }
+    // NOTE: signed
+    for(int8_t flash = BRIGHTNESS_LEVELS; flash >= 0; flash--) {
+         for(uint8_t i = 0; i < LED_COUNT; i++) {
+            uint8_t bright = ledLogCurve[flash];
+            led_set(i, bright, bright/2, 0);
+            _delay_us(500);
+        }
+    }
+
     
     // Not in SetupHardware so we don't time out
 	USB_Init();
@@ -280,6 +297,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         memcpy(ConfigReport, &sdvxConfig, sizeof(sdvx_config_t));
         *ReportSize = CONFIG_BYTES;
         return true;
+    } else if(HIDInterfaceInfo == &LED_HID_Interface) {
+        uint8_t* LEDReport = (uint8_t*)ReportData;
+        memcpy(LEDReport, (uint8_t*)leds, LED_TOTAL_COUNT);
+        *ReportSize = LED_TOTAL_COUNT;
+        return true;
     }
     *ReportSize = 0;
     return false;
@@ -298,8 +320,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const uint8_t ReportID,
                                           const uint8_t ReportType,
                                           const void* ReportData,
-                                          const uint16_t ReportSize)
-{
+                                          const uint16_t ReportSize) {
     if(HIDInterfaceInfo == &Generic_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
         uint8_t* ConfigReport = (uint8_t*)ReportData;
         // So we can upgrade firmware without having to hit the button
@@ -308,8 +329,22 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         }
         SetConfig(ConfigReport);
     } else if(HIDInterfaceInfo == &LED_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
-        uint8_t* LEDReport = (uint8_t*)ReportData;
-        led_set_indiv(0, LEDReport[0]);
+        LED_Report_t* LEDReport = (LED_Report_t*)ReportData;
+        memcpy((uint8_t*)leds, LEDReport->mainLights, LED_RAW_COUNT);
+        
+        // Keep normal lights but override when we get flashes on BT or FX
+        // BT LEDs flash pure white
+        for(uint8_t i = 0; i < 4; i++) {
+            if(LEDReport->btFx[i]) {
+                led_set(ledMap[i], BRIGHTNESS_LEVELS, BRIGHTNESS_LEVELS, BRIGHTNESS_LEVELS);
+            }
+        }
+        // FX LEDs flash orange
+        for(uint8_t i = 4; i < 6; i++) {
+            if(LEDReport->btFx[i]) {
+                led_set(ledMap[i], BRIGHTNESS_LEVELS, BRIGHTNESS_LEVELS/4, 0);
+            }
+        }
     }
 }
 

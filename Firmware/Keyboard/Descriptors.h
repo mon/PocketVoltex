@@ -71,7 +71,7 @@
             // LED HID Interface for pretty lights
 			USB_Descriptor_Interface_t            HID4_Interface;
 			USB_HID_Descriptor_HID_t              HID4_LEDHID;
-			USB_Descriptor_Endpoint_t             HID4_ReportOUTEndpoint;
+			USB_Descriptor_Endpoint_t             HID4_ReportINEndpoint;
 		} USB_Descriptor_Configuration_t;
 
 		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
@@ -96,7 +96,9 @@
 			STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
 			STRING_ID_Product      = 2, /**< Product string ID */
 			STRING_ID_Config       = 3, /**< Config string ID */
-            STRING_ID_LED          = 4  /**< LED string ID */
+            STRING_ID_KNOB         = 4, 
+            STRING_ID_LED          = 5,  /**< LED string ID */
+            STRING_ID_LED_INDIV    = 6,
 		};
 
 	/* Macros: */
@@ -106,12 +108,12 @@
         
         #define GENERIC_EPADDR               (ENDPOINT_DIR_IN | 3)
         
-        #define LED_EPADDR                   (ENDPOINT_DIR_OUT | 4)
+        #define LED_EPADDR                   (ENDPOINT_DIR_IN | 4)
 
 		#define KEYBOARD_EPSIZE              8
         #define MOUSE_EPSIZE                 8
 		#define GENERIC_EPSIZE               CONFIG_BYTES
-        #define LED_EPSIZE                   LED_COUNT
+        #define LED_EPSIZE                   LED_TOTAL_COUNT
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
