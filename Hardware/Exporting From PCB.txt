@@ -1,0 +1,51 @@
+Make visible only the layers you care for
+
+File -> Save as -> DXF/DWG
+Autocad 2007, DXF, Metric
+Check "Export pads" "On dedicated hole layers"
+Tracks "Export with rounded"
+Primitives to export with zero line width "All"
+Layers "Currently visible"
+
+Open dxf in inkscape
+>Manual scale
+>Factor 1.0
+x/y axis origin 0,0
+
+Delete via layer
+
+Select the pad which is the origin
+Go to transform->move and see where it is in mm by unchecking Relative Move.
+Select all objects and relative move -(pad position - pad size / 2) in mm
+    Do this for all layers
+Select all and relative move -(pad stroke width / 2) IN PIXELS
+Delete pad layer
+
+For board shape:
+    Select the 2 curves, right click "Move to layer" keepout
+    Select all
+    Path->Combine
+    Go to node tool (below mouse, left toolbar)
+    Select all again
+    Click "Join selected nodes" in toolbar
+
+Delete layer 0
+
+For tracks:
+    Select all
+    Stroke style -> Width = the track width (use mm)
+    Cap: round
+    Path->Combine
+    Path->Stroke to path
+    
+Extensions->Modify Path->Flatten Beziers (flatness 0.1)
+Save as -> Desktop cutting plotter dxf
+Use LWPOLYLINE
+Base unit mm
+Visible layers only
+
+Altium seems to like exporting for these offsets,
+sometimes the decimals are different, check them.
+-100.579
+-112.896
+Then do the 0.5px too
