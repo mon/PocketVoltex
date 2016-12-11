@@ -22,6 +22,7 @@
 import sys
 from pywinusb import hid
 from intelhex import IntelHex
+import time
 
 
 # Device information table
@@ -50,6 +51,25 @@ def get_hid_device_handle():
     else:
         return valid_hid_devices[0]
 
+def bootloader_boot():
+    hid_device_filter = hid.HidDeviceFilter(vendor_id=0x16D0,
+                                            product_id=0x0A6D,
+                                            product_name="Pocket Voltex Config")
+
+    valid_hid_devices = hid_device_filter.get_devices()
+
+    if len(valid_hid_devices) is 0:
+        return False
+    else:
+        try:
+            hid_device = valid_hid_devices[0]
+            hid_device.open()
+            output_report_data = [0,0,0,0,0,0,0,0,0,0,0,42]
+
+            hid_device.send_output_report(output_report_data)
+        finally:
+            hid_device.close()
+        return True
 
 def send_page_data(hid_device, address, data):
     # Bootloader page data should be the HID Report ID (always zero) followed
@@ -66,8 +86,15 @@ def program_device(hex_data, device_info):
     hid_device = get_hid_device_handle()
 
     if hid_device is None:
-        print("No valid HID device found.")
-        sys.exit(1)
+        if not bootloader_boot():
+            print("No valid HID device found.")
+            sys.exit(1)
+        print("Rebooted to bootloader")
+        time.sleep(6)
+        hid_device = get_hid_device_handle()
+        if hid_device is None:
+            print("No valid HID device found.")
+            sys.exit(1)
 
     try:
         hid_device.open()

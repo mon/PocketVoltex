@@ -7,9 +7,6 @@
 
 // For ease of code sharing with the OsuPad
 #define SWITCH_COUNT 7
-// essentially sizeof the config type + 1 for some reason 
-// TODO: what is the reason
-#define CONFIG_BYTES (SWITCH_COUNT + 4)
 #define MAGIC_RESET_NUMBER 42
 #define FIRMWARE_VERSION 1
 
@@ -19,7 +16,13 @@ typedef struct {
     bool ledsOn;
     uint8_t debounce;
     uint8_t version;
+    // used to reboot into programming mode
+    uint8_t reboot;
 } sdvx_config_t;
+
+// + 1 for some reason 
+// TODO: what is the reason
+#define CONFIG_BYTES sizeof(sdvx_config_t)
 
 extern sdvx_config_t sdvxConfig;
 

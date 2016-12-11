@@ -18,7 +18,7 @@ F_CPU        = 8000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = Keyboard
-SRC          = $(TARGET).c Descriptors.c Config.c Encoder.c LED.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+SRC          = $(TARGET).c Descriptors.c Config.c Encoder.c LED.c LEDPatterns.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
 LD_FLAGS     =
@@ -65,5 +65,4 @@ flashboot:
 	$(AVRDUDE) -U flash:w:DFU/BootloaderHID.hex:i
 
 flash: all
-	sleep 1
 	python DFU/hid_bootloader_loader.py atmega16u2 Keyboard.hex

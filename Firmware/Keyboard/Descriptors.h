@@ -110,7 +110,7 @@
         
         #define LED_EPADDR                   (ENDPOINT_DIR_IN | 4)
 
-		#define KEYBOARD_EPSIZE              8
+		#define KEYBOARD_EPSIZE              SWITCH_COUNT + 2
         #define MOUSE_EPSIZE                 8
 		#define GENERIC_EPSIZE               CONFIG_BYTES
         #define LED_EPSIZE                   LED_TOTAL_COUNT

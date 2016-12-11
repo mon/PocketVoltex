@@ -15,6 +15,10 @@
 #define LED_DDR  DDRB
 #define LED_MASK (0b111111 << 2)
 
+#define UPDATE_HZ 50
+// prescaler is the div8
+#define TIMER_COMPARE ((F_CPU / 8 / UPDATE_HZ / GND_COUNT / BRIGHTNESS_LEVELS)-1)
+
 #define R 2
 #define G 1
 #define B 0
@@ -38,10 +42,7 @@ void led_init() {
     TCCR0A = _BV(WGM01);
     // clk/8 prescaler
     TCCR0B = _BV(CS01);
-    // 0.16% error on above calculation
-    //OCR0A = 64; // 60Hz
-    OCR0A = 77; // 50Hz
-    //OCR0A = 48; // 80Hz
+    OCR0A = TIMER_COMPARE;
     // Enable interrupt on OCR0A
     TIMSK0 = _BV(OCIE0A);
     // Clear interrupt
@@ -53,6 +54,22 @@ void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
     leds[offset+R] = r;
     leds[offset+G] = g;
     leds[offset+B] = b;
+}
+
+void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t offset = num * 3;
+    if(r > leds[offset+R])
+        leds[offset+R] = r;
+    if(g > leds[offset+G])
+        leds[offset+G] = g;
+    if(b > leds[offset+B])
+        leds[offset+B] = b;
+}
+
+void led_set_all(uint8_t r, uint8_t g, uint8_t b) {
+    for(uint8_t i = 0; i < LED_COUNT; i++) {
+        led_set(i, r, g, b);
+    }
 }
 
 void led_set_indiv(uint8_t num, uint8_t val) {
@@ -115,8 +132,7 @@ ISR(TIMER0_COMPA_vect) {
     
     // Turn off before switch
     LED_PORT &= ~LED_MASK;
-    GND_DDR &= ~GND_MASK;
     // Enable new ground
-    GND_DDR |= currentGndMask;
+    GND_DDR = (GND_DDR & ~GND_MASK) | currentGndMask;
     LED_PORT |= out;
 }

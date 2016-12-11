@@ -2,8 +2,15 @@
 #include "Config.h"
 #include "Encoder.h"
 #include "LED.h"
+#include "LEDPatterns.h"
 
 #define READ_SWITCH(x) (!(*pins[switches[x].switchPort] & _BV(switches[x].switchPin)))
+#define MAGIC_BOOT_KEY            0xDEADBE7A
+// offset * word size
+#define BOOTLOADER_START_ADDRESS  (0x1c00 * 2)
+
+// How long to wait before moving to internal lighting
+#define HID_LED_TIMEOUT 5000
 
 typedef struct
 {
@@ -127,10 +134,10 @@ static switch_t switches[SWITCH_COUNT] = {
 };
 static uint8_t switchesChanged = 1;
 
+// Set to max already so we have our init flash
+static uint16_t hidTimeout = HID_LED_TIMEOUT;
+
 uint32_t Boot_Key ATTR_NO_INIT;
-#define MAGIC_BOOT_KEY            0xDEADBE7A
-// offset * word size
-#define BOOTLOADER_START_ADDRESS  (0x1c00 * 2)
 
 void Bootloader_Jump_Check(void) ATTR_INIT_SECTION(3);
 void Bootloader_Jump_Check(void)
@@ -178,25 +185,7 @@ int main(void)
 	GlobalInterruptEnable();
     
     // Blink to show we're not in bootloader
-    for(uint8_t flash = 0; flash < BRIGHTNESS_LEVELS; flash++) {
-        for(uint8_t i = 0; i < LED_COUNT; i++) {
-            uint8_t bright = ledLogCurve[flash];
-            led_set(i, bright, bright/2, 0);
-            _delay_us(500);
-        }
-    }
-    // NOTE: signed
-    for(int8_t flash = BRIGHTNESS_LEVELS; flash >= 0; flash--) {
-         for(uint8_t i = 0; i < LED_COUNT; i++) {
-            uint8_t bright = ledLogCurve[flash];
-            led_set(i, bright, bright/2, 0);
-            _delay_us(500);
-        }
-    }
-
-    
-    // Not in SetupHardware so we don't time out
-	USB_Init();
+    led_anim_flash();
 
 	for (;;)
 	{
@@ -235,6 +224,8 @@ void SetupHardware()
 	/* Hardware Initialization */
     encoder_init();
     led_init();
+    
+	USB_Init();
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -287,6 +278,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         MouseReport->X = encoder_get(0);
         MouseReport->Y = -encoder_get(1);
         
+        led_knobs_update(MouseReport->X, MouseReport->Y);
+        
         encoder_set(0, 0);
         encoder_set(1, 0);
 
@@ -297,12 +290,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         memcpy(ConfigReport, &sdvxConfig, sizeof(sdvx_config_t));
         *ReportSize = CONFIG_BYTES;
         return true;
-    } else if(HIDInterfaceInfo == &LED_HID_Interface) {
+    }/* else if(HIDInterfaceInfo == &LED_HID_Interface) {
         uint8_t* LEDReport = (uint8_t*)ReportData;
         memcpy(LEDReport, (uint8_t*)leds, LED_TOTAL_COUNT);
         *ReportSize = LED_TOTAL_COUNT;
         return true;
-    }
+    }*/
     *ReportSize = 0;
     return false;
 
@@ -329,6 +322,9 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         }
         SetConfig(ConfigReport);
     } else if(HIDInterfaceInfo == &LED_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
+        // reset our timeout
+        hidTimeout = 0;
+        
         LED_Report_t* LEDReport = (LED_Report_t*)ReportData;
         memcpy((uint8_t*)leds, LEDReport->mainLights, LED_RAW_COUNT);
         
@@ -384,10 +380,16 @@ void EVENT_USB_Device_ControlRequest(void)
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void)
 {
-	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
+    HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
     HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
-	HID_Device_MillisecondElapsed(&Generic_HID_Interface);
-	HID_Device_MillisecondElapsed(&LED_HID_Interface);
+    HID_Device_MillisecondElapsed(&Generic_HID_Interface);
+    HID_Device_MillisecondElapsed(&LED_HID_Interface);
+    
+    if(hidTimeout > HID_LED_TIMEOUT) {
+        led_frame();
+    } else {
+        hidTimeout++;
+    }
     
     for(int i = 0; i < SWITCH_COUNT; i++) {
         if(switches[i].debounce) {
