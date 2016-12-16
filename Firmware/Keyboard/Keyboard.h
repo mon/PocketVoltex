@@ -48,6 +48,21 @@
         
 		#include <LUFA/Drivers/USB/USB.h>
 		#include <LUFA/Platform/Platform.h>
+        
+        // NOTE: atemga16u2 does not have a PORTA
+        typedef enum {
+            B = 0,
+            C,
+            D
+        } port_t;
+        
+        typedef struct {
+            port_t switchPort;
+            uint8_t switchPin;
+            uint8_t state;
+            uint8_t lastReport;
+            uint8_t debounce;
+        } switch_t;
 
 	/* Function Prototypes: */
 		void SetupHardware(void);

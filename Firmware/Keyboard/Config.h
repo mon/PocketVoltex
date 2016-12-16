@@ -18,9 +18,9 @@ typedef struct {
     uint8_t switches[SWITCH_COUNT];
     bool ledsOn;
     uint8_t debounce;
-    uint8_t version;
-    // used to reboot into programming mode
-    uint8_t reboot;
+    // When tapping or long-pressing the macro key
+    uint8_t macroClick;
+    uint8_t macroPin[4];
 } sdvx_config_t;
 
 // + 1 for some reason 

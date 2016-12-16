@@ -3,6 +3,7 @@
 #include "Encoder.h"
 #include "LED.h"
 #include "LEDPatterns.h"
+#include "Macro.h"
 
 #define READ_SWITCH(x) (!(*pins[switches[x].switchPort] & _BV(switches[x].switchPin)))
 #define MAGIC_BOOT_KEY            0xDEADBE7A
@@ -104,24 +105,9 @@ USB_ClassInfo_HID_Device_t LED_HID_Interface =
         },
 };
 
-// NOTE: atemga16u2 does not have a PORTA
-typedef enum {
-    B = 0,
-    C,
-    D
-} port_t;
-
 static volatile uint8_t *ports[] = {&PORTB, &PORTC, &PORTD};
 static volatile uint8_t *pins[] = {&PINB, &PINC, &PIND};
 static volatile uint8_t *ddrs[] = {&DDRB, &DDRC, &DDRD};
-
-typedef struct {
-    port_t switchPort;
-    uint8_t switchPin;
-    uint8_t state;
-    uint8_t lastReport;
-    uint8_t debounce;
-} switch_t;
 
 static switch_t switches[SWITCH_COUNT] = {
     {B, 1}, // A
@@ -130,7 +116,8 @@ static switch_t switches[SWITCH_COUNT] = {
     {D, 4}, // D
     {B, 0}, // FX L
     {D, 6}, // FX R
-    {C, 2} // START
+    {C, 2}, // START
+    {C, 1}  // Macro key
 };
 static uint8_t switchesChanged = 1;
 
@@ -215,9 +202,11 @@ void SetupHardware()
         // with internal pullups
         *ports[switches[i].switchPort] |= _BV(switches[i].switchPin);
     }
+    // RESET has its own pullup
+    *ports[switches[SWITCH_COUNT-1].switchPort] &= ~_BV(switches[SWITCH_COUNT-1].switchPin);
     
-    // FX_L held while plugging in
-    if(READ_SWITCH(4)) {
+    // RESET held while plugging in
+    if(READ_SWITCH(SWITCH_COUNT-1)) {
         RebootToBootloader();
     }
 
@@ -250,15 +239,20 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
     }
     if (HIDInterfaceInfo == &Keyboard_HID_Interface) {
         Keyboard_Report_t* KeyboardReport = (Keyboard_Report_t*)ReportData;
+        
+        // Only the first 4 bytes are read by bemanitools, so let's use the first
+        uint8_t macroUpdated = macro_make_report(&KeyboardReport->KeyCode[0]);
         update_switches();
         
-        if(!switchesChanged) {
+        if(!switchesChanged && !macroUpdated) {
             *ReportSize = 0;
             return false;
         }
-         
-        for(uint8_t i = 0; i < SWITCH_COUNT; i++) {
-            KeyboardReport->KeyCode[i] = switches[i].state ? sdvxConfig.switches[i] : 0;
+        
+        // NOTE: using SWITCH_COUNT-1 so we don't write the report for the macro pin
+        for(uint8_t i = 0; i < SWITCH_COUNT-1; i++) {
+            // i+1 to take care of the shift from above
+            KeyboardReport->KeyCode[i+1] = switches[i].state ? sdvxConfig.switches[i] : 0;
             switches[i].lastReport = switches[i].state;
             // Update blinkenlights
             if(switches[i].state) {
@@ -385,6 +379,8 @@ void EVENT_USB_Device_StartOfFrame(void)
     } else {
         hidTimeout++;
     }
+    
+    macro_on_frame(&switches[SWITCH_COUNT-1]);
     
     for(int i = 0; i < SWITCH_COUNT; i++) {
         if(switches[i].debounce) {

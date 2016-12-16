@@ -18,7 +18,7 @@ F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = Keyboard
-SRC          = $(TARGET).c Descriptors.c Config.c Encoder.c LED.c LEDPatterns.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+SRC          = $(TARGET).c asciihid.c Descriptors.c Config.c Encoder.c LED.c LEDPatterns.c Macro.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
 LD_FLAGS     =
@@ -54,7 +54,7 @@ rfuse:
 	$(AVRDUDE) -U hfuse:r:-:h -U lfuse:r:-:h -U efuse:r:-:h
 
 wfuse:
-	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0xdb:m -U efuse:w:0xf6:m
+	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9b:m -U efuse:w:0xf6:m
 
 # To make this hex, compile HID Bootloader in LUFA
 # FLASH_SIZE_KB        := 16
