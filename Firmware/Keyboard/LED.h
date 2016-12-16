@@ -4,18 +4,19 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <string.h>
 
 #define LED_COUNT 8
-#define LED_RAW_COUNT (LED_COUNT*3)
+#define LED_PHYSICAL_COUNT (LED_COUNT*3)
 // BT + FX
 #define LED_VIRTUAL_COUNT 6
-#define LED_TOTAL_COUNT (LED_RAW_COUNT + LED_VIRTUAL_COUNT)
+#define LED_TOTAL_COUNT (LED_PHYSICAL_COUNT + LED_VIRTUAL_COUNT)
 #define BRIGHTNESS_LEVELS 64
 
 // Arranged left to right, top to bottom
 // LED order is BGR...BGR
-volatile uint8_t leds[LED_RAW_COUNT];
+volatile uint8_t leds[LED_PHYSICAL_COUNT];
 
 // Maps BT/FX keys to their associated LED
 // Order is BT-1-4, FX-L, FX-R
@@ -30,7 +31,7 @@ void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
 void led_set_all(uint8_t r, uint8_t g, uint8_t b);
 void led_set_indiv(uint8_t num, uint8_t val);
 
-const static uint8_t ledLogCurve[] = {
+PROGMEM const static uint8_t ledLogCurve[] = {
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 1, 1, 1, 1, 2, 2,
     3, 3, 4, 5, 6, 7, 8, 9,

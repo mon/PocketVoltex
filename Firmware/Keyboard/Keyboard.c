@@ -21,7 +21,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t mainLights[LED_RAW_COUNT];
+    uint8_t mainLights[LED_PHYSICAL_COUNT];
     uint8_t btFx[6];
 } LED_Report_t;
 
@@ -276,7 +276,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
         
         MouseReport->X = encoder_get(0);
-        MouseReport->Y = -encoder_get(1);
+        MouseReport->Y = encoder_get(1);
         
         led_knobs_update(MouseReport->X, MouseReport->Y);
         
@@ -290,12 +290,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         memcpy(ConfigReport, &sdvxConfig, sizeof(sdvx_config_t));
         *ReportSize = CONFIG_BYTES;
         return true;
-    }/* else if(HIDInterfaceInfo == &LED_HID_Interface) {
-        uint8_t* LEDReport = (uint8_t*)ReportData;
-        memcpy(LEDReport, (uint8_t*)leds, LED_TOTAL_COUNT);
-        *ReportSize = LED_TOTAL_COUNT;
-        return true;
-    }*/
+    }
     *ReportSize = 0;
     return false;
 
@@ -315,9 +310,9 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const void* ReportData,
                                           const uint16_t ReportSize) {
     if(HIDInterfaceInfo == &Generic_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
-        uint8_t* ConfigReport = (uint8_t*)ReportData;
+        sdvx_config_t* ConfigReport = (sdvx_config_t*)ReportData;
         // So we can upgrade firmware without having to hit the button
-        if(ConfigReport[CONFIG_BYTES-1] == MAGIC_RESET_NUMBER) {
+        if(ConfigReport->reboot == MAGIC_RESET_NUMBER) {
             RebootToBootloader();
         }
         SetConfig(ConfigReport);
@@ -326,7 +321,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         hidTimeout = 0;
         
         LED_Report_t* LEDReport = (LED_Report_t*)ReportData;
-        memcpy((uint8_t*)leds, LEDReport->mainLights, LED_RAW_COUNT);
+        memcpy((uint8_t*)leds, LEDReport->mainLights, LED_PHYSICAL_COUNT);
         
         // Keep normal lights but override when we get flashes on BT or FX
         // BT LEDs flash pure white

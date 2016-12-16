@@ -33,7 +33,7 @@ void InitConfig(void) {
     sdvxConfig.version = FIRMWARE_VERSION;
 }
 
-void SetConfig(uint8_t* config) {
+void SetConfig(sdvx_config_t* config) {
     memcpy(&sdvxConfig, config, sizeof(sdvx_config_t));
     // Version is set in firmware, not software
     sdvxConfig.version = FIRMWARE_VERSION;

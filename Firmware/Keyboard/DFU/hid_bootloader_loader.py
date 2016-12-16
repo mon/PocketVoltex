@@ -64,7 +64,10 @@ def bootloader_boot():
         try:
             hid_device = valid_hid_devices[0]
             hid_device.open()
-            output_report_data = [0,0,0,0,0,0,0,0,0,0,0,42]
+            # switch count + static stuff + report id
+            output_report_data = [0] * (8 + 9 + 1)
+            # report ID is 0 at byte 0
+            output_report_data[1] = 42;
 
             hid_device.send_output_report(output_report_data)
         finally:

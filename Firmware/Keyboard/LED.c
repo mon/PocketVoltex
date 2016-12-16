@@ -37,7 +37,7 @@ void led_init() {
     // all LEDs output
     LED_DDR |= LED_MASK;
     
-    memset((uint8_t*)leds, 0, LED_RAW_COUNT);
+    memset((uint8_t*)leds, 0, LED_PHYSICAL_COUNT);
     
     // 64 light levels * 60Hz update * 4 different GND pins = 15360Hz
     // 520 clock cycles for our interrupt handler

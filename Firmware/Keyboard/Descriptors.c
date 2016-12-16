@@ -53,13 +53,15 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
         HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
         HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
         
-        // INPUT is also needed to be recognised by Bemanitools
-        //HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-        0x79, STRING_ID_LED_INDIV, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_INDIV),
-        0x89, STRING_ID_LED_INDIV + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_INDIV + LED_COUNT),
-        HID_RI_USAGE_MINIMUM(8, 1), // LED 1
-        HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
+        // at least 1 INPUT is also needed to be recognised by Bemanitools
+        HID_RI_USAGE_MINIMUM(8, 1),
+        HID_RI_USAGE_MAXIMUM(8, 1),
         HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+        //0x79, STRING_ID_LED_INDIV, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_INDIV),
+        //0x89, STRING_ID_LED_INDIV + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_INDIV + LED_COUNT),
+        //HID_RI_USAGE_MINIMUM(8, 1), // LED 1
+        //HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
+        //HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
     HID_RI_END_COLLECTION(0),
 };
 
@@ -86,13 +88,9 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM KeyboardReport[] =
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM MouseReport[] =
 {
 	/* Use the HID class driver's standard Mouse report.
-	 *   Min X/Y Axis values: -128
-	 *   Max X/Y Axis values:  127
-	 *   Min physical X/Y Axis values (used to determine resolution): -128
-	 *   Max physical X/Y Axis values (used to determine resolution):  127
+     *   Min/max X/Y -128 to 127
      *   NOTE: need at least 1 button or report does not work
-	 *   Buttons: 1
-	 *   Absolute screen coordinates: false
+	 *   Relative coordinates
 	 */
 	HID_DESCRIPTOR_MOUSE(-128, 127, -128, 127, 1, false)
 };
@@ -291,7 +289,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.EndpointAddress        = LED_EPADDR,
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 			.EndpointSize           = LED_EPSIZE,
-			.PollingIntervalMS      = 15
+			.PollingIntervalMS      = 255
 		},
 };
 
@@ -315,6 +313,7 @@ const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Po
 const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Config");
 const USB_Descriptor_String_t PROGMEM LEDString = USB_STRING_DESCRIPTOR(L"Pocket Voltex LEDs");
 const USB_Descriptor_String_t PROGMEM KnobString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Knobs");
+// There may be a better way to do this
 const USB_Descriptor_String_t PROGMEM LEDString_indiv[] = {
     USB_STRING_DESCRIPTOR(L"L1-B"),
     USB_STRING_DESCRIPTOR(L"L1-G"),
