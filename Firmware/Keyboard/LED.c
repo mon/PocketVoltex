@@ -15,9 +15,12 @@
 #define LED_DDR  DDRB
 #define LED_MASK (0b111111 << 2)
 
-#define UPDATE_HZ 50
+#define UPDATE_HZ 100
 // prescaler is the div8
 #define TIMER_COMPARE ((F_CPU / 8 / UPDATE_HZ / GND_COUNT / BRIGHTNESS_LEVELS)-1)
+#if TIMER_COMPARE > 255
+    #error timer compare too large for timer register
+#endif
 
 #define R 2
 #define G 1
