@@ -7,25 +7,22 @@ switches = [[0,0],
             [ 14.287,-37.592],
             [-28.5,-75.692],
             [ 28.5,-75.692]];
-bolts = [[-47.9, 8.05],
-         [ 47.9, 8.05],
-         [-72, -16.9],
-         [ 72, -16.9],
-         [-72, -49.9],
-         [ 72, -49.9],
-         [-45, -75.387],
-         [ 45, -75.387]];
+bolts = [[46.475, 6.135],
+         [71, -16.925],
+         [71.304, -54.219],
+         [42.732, -82.791]];
 // Not the encoders themselves, but the circle that surrounds them
 encoders = [[-64,0.4],
             [ 64,0.4]];
 encoderRadius = 14.278;
 
+// encoder solder points hit the case unless we cut these out
 // x, y, hole size
-encoderHoles = [[71.4, 0.4, 3.2],
+encoderHoles = [[71.6, 0.4, 3.4],
                 [69, -10.1, 1.6]];
 
 usbWidth = 9;
-usbPos = [-21.311, 10.16];
+usbPos = [-21.311, 10.3];
 // bottom to top
 plate_thickness = [3, 3, 1.6, 3, 1.6];
 
@@ -34,9 +31,10 @@ fudge = 0.2;
 // So you get a little clear acrylic edge and it looks nice
 wallOverlap = 1;
 
-boltDiam = 3;
-boltFudge = fudge;
+boltDiam = 2;
+boltFudge = 0;
 boltSize = boltDiam + boltFudge;
+spacerSize = boltSize + 1;
 
 boltExpand = boltDiam/2;
 
@@ -83,16 +81,32 @@ module switches() {
     }
 }
 
+module bolt_spacers() {
+    for(bolt = bolts) {
+        translate([bolt[0], bolt[1]])
+        circle(d = spacerSize, center = true);
+        
+        // mirror
+        translate([-bolt[0], bolt[1]])
+        circle(d = spacerSize, center = true);
+    }
+}
+
 module bolts() {
     for(bolt = bolts) {
         translate([bolt[0], bolt[1]])
         circle(d = boltSize, center = true);
+        
+        // mirror
+        translate([-bolt[0], bolt[1]])
+        circle(d = boltSize, center = true);
     }
 }
 
+// Only used to see if my distances are right
 module bolts_expansion() {
     offset(r = boltExpand)
-    bolts();
+    bolt_spacers();
 }
 
 module encoders() {
@@ -118,7 +132,7 @@ module encoderHoles_half() {
 // don't do the same thing twice
 module usb_half() {
     w = usbWidth / 2;
-    h = wallStrength + fudge;
+    h = wallStrength + fudge*2;
     curveWidth = h / 2;
     
     // USB connector origin is at board edge
@@ -173,17 +187,17 @@ module top_ring() {
                 // Room for FX/START
                 switches();
             };
+            import("RING_TOP_SUPPORTS.dxf");
             bolts_expansion();
         }
-        bolts();
+        bolt_spacers();
     }
-    import("RING_TOP_SUPPORTS.dxf");
 }
 
 module pcb() {
     difference() {
         board();
-        bolts();
+        bolt_spacers();
     }
 }
 
@@ -195,14 +209,14 @@ module bottom_ring() {
                 offset(delta = -wallStrength)
                     board();
             };
+            import("RING_BOT_SUPPORTS.dxf");
             bolts_expansion();
         }
-        bolts();
+        bolt_spacers();
         encoderHoles();
         translate([usbPos[0], usbPos[1], 0])
         usb();
     }
-    import("RING_BOT_SUPPORTS.dxf");
 }
 
 module bottom_plate() {
@@ -214,9 +228,9 @@ module bottom_plate() {
 
 // This is kinda disgusting
 module full_stack() {
-    /*color([1, 1, 1, 0.2])
+    color([1, 1, 1, 0.2])
     linear_extrude(plate_thickness[0])
-        bottom_plate();*/
+        bottom_plate();
     translate([0, 0, plate_thickness[0]]) {
         color([1, 1, 1, 0.2])
         linear_extrude(plate_thickness[1])
