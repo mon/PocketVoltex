@@ -20,16 +20,19 @@ encoderRadius = 14.278;
 // x, y, hole size
 encoderHoles = [[71.6, 0.4, 3.4],
                 [69, -10.1, 1.6]];
+                
+switchHole = [23.65,-8.775];
+switchDiam = 3;
 
 usbWidth = 9;
 usbPos = [-21.311, 10.3];
-// bottom to top
-plate_thickness = [3, 3, 1.6, 3, 1.6];
+// bottom to top, last 2 are white/black sections of the 1 plate
+plate_thickness = [3, 3, 1.6, 3, 1.5, 0.1];
 
 fudge = 0.2;
 
 // So you get a little clear acrylic edge and it looks nice
-wallOverlap = 1;
+wallOverlap = 0.5;
 
 boltDiam = 2;
 boltFudge = 0.1;
@@ -43,6 +46,9 @@ wallStrength = boltDiam * 2;
 
 // 0 = full spec, 1 = half spec, 2 = plain square
 holetype = 0;
+
+// For the animation
+explodeFactor = 20;
 
 module switch(holetype){
     //Hole size, from Cherry MX data sheet
@@ -174,6 +180,8 @@ module top_plate() {
         }
         switches();
         bolts();
+        translate([switchHole[0], switchHole[1], 0])
+        circle(d = switchDiam, center = true);
     }
 }
 
@@ -201,6 +209,10 @@ module pcb() {
     }
 }
 
+module artwork() {
+    import("Artwork.dxf");
+}
+
 module bottom_ring() {
     difference() {
         union() {
@@ -226,27 +238,49 @@ module bottom_plate() {
     }
 }
 
+module art_trimmed() {
+    intersection() {
+        // Won't work cause I'm an idiot
+        //offset(delta = -0.5)
+        top_plate();
+        artwork();
+    }
+}
+
 // This is kinda disgusting
 module full_stack() {
-    color([1, 1, 1, 0.2])
+    // quadratic ease out
+    t = $t -1;
+    boom = -explodeFactor * (t*t*t*t - 1);
+    
+    color([1, 1, 1, 0.4])
     linear_extrude(plate_thickness[0])
         bottom_plate();
-    translate([0, 0, plate_thickness[0]]) {
-        color([1, 1, 1, 0.2])
+    translate([0, 0, plate_thickness[0] + boom]) {
+        color([1, 1, 1, 0.4])
         linear_extrude(plate_thickness[1])
             bottom_ring();
-        translate([0, 0, plate_thickness[1]]) {
+        translate([0, 0, plate_thickness[1] + boom]) {
             color([1,1,1, 1])
             linear_extrude(plate_thickness[2])
                 pcb();
-            translate([0, 0, plate_thickness[2]]) {
-                color([1, 1, 1, 0.2])
+            translate([0, 0, plate_thickness[2] + boom]) {
+                color([1, 1, 1, 0.4])
                 linear_extrude(plate_thickness[3])
                     top_ring();
-                translate([0, 0, plate_thickness[3]]) {
-                    color([0,0,0, 0.5])
+                translate([0, 0, plate_thickness[3] + boom]) {
+                    color([1,1,1, 1])
                     linear_extrude(plate_thickness[4])
                         top_plate();
+                    translate([0, 0, plate_thickness[4]]) {
+                        color([0,0,0, 1])
+                        linear_extrude(plate_thickness[5]) {
+                            difference() {
+                                top_plate();
+                                art_trimmed();
+                            }
+                        }
+                    }
                 }
             }
         }

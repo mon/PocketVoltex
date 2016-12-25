@@ -38,6 +38,8 @@ For tracks:
     Path->Combine
     Path->Stroke to path
     
+You may need to Path->Union everything for artwork layers to render nicely
+    
 Extensions->Modify Path->Flatten Beziers (flatness 0.1)
 Save as -> Desktop cutting plotter dxf
 Use LWPOLYLINE
