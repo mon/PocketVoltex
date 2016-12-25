@@ -32,11 +32,11 @@ fudge = 0.2;
 wallOverlap = 1;
 
 boltDiam = 2;
-boltFudge = 0;
+boltFudge = 0.1;
 boltSize = boltDiam + boltFudge;
 spacerSize = boltSize + 1;
 
-boltExpand = boltDiam/2;
+boltExpand = boltDiam;
 
 // bolt + half on either side
 wallStrength = boltDiam * 2;
