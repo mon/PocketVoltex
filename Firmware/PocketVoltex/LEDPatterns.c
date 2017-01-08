@@ -28,6 +28,9 @@ static KnobLights knobs[2] = {
     {{1,0,1}, {6,7}, {0, BRIGHTNESS_LEVELS-1}}
 };
 
+// TODO DEBUG DELETE
+uint8_t debugG = 0, debugB = 0;
+
 // Called every 1ms
 void led_frame(void) {
     if(++frameCounter < LED_MS_PER_FRAME) {
@@ -86,15 +89,16 @@ void led_frame(void) {
             break;
     }
     
-    led_set_all(0,0,0);
-    for(uint8_t i = 0; i < 2; i++) {
+    //led_set_all(64,debugG,debugB);
+    // Knob lights, what shall I do with you?
+    /*for(uint8_t i = 0; i < 2; i++) {
         for(uint8_t led = 0; led < 2; led++) {
             uint8_t r = knobs[i].levels[led] * knobs[i].rgb[0];
             uint8_t g = knobs[i].levels[led] * knobs[i].rgb[1];
             uint8_t b = knobs[i].levels[led] * knobs[i].rgb[2];
             led_set_max(ledCircleMap[knobs[i].leds[led]], r, g, b);
         }
-    }
+    }*/
 }
 
 void led_knob_indiv(KnobLights* knob, int8_t value) {
@@ -137,8 +141,10 @@ void led_knob_indiv(KnobLights* knob, int8_t value) {
 }
 
 void led_knobs_update(int8_t left, int8_t right) {
-    led_knob_indiv(&knobs[0], left*2);
-    led_knob_indiv(&knobs[1], right*2);
+    //led_knob_indiv(&knobs[0], left*2);
+    //led_knob_indiv(&knobs[1], right*2);
+    debugG += left;
+    debugB += right;
 }
 
 void led_anim_flash(void) {

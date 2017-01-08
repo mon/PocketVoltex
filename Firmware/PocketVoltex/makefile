@@ -17,7 +17,7 @@ BOARD        = USER
 F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
-TARGET       = Keyboard
+TARGET       = PocketVoltex
 SRC          = $(TARGET).c asciihid.c Descriptors.c Config.c Encoder.c LED.c LEDPatterns.c Macro.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
@@ -65,4 +65,4 @@ flashboot:
 	$(AVRDUDE) -U flash:w:DFU/BootloaderHID.hex:i
 
 flash: all
-	python DFU/hid_bootloader_loader.py atmega16u2 Keyboard.hex
+	python DFU/hid_bootloader_loader.py atmega16u2 PocketVoltex.hex

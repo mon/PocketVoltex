@@ -3,7 +3,7 @@
 
 #include "Config.h"
 #include "asciihid.h"
-#include "Keyboard.h"
+#include "PocketVoltex.h"
 
 extern sdvx_config_t sdvxConfig;
 
