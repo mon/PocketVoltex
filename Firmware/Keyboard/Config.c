@@ -16,8 +16,11 @@ static sdvx_config_t defaults PROGMEM = {
         HID_KEYBOARD_SC_ENTER},
     .ledsOn = true,
     .debounce = 30,
-    .macroClick = KEYPADPLUS,
-    .macroPin = {KEYPAD0,KEYPAD0,KEYPAD0,KEYPAD0}
+    .macroClick = HID_KEYBOARD_SC_KEYPAD_PLUS,
+    .macroPin = {HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
+                 HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
+                 HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
+                 HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT}
 };
 
 uint8_t firstRun EEMEM; // init to 255

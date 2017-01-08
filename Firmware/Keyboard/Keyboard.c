@@ -167,21 +167,21 @@ int main(void)
     
     InitConfig();
     
-	SetupHardware();
+    SetupHardware();
 
-	GlobalInterruptEnable();
+    GlobalInterruptEnable();
     
     // Blink to show we're not in bootloader
     led_anim_flash();
 
-	for (;;)
-	{
-		HID_Device_USBTask(&Keyboard_HID_Interface);
+    for (;;)
+    {
+        HID_Device_USBTask(&Keyboard_HID_Interface);
         HID_Device_USBTask(&Mouse_HID_Interface);
-		HID_Device_USBTask(&Generic_HID_Interface);
-		HID_Device_USBTask(&LED_HID_Interface);
-		USB_USBTask();
-	}
+        HID_Device_USBTask(&Generic_HID_Interface);
+        HID_Device_USBTask(&LED_HID_Interface);
+        USB_USBTask();
+    }
 }
 
 /** Configures the board hardware and chip peripherals */
@@ -189,9 +189,9 @@ void SetupHardware()
 {
     uint8_t i;
     
-	/* Disable watchdog if enabled by bootloader/fuses */
-	MCUSR &= ~(1 << WDRF);
-	wdt_disable();
+    /* Disable watchdog if enabled by bootloader/fuses */
+    MCUSR &= ~(1 << WDRF);
+    wdt_disable();
     
     for(i = 0; i < SWITCH_COUNT; i++) {
         switches[i].state = 0;
@@ -210,11 +210,11 @@ void SetupHardware()
         RebootToBootloader();
     }
 
-	/* Hardware Initialization */
+    /* Hardware Initialization */
     encoder_init();
     led_init();
     
-	USB_Init();
+    USB_Init();
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -277,8 +277,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         encoder_set(0, 0);
         encoder_set(1, 0);
 
-		*ReportSize = sizeof(USB_MouseReport_Data_t);
-		return true;
+        *ReportSize = sizeof(USB_MouseReport_Data_t);
+        return true;
     } else if(HIDInterfaceInfo == &Generic_HID_Interface) {
         uint8_t* ConfigReport = (uint8_t*)ReportData;
         memcpy(ConfigReport, &sdvxConfig, sizeof(sdvx_config_t));
@@ -337,7 +337,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
 {
-	
+    
 }
 
 /** Event handler for the library USB Disconnection event. */
@@ -349,12 +349,12 @@ void EVENT_USB_Device_Disconnect(void)
 /** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
-	HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
+    HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
     HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
-	HID_Device_ConfigureEndpoints(&Generic_HID_Interface);
-	HID_Device_ConfigureEndpoints(&LED_HID_Interface);
+    HID_Device_ConfigureEndpoints(&Generic_HID_Interface);
+    HID_Device_ConfigureEndpoints(&LED_HID_Interface);
 
-	USB_Device_EnableSOFEvents();
+    USB_Device_EnableSOFEvents();
 }
 
 /** Event handler for the library USB Control Request reception event. */
