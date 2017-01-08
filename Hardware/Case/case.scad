@@ -7,21 +7,21 @@ switches = [[0,0],
             [ 14.287,-37.592],
             [-28.5,-75.692],
             [ 28.5,-75.692]];
-bolts = [[46.475, 6.135],
+bolts = [[30.025, 6.65],
          [71, -16.925],
-         [71.304, -54.219],
+         [71, 16.5],
          [42.732, -82.791]];
 // Not the encoders themselves, but the circle that surrounds them
 encoders = [[-64,0.4],
             [ 64,0.4]];
-encoderRadius = 14.278;
+encoderRadius = 13;
 
 // encoder solder points hit the case unless we cut these out
 // x, y, hole size
 encoderHoles = [[71.6, 0.4, 3.4],
                 [69, -10.1, 1.6]];
                 
-switchHole = [23.65,-8.775];
+switchHole = [0,-75.692];
 switchDiam = 3;
 
 usbWidth = 9;
@@ -32,7 +32,7 @@ plate_thickness = [3, 3, 1.6, 3, 1.5, 0.1];
 fudge = 0.2;
 
 // So you get a little clear acrylic edge and it looks nice
-wallOverlap = 0.5;
+wallOverlap = 1;
 
 boltDiam = 2;
 boltFudge = 0.1;
@@ -42,10 +42,10 @@ spacerSize = boltSize + 1;
 boltExpand = boltDiam;
 
 // bolt + half on either side
-wallStrength = boltDiam * 2;
+wallStrength = 6;
 
 // 0 = full spec, 1 = half spec, 2 = plain square
-holetype = 0;
+holetype = 2;
 
 // For the animation
 explodeFactor = 20;
