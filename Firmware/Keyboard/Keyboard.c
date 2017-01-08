@@ -360,6 +360,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 /** Event handler for the library USB Control Request reception event. */
 void EVENT_USB_Device_ControlRequest(void)
 {
+    USB_Process_BOS();
 	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
     HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
 	HID_Device_ProcessControlRequest(&Generic_HID_Interface);

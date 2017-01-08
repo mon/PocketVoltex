@@ -1,5 +1,8 @@
 #include "Descriptors.h"
 
+#define WEBUSB_ID 0x01
+#define MS_OS_ID 0x02
+
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
 {
 	HID_RI_USAGE_PAGE(16, 0xFFDC), /* Vendor Page 0xDC */
@@ -72,7 +75,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
-	.USBSpecification       = VERSION_BCD(1,1,0),
+	.USBSpecification       = VERSION_BCD(2,1,0),
 	.Class                  = USB_CSCP_NoDeviceClass,
 	.SubClass               = USB_CSCP_NoDeviceSubclass,
 	.Protocol               = USB_CSCP_NoDeviceProtocol,
@@ -88,6 +91,35 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.SerialNumStrIndex      = STRING_ID_Product,
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
+};
+
+const uint8_t PROGMEM MS_OS_Descriptor[] =
+{
+    MS_OS_DESCRIPTOR_SET(
+        MS_OS_CONFIG_SUBSET_HEADER(0x00, // Config 0
+            MS_OS_FUNCTION_SUBSET_HEADER(INTERFACE_ID_Generic, // Interface ID
+                MS_OS_COMPAT_ID_WINUSB
+            )
+        )
+    )
+};
+
+const uint8_t PROGMEM WebUSBAllowedOrigins[] = {
+    WEBUSB_ALLOWED_ORIGINS_HEADER(1, // 1 config header present
+        WEBUSB_CONFIG_SUBSET_HEADER(0x00, 1, // Config 0, 1 function header
+            // Config interface accessible from the web, two valid URLs
+            WEBUSB_FUNCTION_SUBSET_HEADER(INTERFACE_ID_Generic, URL_ID_Config, URL_ID_Localhost)
+        )
+    )
+};
+
+const uint8_t PROGMEM BOSDescriptor[] =
+{
+    BOS_DESCRIPTOR(2, // 2 capability descriptors in use
+        WEBUSB_CAPABILITY_DESCRIPTOR(WEBUSB_ID, URL_ID_Config), // Vendor request ID, URL ID
+        // Required to force WinUSB driver for driverless WebUSB compatibility
+        MS_OS_20_CAPABILITY_DESCRIPTOR(MS_OS_ID, sizeof(MS_OS_Descriptor)) // Vendor request ID, Descriptor set length
+    )
 };
 
 const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
@@ -256,6 +288,10 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		},
 };
 
+
+const USB_Descriptor_URL_t PROGMEM ConfigURL = URL_STRING_DESCRIPTOR(URL_HTTPS, "mon.im/sdvx/config");
+const USB_Descriptor_URL_t PROGMEM LocalhostURL = URL_STRING_DESCRIPTOR(URL_HTTP, "localhost");
+
 const USB_Descriptor_String_t PROGMEM LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
 const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR(L"mon.im");
 const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Pocket Voltex");
@@ -296,6 +332,54 @@ const USB_Descriptor_String_t PROGMEM LEDString_indiv[] = {
     USB_STRING_DESCRIPTOR(L"FX-R"),
 };
 
+void USB_Process_BOS(void) {
+    const void* Address = NULL;
+	uint16_t    Size    = 0;
+    
+    if(!(Endpoint_IsSETUPReceived()) ||
+        USB_ControlRequest.bmRequestType != (REQDIR_DEVICETOHOST | REQTYPE_VENDOR | REQREC_DEVICE)) {
+        return;
+    }
+    switch(USB_ControlRequest.bRequest) {
+        case WEBUSB_ID:
+            switch(USB_ControlRequest.wIndex) {
+                case WEBUSB_REQUEST_GET_ALLOWED_ORIGINS:
+                    Address = &WebUSBAllowedOrigins;
+                    Size = sizeof(WebUSBAllowedOrigins);
+                    break;
+                case WEBUSB_REQUEST_GET_URL:
+                    switch(USB_ControlRequest.wValue) {
+                        case URL_ID_Localhost:
+                            Address = &LocalhostURL;
+                            Size = pgm_read_byte(&LocalhostURL.Header.Size);
+                            break;
+                        case URL_ID_Config:
+                            Address = &ConfigURL;
+                            Size = pgm_read_byte(&ConfigURL.Header.Size);
+                            break;
+                    }
+                    break;
+            }
+            break;
+        case MS_OS_ID:
+            if(USB_ControlRequest.wIndex == MS_OS_20_DESCRIPTOR_INDEX) {
+                Address = &MS_OS_Descriptor;
+                Size    = sizeof(MS_OS_Descriptor);
+            }
+            break;
+        default:
+            return;
+    }
+    if(Address != NULL) {
+        Endpoint_SelectEndpoint(ENDPOINT_CONTROLEP);
+
+        Endpoint_ClearSETUP();
+
+        Endpoint_Write_Control_PStream_LE(Address, Size);
+        Endpoint_ClearOUT();
+    }
+}
+
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given
  *  to the USB library. When the device receives a Get Descriptor request on the control endpoint, this function
@@ -303,7 +387,7 @@ const USB_Descriptor_String_t PROGMEM LEDString_indiv[] = {
  *  USB host.
  */
 uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
-                                    const uint8_t wIndex,
+                                    const uint16_t wIndex,
                                     const void** const DescriptorAddress)
 {
 	const uint8_t  DescriptorType   = (wValue >> 8);
@@ -321,6 +405,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 		case DTYPE_Configuration:
 			Address = &ConfigurationDescriptor;
 			Size    = sizeof(USB_Descriptor_Configuration_t);
+			break;
+        case DTYPE_BOS:
+            Address = &BOSDescriptor;
+			Size    = sizeof(BOSDescriptor);
 			break;
 		case DTYPE_String:
 			switch (DescriptorNumber)
@@ -355,7 +443,6 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
                         Size    = pgm_read_byte(&LEDString_indiv[STRING_ID_LED_INDIV - DescriptorNumber].Header.Size);
                     }
 			}
-
 			break;
 		case HID_DTYPE_HID:
             Size = sizeof(USB_HID_Descriptor_HID_t);

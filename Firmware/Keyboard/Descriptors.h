@@ -74,9 +74,7 @@
 			USB_Descriptor_Endpoint_t             HID4_ReportINEndpoint;
 		} USB_Descriptor_Configuration_t;
 
-		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
-		 *  should have a unique ID index associated with it, which can be used to refer to the
-		 *  interface from other descriptors.
+		/** Enum for the device interface descriptor IDs within the device.
 		 */
 		enum InterfaceDescriptors_t
 		{
@@ -87,8 +85,6 @@
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
-		 *  have a unique ID index associated with it, which can be used to refer to the string from
-		 *  other descriptors.
 		 */
 		enum StringDescriptors_t
 		{
@@ -100,6 +96,12 @@
             STRING_ID_LED          = 5,  /**< LED string ID */
             STRING_ID_LED_INDIV    = 6,
 		};
+        
+        enum URLDescriptors_t
+        {
+            URL_ID_Localhost  = 1,
+            URL_ID_Config     = 2,
+        };
 
 	/* Macros: */
 		#define KEYBOARD_EPADDR              (ENDPOINT_DIR_IN | 1)
@@ -117,9 +119,11 @@
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
-		                                    const uint8_t wIndex,
+		                                    const uint16_t wIndex,
 		                                    const void** const DescriptorAddress)
 		                                    ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
+        
+        void USB_Process_BOS(void);
 
 #endif
 
