@@ -3,27 +3,6 @@
 #define WEBUSB_ID 0x01
 #define MS_OS_ID 0x02
 
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM GenericReport[] =
-{
-	HID_RI_USAGE_PAGE(16, 0xFFDC), /* Vendor Page 0xDC */
-	HID_RI_USAGE(8, 0xFB), /* Vendor Usage 0xFB */
-	HID_RI_COLLECTION(8, 0x01), /* Vendor Usage 1 */
-        // Global Items
-		HID_RI_LOGICAL_MINIMUM(8, 0x00),
-		HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
-		HID_RI_REPORT_SIZE(8, 8),
-		HID_RI_REPORT_COUNT(8, CONFIG_BYTES),
-    
-        // Write config
-		HID_RI_USAGE(8, 0x02), /* Vendor Usage 2 */
-		HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-        
-        // Read config
-        HID_RI_USAGE(8, 0x02), /* Vendor Usage 2 */
-		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-	HID_RI_END_COLLECTION(0),
-};
-
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
 {
     HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
@@ -37,8 +16,8 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
         HID_RI_USAGE_PAGE(8, 0x0A), // Ordinals
         
         // Locals
-        0x79, STRING_ID_LED_INDIV, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_INDIV),
-        0x89, STRING_ID_LED_INDIV + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_INDIV + LED_COUNT),
+        0x79, STRING_ID_LED_Indiv, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_Indiv),
+        0x89, STRING_ID_LED_Indiv + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_Indiv + LED_COUNT),
         HID_RI_USAGE_MINIMUM(8, 1), // LED 1
         HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
         HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
@@ -47,8 +26,8 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
         HID_RI_USAGE_MINIMUM(8, 1),
         HID_RI_USAGE_MAXIMUM(8, 1),
         HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-        //0x79, STRING_ID_LED_INDIV, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_INDIV),
-        //0x89, STRING_ID_LED_INDIV + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_INDIV + LED_COUNT),
+        //0x79, STRING_ID_LED_Indiv, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_Indiv),
+        //0x89, STRING_ID_LED_Indiv + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_Indiv + LED_COUNT),
         //HID_RI_USAGE_MINIMUM(8, 1), // LED 1
         //HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
         //HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
@@ -97,19 +76,15 @@ const uint8_t PROGMEM MS_OS_Descriptor[] =
 {
     MS_OS_DESCRIPTOR_SET(
         MS_OS_CONFIG_SUBSET_HEADER(0x00, // Config 0
-            MS_OS_FUNCTION_SUBSET_HEADER(INTERFACE_ID_Generic, // Interface ID
-                MS_OS_COMPAT_ID_WINUSB
-            )
+            MS_OS_COMPAT_ID_WINUSB
         )
     )
 };
 
 const uint8_t PROGMEM WebUSBAllowedOrigins[] = {
-    WEBUSB_ALLOWED_ORIGINS_HEADER(1, // 1 config header present
-        WEBUSB_CONFIG_SUBSET_HEADER(0x00, 1, // Config 0, 1 function header
-            // Config interface accessible from the web, two valid URLs
-            WEBUSB_FUNCTION_SUBSET_HEADER(INTERFACE_ID_Generic, URL_ID_Config, URL_ID_Localhost)
-        )
+    WEBUSB_ALLOWED_ORIGINS_HEADER(0, // no config headers
+        // our two valid URLs
+        URL_ID_Config, URL_ID_Localhost
     )
 };
 
@@ -129,7 +104,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-			.TotalInterfaces        = 4,
+			.TotalInterfaces        = 3,
 
 			.ConfigurationNumber    = 1,
 			.ConfigurationStrIndex  = STRING_ID_Product,
@@ -189,7 +164,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.SubClass               = HID_CSCP_BootSubclass,
 			.Protocol               = HID_CSCP_MouseBootProtocol,
 
-			.InterfaceStrIndex      = STRING_ID_KNOB
+			.InterfaceStrIndex      = STRING_ID_Knobs
 		},
 
 	.HID2_MouseHID =
@@ -212,45 +187,8 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.EndpointSize           = MOUSE_EPSIZE,
 			.PollingIntervalMS      = 0x01
 		},
-
-	.HID3_Interface =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
-
-			.InterfaceNumber        = INTERFACE_ID_Generic,
-			.AlternateSetting       = 0x00,
-
-			.TotalEndpoints         = 1,
-
-			.Class                  = HID_CSCP_HIDClass,
-			.SubClass               = HID_CSCP_NonBootSubclass,
-			.Protocol               = HID_CSCP_NonBootProtocol,
-
-			.InterfaceStrIndex      = STRING_ID_Config
-		},
-
-	.HID3_VendorHID =
-		{
-			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
-
-			.HIDSpec                = VERSION_BCD(1,1,1),
-			.CountryCode            = 0x00,
-			.TotalReportDescriptors = 1,
-			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(GenericReport)
-		},
-
-	.HID3_ReportINEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = GENERIC_EPADDR,
-			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = GENERIC_EPSIZE,
-			.PollingIntervalMS      = 255
-		},
         
-	.HID4_Interface =
+	.HID3_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
@@ -266,7 +204,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.InterfaceStrIndex      = STRING_ID_LED
 		},
 
-	.HID4_LEDHID =
+	.HID3_LEDHID =
 		{
 			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
@@ -277,7 +215,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.HIDReportLength        = sizeof(LEDReport)
 		},
 
-	.HID4_ReportINEndpoint =
+	.HID3_ReportINEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
@@ -295,7 +233,6 @@ const USB_Descriptor_URL_t PROGMEM LocalhostURL = URL_STRING_DESCRIPTOR(URL_HTTP
 const USB_Descriptor_String_t PROGMEM LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
 const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR(L"mon.im");
 const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Pocket Voltex");
-const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Config");
 const USB_Descriptor_String_t PROGMEM LEDString = USB_STRING_DESCRIPTOR(L"Pocket Voltex LEDs");
 const USB_Descriptor_String_t PROGMEM KnobString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Knobs");
 // There may be a better way to do this
@@ -425,22 +362,18 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &ProductString;
 					Size    = pgm_read_byte(&ProductString.Header.Size);
 					break;
-				case STRING_ID_Config:
-					Address = &ConfigString;
-					Size    = pgm_read_byte(&ConfigString.Header.Size);
-					break;
                 case STRING_ID_LED:
                     Address = &LEDString;
 					Size    = pgm_read_byte(&LEDString.Header.Size);
 					break;
-                case STRING_ID_KNOB:
+                case STRING_ID_Knobs:
                     Address = &KnobString;
 					Size    = pgm_read_byte(&KnobString.Header.Size);
 					break;
                 default:
-                    if(DescriptorNumber >= STRING_ID_LED_INDIV) {
-                        Address = &(LEDString_indiv[STRING_ID_LED_INDIV - DescriptorNumber]);
-                        Size    = pgm_read_byte(&LEDString_indiv[STRING_ID_LED_INDIV - DescriptorNumber].Header.Size);
+                    if(DescriptorNumber >= STRING_ID_LED_Indiv) {
+                        Address = &(LEDString_indiv[STRING_ID_LED_Indiv - DescriptorNumber]);
+                        Size    = pgm_read_byte(&LEDString_indiv[STRING_ID_LED_Indiv - DescriptorNumber].Header.Size);
                     }
 			}
 			break;
@@ -453,11 +386,8 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
                 case INTERFACE_ID_Mouse:
 					Address = &ConfigurationDescriptor.HID2_MouseHID;
 					break;
-				case INTERFACE_ID_Generic:
-					Address = &ConfigurationDescriptor.HID3_VendorHID;
-					break;
 				case INTERFACE_ID_LED:
-					Address = &ConfigurationDescriptor.HID4_LEDHID;
+					Address = &ConfigurationDescriptor.HID3_LEDHID;
 					break;
 			}
 			break;
@@ -470,10 +400,6 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
                 case INTERFACE_ID_Mouse:
 					Address = &MouseReport;
 					Size    = sizeof(MouseReport);
-					break;
-				case INTERFACE_ID_Generic:
-					Address = &GenericReport;
-					Size    = sizeof(GenericReport);
 					break;
                 case INTERFACE_ID_LED:
 					Address = &LEDReport;

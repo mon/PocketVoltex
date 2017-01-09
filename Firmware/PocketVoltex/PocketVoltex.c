@@ -29,7 +29,6 @@ typedef struct
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(Keyboard_Report_t)];
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
-static uint8_t PrevGenericHIDReportBuffer[sizeof(sdvx_config_t)];
 static uint8_t PrevLEDHIDReportBuffer[sizeof(LED_Report_t)];
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
@@ -52,11 +51,6 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
         },
 };
 
-/** LUFA HID Class driver interface configuration and state information. This structure is
- *  passed to all HID Class driver functions, so that multiple instances of the same class
- *  within a device can be differentiated from one another. This is for the mouse HID
- *  interface within the device.
- */
 USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
 {
     .Config =
@@ -70,22 +64,6 @@ USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
                 },
             .PrevReportINBuffer           = PrevMouseHIDReportBuffer,
             .PrevReportINBufferSize       = sizeof(PrevMouseHIDReportBuffer),
-        },
-};
-
-USB_ClassInfo_HID_Device_t Generic_HID_Interface =
-{
-    .Config =
-        {
-            .InterfaceNumber              = INTERFACE_ID_Generic,
-            .ReportINEndpoint             =
-                {
-                    .Address              = GENERIC_EPADDR,
-                    .Size                 = GENERIC_EPSIZE,
-                    .Banks                = 1,
-                },
-            .PrevReportINBuffer           = PrevGenericHIDReportBuffer,
-            .PrevReportINBufferSize       = sizeof(PrevGenericHIDReportBuffer),
         },
 };
 
@@ -178,7 +156,6 @@ int main(void)
     {
         HID_Device_USBTask(&Keyboard_HID_Interface);
         HID_Device_USBTask(&Mouse_HID_Interface);
-        HID_Device_USBTask(&Generic_HID_Interface);
         HID_Device_USBTask(&LED_HID_Interface);
         USB_USBTask();
     }
@@ -279,11 +256,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
         *ReportSize = sizeof(USB_MouseReport_Data_t);
         return true;
-    } else if(HIDInterfaceInfo == &Generic_HID_Interface) {
-        uint8_t* ConfigReport = (uint8_t*)ReportData;
-        memcpy(ConfigReport, &sdvxConfig, sizeof(sdvx_config_t));
-        *ReportSize = CONFIG_BYTES;
-        return true;
     }
     *ReportSize = 0;
     return false;
@@ -303,14 +275,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const uint8_t ReportType,
                                           const void* ReportData,
                                           const uint16_t ReportSize) {
-    if(HIDInterfaceInfo == &Generic_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
-        sdvx_config_t* ConfigReport = (sdvx_config_t*)ReportData;
-        // So we can upgrade firmware without having to hit the button
-        if(ConfigReport->reboot == MAGIC_RESET_NUMBER) {
-            RebootToBootloader();
-        }
-        SetConfig(ConfigReport);
-    } else if(HIDInterfaceInfo == &LED_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
+    if(HIDInterfaceInfo == &LED_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
         // reset our timeout
         hidTimeout = 0;
         
@@ -351,7 +316,6 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 {
     HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
     HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
-    HID_Device_ConfigureEndpoints(&Generic_HID_Interface);
     HID_Device_ConfigureEndpoints(&LED_HID_Interface);
 
     USB_Device_EnableSOFEvents();
@@ -363,7 +327,6 @@ void EVENT_USB_Device_ControlRequest(void)
     USB_Process_BOS();
 	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
     HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
-	HID_Device_ProcessControlRequest(&Generic_HID_Interface);
 	HID_Device_ProcessControlRequest(&LED_HID_Interface);
 }
 
@@ -372,7 +335,6 @@ void EVENT_USB_Device_StartOfFrame(void)
 {
     HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
     HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
-    HID_Device_MillisecondElapsed(&Generic_HID_Interface);
     HID_Device_MillisecondElapsed(&LED_HID_Interface);
     
     if(hidTimeout > HID_LED_TIMEOUT) {
