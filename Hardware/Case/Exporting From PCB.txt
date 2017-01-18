@@ -37,6 +37,18 @@ For tracks:
     Cap: round
     Path->Combine
     Path->Stroke to path
+
+For artwork:
+    Cross reference with altium to make layers for tracks
+        1.5mm
+        1.2mm
+        1mm
+        0.75mm
+        0.5mm
+        0.254mm
+        Raster Fill
+    Path->Combine each individual letter (todo: actually needed?)
+        Also do long lines in 0.75mm layer
     
 You may need to Path->Union everything for artwork layers to render nicely
     

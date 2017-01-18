@@ -1,12 +1,17 @@
+use <imports/cherry_mx.scad>
+include <imports/mx_keycap.scad>
+key_profile_index = 11;
+
 $fn = 64;
 
-switches = [[0,0],
-            [-42.862,-37.592],
-            [ 42.862,-37.592],
-            [-14.287,-37.592],
-            [ 14.287,-37.592],
-            [-28.5,-75.692],
-            [ 28.5,-75.692]];
+// x, y, keycap width in units, isBlack
+switches = [[0,0, 1],
+            [-42.862,-37.592, 1.25],
+            [ 42.862,-37.592, 1.25],
+            [-14.287,-37.592, 1.25],
+            [ 14.287,-37.592, 1.25],
+            [-28.5,-75.692, 1.75, 1],
+            [ 28.5,-75.692, 1.75, 1]];
 bolts = [[30.025, 6.65],
          [71, -16.925],
          [71, 16.5],
@@ -21,8 +26,8 @@ encoderRadius = 13;
 encoderHoles = [[71.6, 0.4, 3.4],
                 [69, -10.1, 1.6]];
                 
-switchHole = [0,-75.692];
-switchDiam = 3;
+macroHole = [0,-75.692];
+macroDiam = 3;
 
 usbWidth = 9;
 usbPos = [-21.311, 10.3];
@@ -87,6 +92,22 @@ module switches() {
     }
 }
 
+module switch_models() {
+    for(sw = switches) {
+        translate([sw[0], sw[1]])
+        cherry_mx_model();
+    }
+}
+
+module switch_keycaps() {
+    for(sw = switches) {
+        color(sw[3] ? [0.1,0.1,0.1] : [1,1,1])
+        translate([sw[0], sw[1], 11.5])
+        scale([sw[2],1,1])
+        key();
+    }
+}
+
 module bolt_spacers() {
     for(bolt = bolts) {
         translate([bolt[0], bolt[1]])
@@ -135,6 +156,22 @@ module encoderHoles_half() {
     }
 }
 
+module encoder_model() {
+    translate([0,0,5.5])
+    rotate([90,0,0])
+    import("imports/PEC16.stl");
+    
+    translate([0,0,13])
+    cylinder(20, d = 25);
+}
+
+module encoder_model_full() {
+    for(enc = encoders) {
+        translate([enc[0], enc[1]])
+        encoder_model();
+    }
+}
+
 // don't do the same thing twice
 module usb_half() {
     w = usbWidth / 2;
@@ -161,7 +198,7 @@ module usb() {
 }
 
 module board() {
-    import("BOARD_SHAPE.dxf");
+    import("imports/BOARD_SHAPE.dxf");
 }
 
 module board_encoderhole() {
@@ -180,8 +217,8 @@ module top_plate() {
         }
         switches();
         bolts();
-        translate([switchHole[0], switchHole[1], 0])
-        circle(d = switchDiam, center = true);
+        translate([macroHole[0], macroHole[1], 0])
+        circle(d = macroDiam, center = true);
     }
 }
 
@@ -195,7 +232,7 @@ module top_ring() {
                 // Room for FX/START
                 switches();
             };
-            import("RING_TOP_SUPPORTS.dxf");
+            import("imports/RING_TOP_SUPPORTS.dxf");
             bolts_expansion();
         }
         bolt_spacers();
@@ -210,7 +247,7 @@ module pcb() {
 }
 
 module artwork() {
-    import("Artwork.dxf");
+    import("imports/Artwork.dxf");
 }
 
 module bottom_ring() {
@@ -221,7 +258,7 @@ module bottom_ring() {
                 offset(delta = -wallStrength)
                     board();
             };
-            import("RING_BOT_SUPPORTS.dxf");
+            import("imports/RING_BOT_SUPPORTS.dxf");
             bolts_expansion();
         }
         bolt_spacers();
@@ -264,7 +301,21 @@ module full_stack() {
             color([1,1,1, 1])
             linear_extrude(plate_thickness[2])
                 pcb();
+            // not-as-pretty model of macro key
+            translate([macroHole[0], macroHole[1], plate_thickness[2]])
+            color([1,0.5,0])
+            cylinder(h = 5.2, d = macroDiam);
+            
             translate([0, 0, plate_thickness[2] + boom]) {
+                // pretty models of stuff
+                translate([0, 0, boom*2]) {
+                    color([0.8,0.8,0.8,1])
+                    encoder_model_full();
+                    
+                    switch_models();
+                    switch_keycaps();
+                };
+                
                 color([1, 1, 1, 0.4])
                 linear_extrude(plate_thickness[3])
                     top_ring();
