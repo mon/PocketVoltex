@@ -67,6 +67,11 @@
 			USB_Descriptor_Interface_t            HID3_Interface;
 			USB_HID_Descriptor_HID_t              HID3_LEDHID;
 			USB_Descriptor_Endpoint_t             HID3_ReportINEndpoint;
+            
+			// Config interface as we can't talk to composite directly
+			USB_Descriptor_Interface_t            Config_Interface;
+			USB_Descriptor_Endpoint_t             Config_DataInEndpoint;
+			USB_Descriptor_Endpoint_t             Config_DataOutEndpoint;
 		} USB_Descriptor_Configuration_t;
 
 		/** Enum for the device interface descriptor IDs within the device.
@@ -75,7 +80,8 @@
 		{
 			INTERFACE_ID_Keyboard = 0, /**< Keyboard interface descriptor ID */
             INTERFACE_ID_Mouse    = 1, /**< Mouse interface descriptor ID */
-            INTERFACE_ID_LED      = 2  /**< LED interface descriptor ID  */
+            INTERFACE_ID_LED      = 2, /**< LED interface descriptor ID  */
+            INTERFACE_ID_Config   = 3  /**< Config interface descriptor ID  */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
@@ -86,8 +92,9 @@
 			STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
 			STRING_ID_Product      = 2, /**< Product string ID */
             STRING_ID_Knobs        = 3, 
-            STRING_ID_LED          = 4,  /**< LED string ID */
-            STRING_ID_LED_Indiv    = 5,
+            STRING_ID_Config       = 4, 
+            STRING_ID_LED          = 5,  /**< LED string ID */
+            STRING_ID_LED_Indiv    = 6,
 		};
         
         enum URLDescriptors_t
@@ -97,15 +104,19 @@
         };
 
 	/* Macros: */
-		#define KEYBOARD_EPADDR              (ENDPOINT_DIR_IN | 1)
-        
-        #define MOUSE_IN_EPADDR              (ENDPOINT_DIR_IN | 2)
-        
-        #define LED_EPADDR                   (ENDPOINT_DIR_IN | 3)
+		#define KEYBOARD_EPADDR              (ENDPOINT_DIR_IN  | 1)
+        #define MOUSE_IN_EPADDR              (ENDPOINT_DIR_IN  | 2)
+        #define LED_EPADDR                   (ENDPOINT_DIR_IN  | 3)
+        #define CONFIG_IN_EPADDR             (ENDPOINT_DIR_IN  | 4)
+        #define CONFIG_OUT_EPADDR            (ENDPOINT_DIR_OUT | 5)
 
 		#define KEYBOARD_EPSIZE              SWITCH_COUNT + 2
         #define MOUSE_EPSIZE                 8
         #define LED_EPSIZE                   LED_TOTAL_COUNT
+        // MUST be 8, 16, 32 or 64 bytes
+        #define CONFIG_EPSIZE CONFIG_BYTES <= 8 ? 8 :   \
+                              CONFIG_BYTES <= 16 ? 16 : \
+                              CONFIG_BYTES <= 32 ? 32 : 64 // if it's larger than 64 bytes, you're out of luck
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,

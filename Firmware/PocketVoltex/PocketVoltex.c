@@ -158,6 +158,19 @@ int main(void)
         HID_Device_USBTask(&Mouse_HID_Interface);
         HID_Device_USBTask(&LED_HID_Interface);
         USB_USBTask();
+        
+        //uint8_t ReceivedData[VENDOR_IO_EPSIZE];
+        //memset(ReceivedData, 0x00, sizeof(ReceivedData));
+        //
+        Endpoint_SelectEndpoint(CONFIG_OUT_EPADDR);
+        if (Endpoint_IsOUTReceived()) {
+        //  Endpoint_Read_Stream_LE(ReceivedData, VENDOR_IO_EPSIZE, NULL);
+            Endpoint_ClearOUT();
+        //
+        //  Endpoint_SelectEndpoint(VENDOR_IN_EPADDR);
+        //  Endpoint_Write_Stream_LE(ReceivedData, VENDOR_IO_EPSIZE, NULL);
+        //  Endpoint_ClearIN();
+        }
     }
 }
 
@@ -317,6 +330,8 @@ void EVENT_USB_Device_ConfigurationChanged(void)
     HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
     HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
     HID_Device_ConfigureEndpoints(&LED_HID_Interface);
+    Endpoint_ConfigureEndpoint(CONFIG_IN_EPADDR,  EP_TYPE_BULK, CONFIG_EPSIZE, 1);
+    Endpoint_ConfigureEndpoint(CONFIG_OUT_EPADDR, EP_TYPE_BULK, CONFIG_EPSIZE, 1);
 
     USB_Device_EnableSOFEvents();
 }

@@ -50,6 +50,47 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM MouseReport[] =
 	HID_DESCRIPTOR_MOUSE(-128, 127, -128, 127, 1, false)
 };
 
+
+const uint8_t PROGMEM MS_OS_Descriptor[] =
+{
+    MS_OS_DESCRIPTOR_SET
+    (
+        MS_OS_CONFIG_SUBSET_HEADER
+        (
+            0x00, // Config 0
+            MS_OS_FUNCTION_SUBSET_HEADER
+            (
+                INTERFACE_ID_Config, // Interface ID
+                MS_OS_COMPAT_ID_WINUSB
+            )
+        )
+    )
+};
+
+const uint8_t PROGMEM WebUSBAllowedOrigins[] = {
+    WEBUSB_ALLOWED_ORIGINS_HEADER
+    (
+        1, // 1 config header present
+        WEBUSB_CONFIG_SUBSET_HEADER
+        (
+            0x00, 1, // Config 0, 1 function header
+            // Config interface accessible from the web, 2 valid URLs
+            WEBUSB_FUNCTION_SUBSET_HEADER(INTERFACE_ID_Config, URL_ID_Config, URL_ID_Localhost)
+        )
+    )
+};
+
+const uint8_t PROGMEM BOSDescriptor[] =
+{
+    BOS_DESCRIPTOR
+    (
+        2, // 2 capability descriptors in use
+        WEBUSB_CAPABILITY_DESCRIPTOR(WEBUSB_ID, URL_ID_Config), // Vendor request ID, URL ID
+        // Required to force WinUSB driver for driverless WebUSB compatibility
+        MS_OS_20_CAPABILITY_DESCRIPTOR(MS_OS_ID, sizeof(MS_OS_Descriptor)) // Vendor request ID, Descriptor set length
+    )
+};
+
 const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
@@ -72,31 +113,6 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
 
-const uint8_t PROGMEM MS_OS_Descriptor[] =
-{
-    MS_OS_DESCRIPTOR_SET(
-        MS_OS_CONFIG_SUBSET_HEADER(0x00, // Config 0
-            MS_OS_COMPAT_ID_WINUSB
-        )
-    )
-};
-
-const uint8_t PROGMEM WebUSBAllowedOrigins[] = {
-    WEBUSB_ALLOWED_ORIGINS_HEADER(0, // no config headers
-        // our two valid URLs
-        URL_ID_Config, URL_ID_Localhost
-    )
-};
-
-const uint8_t PROGMEM BOSDescriptor[] =
-{
-    BOS_DESCRIPTOR(2, // 2 capability descriptors in use
-        WEBUSB_CAPABILITY_DESCRIPTOR(WEBUSB_ID, URL_ID_Config), // Vendor request ID, URL ID
-        // Required to force WinUSB driver for driverless WebUSB compatibility
-        MS_OS_20_CAPABILITY_DESCRIPTOR(MS_OS_ID, sizeof(MS_OS_Descriptor)) // Vendor request ID, Descriptor set length
-    )
-};
-
 const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 {
 	.Config =
@@ -104,7 +120,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-			.TotalInterfaces        = 3,
+			.TotalInterfaces        = 4,
 
 			.ConfigurationNumber    = 1,
 			.ConfigurationStrIndex  = STRING_ID_Product,
@@ -224,6 +240,44 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.EndpointSize           = LED_EPSIZE,
 			.PollingIntervalMS      = 255
 		},
+        
+	.Config_Interface =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
+
+			.InterfaceNumber        = INTERFACE_ID_Config,
+			.AlternateSetting       = 0,
+
+			.TotalEndpoints         = 2,
+
+			.Class                  = 0xFF,
+			.SubClass               = 0xFF,
+			.Protocol               = 0xFF,
+
+			.InterfaceStrIndex      = STRING_ID_Config
+		},
+
+	.Config_DataInEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = CONFIG_IN_EPADDR,
+			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = CONFIG_EPSIZE,
+            // ignored but required
+			.PollingIntervalMS      = 0x05
+		},
+
+	.Config_DataOutEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = CONFIG_OUT_EPADDR,
+			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = CONFIG_EPSIZE,
+            // ignored but required
+			.PollingIntervalMS      = 0x05
+		}
 };
 
 
@@ -235,6 +289,7 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR
 const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Pocket Voltex");
 const USB_Descriptor_String_t PROGMEM LEDString = USB_STRING_DESCRIPTOR(L"Pocket Voltex LEDs");
 const USB_Descriptor_String_t PROGMEM KnobString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Knobs");
+const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Config");
 // There may be a better way to do this
 const USB_Descriptor_String_t PROGMEM LEDString_indiv[] = {
     USB_STRING_DESCRIPTOR(L"L1-B"),
@@ -277,6 +332,7 @@ void USB_Process_BOS(void) {
         USB_ControlRequest.bmRequestType != (REQDIR_DEVICETOHOST | REQTYPE_VENDOR | REQREC_DEVICE)) {
         return;
     }
+    led_set_all(16,16,16);
     switch(USB_ControlRequest.bRequest) {
         case WEBUSB_ID:
             switch(USB_ControlRequest.wIndex) {
@@ -369,6 +425,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
                 case STRING_ID_Knobs:
                     Address = &KnobString;
 					Size    = pgm_read_byte(&KnobString.Header.Size);
+					break;
+                case STRING_ID_Config:
+                    Address = &ConfigString;
+					Size    = pgm_read_byte(&ConfigString.Header.Size);
 					break;
                 default:
                     if(DescriptorNumber >= STRING_ID_LED_Indiv) {
