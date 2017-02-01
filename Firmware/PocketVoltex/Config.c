@@ -34,13 +34,17 @@ void InitConfig(void) {
         eeprom_write_byte(&firstRun, MAGIC_NUMBER); // defaults set
     }
     eeprom_read_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
-    sdvxConfig.version = FIRMWARE_VERSION;
 }
 
 void SetConfig(sdvx_config_t* config) {
     memcpy(&sdvxConfig, config, sizeof(sdvx_config_t));
-    // Version is set in firmware, not software
-    sdvxConfig.version = FIRMWARE_VERSION;
     
     eeprom_write_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
+}
+
+command_response_t HandleConfig(uint8_t* buffer) {
+    if(buffer[0] == MAGIC_RESET_NUMBER) {
+        return REBOOT;
+    }
+    return IGNORE;
 }
