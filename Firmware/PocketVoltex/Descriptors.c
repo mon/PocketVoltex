@@ -129,7 +129,45 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 
 			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(500)
 		},
+        
+	.Config_Interface =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
+			.InterfaceNumber        = INTERFACE_ID_Config,
+			.AlternateSetting       = 0,
+
+			.TotalEndpoints         = 2,
+
+			.Class                  = 0xFF,
+			.SubClass               = 0xFF,
+			.Protocol               = 0xFF,
+
+			.InterfaceStrIndex      = STRING_ID_Config
+		},
+
+	.Config_DataInEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = CONFIG_IN_EPADDR,
+			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = CONFIG_EPSIZE,
+            // ignored but required
+			.PollingIntervalMS      = 0x05
+		},
+
+	.Config_DataOutEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = CONFIG_OUT_EPADDR,
+			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = CONFIG_EPSIZE,
+            // ignored but required
+			.PollingIntervalMS      = 0x05
+		},
+        
 	.HID1_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
@@ -240,44 +278,6 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.EndpointSize           = LED_EPSIZE,
 			.PollingIntervalMS      = 255
 		},
-        
-	.Config_Interface =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
-
-			.InterfaceNumber        = INTERFACE_ID_Config,
-			.AlternateSetting       = 0,
-
-			.TotalEndpoints         = 2,
-
-			.Class                  = 0xFF,
-			.SubClass               = 0xFF,
-			.Protocol               = 0xFF,
-
-			.InterfaceStrIndex      = STRING_ID_Config
-		},
-
-	.Config_DataInEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = CONFIG_IN_EPADDR,
-			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = CONFIG_EPSIZE,
-            // ignored but required
-			.PollingIntervalMS      = 0x05
-		},
-
-	.Config_DataOutEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = CONFIG_OUT_EPADDR,
-			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = CONFIG_EPSIZE,
-            // ignored but required
-			.PollingIntervalMS      = 0x05
-		}
 };
 
 
@@ -332,7 +332,6 @@ void USB_Process_BOS(void) {
         USB_ControlRequest.bmRequestType != (REQDIR_DEVICETOHOST | REQTYPE_VENDOR | REQREC_DEVICE)) {
         return;
     }
-    led_set_all(16,16,16);
     switch(USB_ControlRequest.bRequest) {
         case WEBUSB_ID:
             switch(USB_ControlRequest.wIndex) {

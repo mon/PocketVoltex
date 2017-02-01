@@ -5,7 +5,14 @@
 #include "LEDPatterns.h"
 #include "Macro.h"
 
-#define READ_SWITCH(x) (!(*pins[switches[x].switchPort] & _BV(switches[x].switchPin)))
+#define LOAD_SWITCH(source, sourceBit, result, resultBit) result |= !((source) & _BV(sourceBit)) << resultBit
+// B 0,1
+#define SWITCH_MASKB 0b00000011
+// C 1,2
+#define SWITCH_MASKC 0b00000110
+// D 4,5,6,7
+#define SWITCH_MASKD 0b11110000
+
 #define MAGIC_BOOT_KEY            0xDEADBE7A
 // offset * word size
 #define BOOTLOADER_START_ADDRESS  (0x1c00 * 2)
@@ -83,20 +90,7 @@ USB_ClassInfo_HID_Device_t LED_HID_Interface =
         },
 };
 
-static volatile uint8_t *ports[] = {&PORTB, &PORTC, &PORTD};
-static volatile uint8_t *pins[] = {&PINB, &PINC, &PIND};
-static volatile uint8_t *ddrs[] = {&DDRB, &DDRC, &DDRD};
-
-static switch_t switches[SWITCH_COUNT] = {
-    {B, 1}, // A
-    {D, 7}, // B
-    {D, 5}, // C
-    {D, 4}, // D
-    {B, 0}, // FX L
-    {D, 6}, // FX R
-    {C, 2}, // START
-    {C, 1}  // Macro key
-};
+static switch_t switches[SWITCH_COUNT];
 static uint8_t switchesChanged = 1;
 
 // Set to max already so we have our init flash
@@ -126,16 +120,38 @@ void RebootToBootloader(void) {
     while(1);
 }
 
+/* This is verbose and annoying but the nice method wastes 30 bytes of RAM */
+uint8_t load_switches(void) {
+    uint8_t tmp;
+    uint8_t result = 0;
+    
+    tmp = PINB;
+    LOAD_SWITCH(tmp, 1, result, 0); // PINB1, A
+    LOAD_SWITCH(tmp, 0, result, 4); // PINB0, FX L
+    tmp = PINC;
+    LOAD_SWITCH(tmp, 2, result, 6); // PINC2, START
+    LOAD_SWITCH(tmp, 1, result, 7); // PINC1, MACRO
+    tmp = PIND;
+    LOAD_SWITCH(tmp, 7, result, 1); // PIND7, B
+    LOAD_SWITCH(tmp, 5, result, 2); // PIND5, C
+    LOAD_SWITCH(tmp, 4, result, 3); // PIND4, D
+    LOAD_SWITCH(tmp, 6, result, 5); // PIND6, FX L
+    
+    return result;
+}
+
 void update_switches(void) {
     uint8_t i, newState;
+    uint8_t switchRead = load_switches();
     
     for(i = 0; i < SWITCH_COUNT; i++) {
-        newState = READ_SWITCH(i);
+        newState = switchRead & 1;
         if(!switches[i].debounce && newState != switches[i].lastReport) {
             switches[i].state = newState;
-            switches[i].debounce = sdvxConfig.debounce;
+            switches[i].debounce = SWITCH_DEBOUNCE;
             switchesChanged = 1;
         }
+        switchRead >>= 1;
     }
 }
 
@@ -159,17 +175,27 @@ int main(void)
         HID_Device_USBTask(&LED_HID_Interface);
         USB_USBTask();
         
-        //uint8_t ReceivedData[VENDOR_IO_EPSIZE];
-        //memset(ReceivedData, 0x00, sizeof(ReceivedData));
-        //
         Endpoint_SelectEndpoint(CONFIG_OUT_EPADDR);
         if (Endpoint_IsOUTReceived()) {
-        //  Endpoint_Read_Stream_LE(ReceivedData, VENDOR_IO_EPSIZE, NULL);
+            uint8_t ReceivedData[CONFIG_EPSIZE];
+            Endpoint_Read_Stream_LE(ReceivedData, CONFIG_EPSIZE, NULL);
             Endpoint_ClearOUT();
-        //
-        //  Endpoint_SelectEndpoint(VENDOR_IN_EPADDR);
-        //  Endpoint_Write_Stream_LE(ReceivedData, VENDOR_IO_EPSIZE, NULL);
-        //  Endpoint_ClearIN();
+            
+            command_response_t respond = HandleConfig(ReceivedData);
+            switch(respond) {
+                // we are returning the requested data
+                case RESPOND:
+                    Endpoint_SelectEndpoint(CONFIG_IN_EPADDR);
+                    Endpoint_Write_Stream_LE(ReceivedData, CONFIG_EPSIZE, NULL);
+                    Endpoint_ClearIN();
+                    break;
+                case REBOOT:
+                    RebootToBootloader();
+                    break;
+                // no data to return
+                default:
+                    break;
+            }
         }
     }
 }
@@ -187,16 +213,20 @@ void SetupHardware()
         switches[i].state = 0;
         switches[i].lastReport = 0;
         switches[i].debounce = 0;
-        // setup switches to be inputs
-        *ddrs[switches[i].switchPort] &= ~_BV(switches[i].switchPin);
-        // with internal pullups
-        *ports[switches[i].switchPort] |= _BV(switches[i].switchPin);
     }
+    // Inputs
+    DDRB &= ~SWITCH_MASKB;
+    DDRC &= ~SWITCH_MASKC;
+    DDRD &= ~SWITCH_MASKD;
+    // Pullups
+    PORTB |= SWITCH_MASKB;
+    PORTC |= SWITCH_MASKC;
     // RESET has its own pullup
-    *ports[switches[SWITCH_COUNT-1].switchPort] &= ~_BV(switches[SWITCH_COUNT-1].switchPin);
+    PORTC &= ~_BV(1);
+    PORTD |= SWITCH_MASKD;
     
     // RESET held while plugging in
-    if(READ_SWITCH(SWITCH_COUNT-1)) {
+    if(!(PINC & _BV(1))) {
         RebootToBootloader();
     }
 
@@ -246,9 +276,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
             switches[i].lastReport = switches[i].state;
             // Update blinkenlights
             if(switches[i].state) {
-                if(sdvxConfig.ledsOn) {
-                    // TODO
-                }
+                //if(sdvxConfig.ledsOn) {
+                //    // TODO
+                //}
             }
         }
          
@@ -272,7 +302,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
     }
     *ReportSize = 0;
     return false;
-
 }
 
 /** HID class driver callback function for the processing of HID reports from the host.
@@ -321,17 +350,17 @@ void EVENT_USB_Device_Connect(void)
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void)
 {
-    
+    led_set_all(0,0,0);
 }
 
 /** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
+    Endpoint_ConfigureEndpoint(CONFIG_IN_EPADDR,  EP_TYPE_BULK, CONFIG_EPSIZE, 1);
+    Endpoint_ConfigureEndpoint(CONFIG_OUT_EPADDR, EP_TYPE_BULK, CONFIG_EPSIZE, 1);
     HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
     HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
     HID_Device_ConfigureEndpoints(&LED_HID_Interface);
-    Endpoint_ConfigureEndpoint(CONFIG_IN_EPADDR,  EP_TYPE_BULK, CONFIG_EPSIZE, 1);
-    Endpoint_ConfigureEndpoint(CONFIG_OUT_EPADDR, EP_TYPE_BULK, CONFIG_EPSIZE, 1);
 
     USB_Device_EnableSOFEvents();
 }
@@ -340,9 +369,9 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 void EVENT_USB_Device_ControlRequest(void)
 {
     USB_Process_BOS();
-	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
+    HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
     HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
-	HID_Device_ProcessControlRequest(&LED_HID_Interface);
+    HID_Device_ProcessControlRequest(&LED_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
