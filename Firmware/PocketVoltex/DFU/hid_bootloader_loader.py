@@ -24,6 +24,10 @@ from pywinusb import hid
 from intelhex import IntelHex
 import time
 
+# new bootloader
+import usb1
+
+ENDPOINT_SIZE = 32
 
 # Device information table
 device_info_map = dict()
@@ -52,26 +56,23 @@ def get_hid_device_handle():
         return valid_hid_devices[0]
 
 def bootloader_boot():
-    hid_device_filter = hid.HidDeviceFilter(vendor_id=0x16D0,
-                                            product_id=0x0A6D,
-                                            product_name="Pocket Voltex Config")
-
-    valid_hid_devices = hid_device_filter.get_devices()
-
-    if len(valid_hid_devices) is 0:
-        return False
-    else:
-        try:
-            hid_device = valid_hid_devices[0]
-            hid_device.open()
-            # switch count + static stuff + report id
-            output_report_data = [0] * (8 + 9 + 1)
-            # report ID is 0 at byte 0
-            output_report_data[1] = 42;
-
-            hid_device.send_output_report(output_report_data)
-        finally:
-            hid_device.close()
+    # eventually the hid loader will use this too
+    with usb1.USBContext() as context:
+        voltex = None
+        for dev in context.getDeviceList():
+            if dev.getVendorID() == 0x16D0 and dev.getProductID() == 0x0A6D:
+                # because there is the pseudo-composite-parent we ignore
+                try:
+                    voltex = dev.open()
+                    print "Open success!"
+                except:
+                    print "Open fail"
+        if voltex is None:
+            # Device not present, or user is not allowed to access device.
+            print("Couldn't find device to reboot")
+            return False
+        with voltex.claimInterface(0):
+            voltex.bulkWrite(1, [42] + [0]*(ENDPOINT_SIZE-1))
         return True
 
 def send_page_data(hid_device, address, data):
@@ -93,7 +94,7 @@ def program_device(hex_data, device_info):
             print("No valid HID device found.")
             sys.exit(1)
         print("Rebooted to bootloader")
-        time.sleep(6)
+        time.sleep(4)
         hid_device = get_hid_device_handle()
         if hid_device is None:
             print("No valid HID device found.")

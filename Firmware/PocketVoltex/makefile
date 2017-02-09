@@ -65,4 +65,4 @@ flashboot:
 	$(AVRDUDE) -U flash:w:DFU/BootloaderHID.hex:i
 
 flash: all
-	python DFU/hid_bootloader_loader.py atmega16u2 PocketVoltex.hex
+	cd DFU && python hid_bootloader_loader.py atmega16u2 ../PocketVoltex.hex

@@ -34,20 +34,77 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
     HID_RI_END_COLLECTION(0),
 };
 
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM KeyboardReport[] =
+const USB_Descriptor_HIDReport_Datatype_t PROGMEM InputsReport[] =
 {
-	// Use the HID class driver's standard Keyboard report
-	HID_DESCRIPTOR_KEYBOARD(SWITCH_COUNT)
-};
-
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM MouseReport[] =
-{
-	/* Use the HID class driver's standard Mouse report.
+	/* Mouse Report
      *   Min/max X/Y -128 to 127
      *   NOTE: need at least 1 button or report does not work
 	 *   Relative coordinates
 	 */
-	HID_DESCRIPTOR_MOUSE(-128, 127, -128, 127, 1, false)
+    HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
+    HID_RI_USAGE(8, 0x02), /* Mouse */
+    HID_RI_COLLECTION(8, 0x01), /* Application */
+        HID_RI_REPORT_ID(8, HID_REPORTID_MouseReport),
+        HID_RI_USAGE(8, 0x01), /* Pointer */
+        HID_RI_COLLECTION(8, 0x00), /* Physical */
+            HID_RI_USAGE_PAGE(8, 0x09), /* Button */
+            HID_RI_USAGE_MINIMUM(8, 0x01),
+            HID_RI_USAGE_MAXIMUM(8, 1),
+            HID_RI_LOGICAL_MINIMUM(8, 0x00),
+            HID_RI_LOGICAL_MAXIMUM(8, 0x01),
+            HID_RI_REPORT_COUNT(8, 1),
+            HID_RI_REPORT_SIZE(8, 0x01),
+            HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+            HID_RI_REPORT_COUNT(8, 0x01),
+            HID_RI_REPORT_SIZE(8, 7), /* 7 bits padding for our 1 button */
+            HID_RI_INPUT(8, HID_IOF_CONSTANT),
+            HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
+            HID_RI_USAGE(8, 0x30), /* Usage X */
+            HID_RI_USAGE(8, 0x31), /* Usage Y */
+            HID_RI_LOGICAL_MINIMUM(16, -128),
+            HID_RI_LOGICAL_MAXIMUM(16, 127),
+            HID_RI_PHYSICAL_MINIMUM(16, -128),
+            HID_RI_PHYSICAL_MAXIMUM(16, 127),
+            HID_RI_REPORT_COUNT(8, 0x02),
+            HID_RI_REPORT_SIZE(8, 8),
+            HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_RELATIVE),
+        HID_RI_END_COLLECTION(0),
+    HID_RI_END_COLLECTION(0),
+    
+	/* Keyboard Report */
+	HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
+	HID_RI_USAGE(8, 0x06), /* Keyboard */
+	HID_RI_COLLECTION(8, 0x01), /* Application */
+		HID_RI_REPORT_ID(8, HID_REPORTID_KeyboardReport),
+		HID_RI_USAGE_PAGE(8, 0x07), /* Key Codes */
+		HID_RI_USAGE_MINIMUM(8, 0xE0), /* Keyboard Left Control */
+		HID_RI_USAGE_MAXIMUM(8, 0xE7), /* Keyboard Right GUI */
+		HID_RI_LOGICAL_MINIMUM(8, 0x00),
+		HID_RI_LOGICAL_MAXIMUM(8, 0x01),
+		HID_RI_REPORT_SIZE(8, 0x01),
+		HID_RI_REPORT_COUNT(8, 0x08),
+		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+		HID_RI_REPORT_COUNT(8, 0x01),
+		HID_RI_REPORT_SIZE(8, 0x08),
+		HID_RI_INPUT(8, HID_IOF_CONSTANT),
+		HID_RI_USAGE_PAGE(8, 0x08), /* LEDs */
+		HID_RI_USAGE_MINIMUM(8, 0x01), /* Num Lock */
+		HID_RI_USAGE_MAXIMUM(8, 0x05), /* Kana */
+		HID_RI_REPORT_COUNT(8, 0x05),
+		HID_RI_REPORT_SIZE(8, 0x01),
+		HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+		HID_RI_REPORT_COUNT(8, 0x01),
+		HID_RI_REPORT_SIZE(8, 0x03),
+		HID_RI_OUTPUT(8, HID_IOF_CONSTANT),
+		HID_RI_LOGICAL_MINIMUM(8, 0x00),
+		HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
+		HID_RI_USAGE_PAGE(8, 0x07), /* Keyboard */
+		HID_RI_USAGE_MINIMUM(8, 0x00), /* Reserved (no event indicated) */
+		HID_RI_USAGE_MAXIMUM(8, 0xFF),
+		HID_RI_REPORT_COUNT(8, SWITCH_COUNT),
+		HID_RI_REPORT_SIZE(8, 0x08),
+		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_ARRAY | HID_IOF_ABSOLUTE),
+	HID_RI_END_COLLECTION(0),
 };
 
 
@@ -108,7 +165,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
 	.ProductStrIndex        = STRING_ID_Product,
-	.SerialNumStrIndex      = STRING_ID_Product,
+	.SerialNumStrIndex      = USE_INTERNAL_SERIAL,
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
@@ -120,7 +177,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-			.TotalInterfaces        = 4,
+			.TotalInterfaces        = 3,
 
 			.ConfigurationNumber    = 1,
 			.ConfigurationStrIndex  = STRING_ID_Product,
@@ -146,17 +203,6 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.InterfaceStrIndex      = STRING_ID_Config
 		},
 
-	.Config_DataInEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = CONFIG_IN_EPADDR,
-			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = CONFIG_EPSIZE,
-            // ignored but required
-			.PollingIntervalMS      = 0x05
-		},
-
 	.Config_DataOutEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
@@ -168,11 +214,22 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.PollingIntervalMS      = 0x05
 		},
         
+	.Config_DataInEndpoint =
+		{
+			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+			.EndpointAddress        = CONFIG_IN_EPADDR,
+			.Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+			.EndpointSize           = CONFIG_EPSIZE,
+            // ignored but required
+			.PollingIntervalMS      = 0x05
+		},
+        
 	.HID1_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
-			.InterfaceNumber        = INTERFACE_ID_Keyboard,
+			.InterfaceNumber        = INTERFACE_ID_Inputs,
 			.AlternateSetting       = 0x00,
 
 			.TotalEndpoints         = 1,
@@ -181,10 +238,10 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.SubClass               = HID_CSCP_NonBootSubclass,
 			.Protocol               = HID_CSCP_NonBootProtocol,
 
-			.InterfaceStrIndex      = NO_DESCRIPTOR
+			.InterfaceStrIndex      = STRING_ID_Controls
 		},
 
-	.HID1_KeyboardHID =
+	.HID1_InputsHID =
 		{
 			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
@@ -192,57 +249,20 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.CountryCode            = 0x00,
 			.TotalReportDescriptors = 1,
 			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(KeyboardReport)
+			.HIDReportLength        = sizeof(InputsReport)
 		},
 
 	.HID1_ReportINEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-			.EndpointAddress        = KEYBOARD_EPADDR,
+			.EndpointAddress        = INPUTS_EPADDR,
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = KEYBOARD_EPSIZE,
+			.EndpointSize           = INPUTS_EPSIZE,
 			.PollingIntervalMS      = 0x01
 		},
         
-    .HID2_MouseInterface =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
-
-			.InterfaceNumber        = INTERFACE_ID_Mouse,
-			.AlternateSetting       = 0x00,
-
-			.TotalEndpoints         = 1,
-
-			.Class                  = HID_CSCP_HIDClass,
-			.SubClass               = HID_CSCP_BootSubclass,
-			.Protocol               = HID_CSCP_MouseBootProtocol,
-
-			.InterfaceStrIndex      = STRING_ID_Knobs
-		},
-
-	.HID2_MouseHID =
-		{
-			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
-
-			.HIDSpec                = VERSION_BCD(1,1,1),
-			.CountryCode            = 0x00,
-			.TotalReportDescriptors = 1,
-			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(MouseReport)
-		},
-
-	.HID2_ReportINEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = MOUSE_IN_EPADDR,
-			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = MOUSE_EPSIZE,
-			.PollingIntervalMS      = 0x01
-		},
-        
-	.HID3_Interface =
+	.HID2_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
@@ -258,7 +278,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.InterfaceStrIndex      = STRING_ID_LED
 		},
 
-	.HID3_LEDHID =
+	.HID2_LEDHID =
 		{
 			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
@@ -269,7 +289,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.HIDReportLength        = sizeof(LEDReport)
 		},
 
-	.HID3_ReportINEndpoint =
+	.HID2_ReportINEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
@@ -288,7 +308,7 @@ const USB_Descriptor_String_t PROGMEM LanguageString = USB_STRING_DESCRIPTOR_ARR
 const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR(L"mon.im");
 const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Pocket Voltex");
 const USB_Descriptor_String_t PROGMEM LEDString = USB_STRING_DESCRIPTOR(L"Pocket Voltex LEDs");
-const USB_Descriptor_String_t PROGMEM KnobString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Knobs");
+const USB_Descriptor_String_t PROGMEM ControlsString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Controls");
 const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Config");
 // There may be a better way to do this
 const USB_Descriptor_String_t PROGMEM LEDString_indiv[] = {
@@ -421,9 +441,9 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
                     Address = &LEDString;
 					Size    = pgm_read_byte(&LEDString.Header.Size);
 					break;
-                case STRING_ID_Knobs:
-                    Address = &KnobString;
-					Size    = pgm_read_byte(&KnobString.Header.Size);
+                case STRING_ID_Controls:
+                    Address = &ControlsString;
+					Size    = pgm_read_byte(&ControlsString.Header.Size);
 					break;
                 case STRING_ID_Config:
                     Address = &ConfigString;
@@ -439,26 +459,19 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 		case HID_DTYPE_HID:
             Size = sizeof(USB_HID_Descriptor_HID_t);
 			switch (wIndex) {
-				case INTERFACE_ID_Keyboard:
-					Address = &ConfigurationDescriptor.HID1_KeyboardHID;
-					break;
-                case INTERFACE_ID_Mouse:
-					Address = &ConfigurationDescriptor.HID2_MouseHID;
+				case INTERFACE_ID_Inputs:
+					Address = &ConfigurationDescriptor.HID1_InputsHID;
 					break;
 				case INTERFACE_ID_LED:
-					Address = &ConfigurationDescriptor.HID3_LEDHID;
+					Address = &ConfigurationDescriptor.HID2_LEDHID;
 					break;
 			}
 			break;
 		case HID_DTYPE_Report:
 			switch (wIndex) {
-				case INTERFACE_ID_Keyboard:
-					Address = &KeyboardReport;
-					Size    = sizeof(KeyboardReport);
-					break;
-                case INTERFACE_ID_Mouse:
-					Address = &MouseReport;
-					Size    = sizeof(MouseReport);
+				case INTERFACE_ID_Inputs:
+					Address = &InputsReport;
+					Size    = sizeof(InputsReport);
 					break;
                 case INTERFACE_ID_LED:
 					Address = &LEDReport;
