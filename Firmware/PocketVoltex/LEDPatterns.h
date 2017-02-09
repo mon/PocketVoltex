@@ -22,7 +22,8 @@ enum LEDMode {
     BREATHE,
 };
 
-void led_frame(void);
+uint8_t led_on_frame(void);
+void led_animate(void);
 void led_anim_flash(void);
 void led_anim_follower(void);
 void led_knobs_update(int8_t left, int8_t right);

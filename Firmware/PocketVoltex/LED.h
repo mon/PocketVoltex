@@ -25,7 +25,7 @@ typedef struct {
 
 // Arranged left to right, top to bottom
 // LED order is BGR...BGR
-volatile uint8_t leds[LED_PHYSICAL_COUNT];
+uint8_t leds[LED_PHYSICAL_COUNT];
 
 // Maps BT/FX keys to their associated LED
 // Order is BT-1-4, FX-L, FX-R
@@ -37,8 +37,10 @@ static const PROGMEM uint8_t ledLeftCircleMap[]  = {0, 2, 4, 6};
 static const PROGMEM uint8_t ledRightCircleMap[] = {7, 5, 3, 1};
 
 void led_init(void);
+void led_commit(void);
 void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
 void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
+void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strength);
 void led_set_all(uint8_t r, uint8_t g, uint8_t b);
 void led_set_indiv(uint8_t num, uint8_t val);
 

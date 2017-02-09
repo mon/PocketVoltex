@@ -41,19 +41,19 @@ typedef struct {
 // OPTIONS SHOULD BE: blue, pink, green, yellow
 static KnobLights knobs[2] = {
     // Aqua, mid left LEDs
-    {{0,1,1}, {2,3}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}},
+    {{0,BRIGHTNESS_MAX,BRIGHTNESS_MAX}, {2,3}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}},
     // Pink, mid right LEDs
-    {{1,0,1}, {0,1}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}}
+    {{BRIGHTNESS_MAX,0,BRIGHTNESS_MAX}, {0,1}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}}
 };
 
 void led_knob_light_indiv(KnobLights* knob, const uint8_t* map);
 
+uint8_t led_on_frame(void) {
+    return ++frameCounter >= LED_MS_PER_FRAME;
+}
+
 // Called every 1ms
-void led_frame(void) {
-    if(++frameCounter < LED_MS_PER_FRAME) {
-        return;
-    }
-    
+void led_animate(void) {
     frameCounter = 0;
     
     switch(animMode) {
@@ -113,19 +113,17 @@ void led_frame(void) {
             break;
     }
     
-    // Knob lights, what shall I do with you?
-    led_set_all(0,0,0);
     led_knob_light_indiv(&knobs[0], ledLeftCircleMap);
     led_knob_light_indiv(&knobs[1], ledRightCircleMap);
 }
 
 void led_knob_light_indiv(KnobLights* knob, const uint8_t* map) {
     for(uint8_t led = 0; led < 2; led++) {
-        uint8_t r = knob->levels[led] * knob->rgb[0];
-        uint8_t g = knob->levels[led] * knob->rgb[1];
-        uint8_t b = knob->levels[led] * knob->rgb[2];
+        uint8_t r = knob->rgb[0];
+        uint8_t g = knob->rgb[1];
+        uint8_t b = knob->rgb[2];
         //led_set_max(ledCircleMap[knobs[i].leds[led]], r, g, b);
-        led_set(pgm_read_byte(&map[knob->leds[led]]), r, g, b);
+        led_fade_over(pgm_read_byte(&map[knob->leds[led]]), r, g, b, knob->levels[led]);
     }
 }
 

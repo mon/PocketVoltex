@@ -28,6 +28,8 @@
 #define G 1
 #define B 0
 
+static volatile uint8_t leds_frontbuffer[LED_PHYSICAL_COUNT];
+
 void led_init() {
     // all GNDs low level for high impedence or gnd
     GND_PORT &= ~GND_MASK;
@@ -39,7 +41,8 @@ void led_init() {
     // all LEDs output
     LED_DDR |= LED_MASK;
     
-    memset((uint8_t*)leds, 0, LED_PHYSICAL_COUNT);
+    memset(leds, 0, LED_PHYSICAL_COUNT);
+    memset((uint8_t*)leds_frontbuffer, 0, LED_PHYSICAL_COUNT);
     
     // 64 light levels * 60Hz update * 4 different GND pins = 15360Hz
     // 520 clock cycles for our interrupt handler
@@ -52,6 +55,10 @@ void led_init() {
     TIMSK0 = _BV(OCIE0A);
     // Clear interrupt
     TIFR0 = _BV(OCF0A);
+}
+
+void led_commit(void) {
+    memcpy((uint8_t*)leds_frontbuffer, leds, LED_PHYSICAL_COUNT);
 }
 
 void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
@@ -69,6 +76,33 @@ void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
         leds[offset+G] = g;
     if(b > leds[offset+B])
         leds[offset+B] = b;
+}
+
+// Applies a crossfade between the current colour and an overlay colour with a given strength
+void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strength) {
+    uint8_t offset = num * 3;
+    // going outside max val for a signed int8
+    int16_t scales[3];
+    // get colour distances
+    scales[R] = r - leds[offset+R];
+    scales[G] = g - leds[offset+G];
+    scales[B] = b - leds[offset+B];
+    for(uint8_t i = 0; i < 3; i++) {
+        // perform scaling with div0 check
+        if(scales[i] == 0) {
+            scales[i] = BRIGHTNESS_LEVELS;
+        } else {
+            // won't ever be 0, don't check later
+            scales[i] = BRIGHTNESS_LEVELS / scales[i];
+        }
+        int16_t new = leds[offset+i] + strength/scales[i];
+        // Integer division strikes again
+        if(new > BRIGHTNESS_MAX)
+            new = BRIGHTNESS_MAX;
+        if(new < 0)
+            new = 0;
+        leds[offset+i] = new;
+    }
 }
 
 void led_set_all(uint8_t r, uint8_t g, uint8_t b) {
@@ -111,7 +145,7 @@ ISR(TIMER0_COMPA_vect) {
     // This saves us doing a costly dynamic _BV()
     static uint8_t currentGndMask = 0;
     static uint8_t brightness = BRIGHTNESS_LEVELS - BRIGHTNESS_INCREMENT;
-    static volatile uint8_t* offset = &leds[0];
+    static volatile uint8_t* offset = &leds_frontbuffer[0];
     
     uint8_t out = 0;
     
@@ -121,7 +155,7 @@ ISR(TIMER0_COMPA_vect) {
         currentGnd = 0;
         // Because we work backwards start at the high end and shift down
         currentGndMask = _BV(7);
-        offset = &leds[0];
+        offset = &leds_frontbuffer[0];
         brightness += BRIGHTNESS_INCREMENT;
         // brightness rolls over cleanly due to being a multiple
     }

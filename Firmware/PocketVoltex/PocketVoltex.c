@@ -38,6 +38,7 @@ static uint8_t PrevInputsHIDReportBuffer[MAX(sizeof(Keyboard_Report_t), sizeof(U
 static uint8_t PrevLEDHIDReportBuffer[sizeof(LED_Report_t)];
 
 static uint8_t sendKeyboard = 0;
+static uint8_t updateLEDs = 1;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -181,6 +182,12 @@ int main(void)
                     break;
             }
         }
+        
+        if(updateLEDs) {
+            updateLEDs = 0;
+            led_animate();
+            led_commit();
+        }
     }
 }
 
@@ -312,7 +319,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
             uint8_t offset = i+2;
             for(uint8_t j = 0; j < 3; j++) {
                 // cast away the volatile for faster ops
-                ((uint8_t*)leds)[i++] = LEDReport->mainLights[offset--];
+                leds[i++] = LEDReport->mainLights[offset--];
             }
         }
         
@@ -343,6 +350,7 @@ void EVENT_USB_Device_Connect(void)
 void EVENT_USB_Device_Disconnect(void)
 {
     led_set_all(0,0,0);
+    led_commit();
 }
 
 /** Event handler for the library USB Configuration Changed event. */
@@ -371,7 +379,11 @@ void EVENT_USB_Device_StartOfFrame(void)
     HID_Device_MillisecondElapsed(&LED_HID_Interface);
     
     if(hidTimeout > HID_LED_TIMEOUT) {
-        led_frame();
+        // we use a sentinel since this is actually inside an interrupt!
+        // less LED flicker if ran outside
+        if(led_on_frame()) {
+            updateLEDs = 1;
+        }
     } else {
         hidTimeout++;
     }
