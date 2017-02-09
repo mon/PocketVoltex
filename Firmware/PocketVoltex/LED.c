@@ -15,6 +15,8 @@
 #define LED_DDR  DDRB
 #define LED_MASK (0b111111 << 2)
 
+#define BRIGHTNESS_INCREMENT (BRIGHTNESS_LEVELS / BRIGHTNESS_DOWNSCALE)
+
 #define UPDATE_HZ 100
 // prescaler is the div8
 #define TIMER_COMPARE ((F_CPU / 8 / UPDATE_HZ / GND_COUNT / BRIGHTNESS_LEVELS)-1)
@@ -108,7 +110,7 @@ ISR(TIMER0_COMPA_vect) {
     static uint8_t currentGnd = GND_COUNT - 1;
     // This saves us doing a costly dynamic _BV()
     static uint8_t currentGndMask = 0;
-    static uint8_t brightness = BRIGHTNESS_LEVELS - 1;
+    static uint8_t brightness = BRIGHTNESS_LEVELS - BRIGHTNESS_INCREMENT;
     static volatile uint8_t* offset = &leds[0];
     
     uint8_t out = 0;
@@ -120,8 +122,8 @@ ISR(TIMER0_COMPA_vect) {
         // Because we work backwards start at the high end and shift down
         currentGndMask = _BV(7);
         offset = &leds[0];
-        ++brightness;
-        brightness %= BRIGHTNESS_LEVELS;
+        brightness += BRIGHTNESS_INCREMENT;
+        // brightness rolls over cleanly due to being a multiple
     }
 
     // Faster than loops

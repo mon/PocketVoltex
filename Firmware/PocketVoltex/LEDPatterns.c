@@ -14,14 +14,14 @@ typedef struct {
 // modes are initialised, we can save a little RAM and store these as a union
 typedef union {
     struct {
-        int8_t level;
+        uint8_t level;
         int8_t dir;
     } flash;
 
     RGB_t singleColour;
 
     struct {
-        int8_t level;
+        uint8_t level;
         RGB_t colour;
     } breathe;
 
@@ -40,11 +40,13 @@ typedef struct {
 
 // OPTIONS SHOULD BE: blue, pink, green, yellow
 static KnobLights knobs[2] = {
-    // Aqua, top left LEDs
-    {{0,1,1}, {0,1}, {BRIGHTNESS_LEVELS-1, 0}},
-    // Pink, top right LEDs
-    {{1,0,1}, {6,7}, {0, BRIGHTNESS_LEVELS-1}}
+    // Aqua, mid left LEDs
+    {{0,1,1}, {2,3}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}},
+    // Pink, mid right LEDs
+    {{1,0,1}, {0,1}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}}
 };
+
+void led_knob_light_indiv(KnobLights* knob, const uint8_t* map);
 
 // Called every 1ms
 void led_frame(void) {
@@ -57,17 +59,19 @@ void led_frame(void) {
     switch(animMode) {
         case INIT_FLASH:
             if(pattern.flash.dir) {
-                pattern.flash.level += 3;
-                if(pattern.flash.level >= BRIGHTNESS_LEVELS - 1) {
-                    pattern.flash.level = BRIGHTNESS_LEVELS - 1;
+                if(pattern.flash.level >= BRIGHTNESS_LEVELS - FLASH_SPEED) {
+                    pattern.flash.level = BRIGHTNESS_MAX;
                     pattern.flash.dir = 0;
+                } else {
+                    pattern.flash.level += FLASH_SPEED;
                 }
             } else {
-                if(pattern.flash.level <= 3) {
+                if(pattern.flash.level <= FLASH_SPEED) {
                     pattern.flash.level = 0;
+                    led_set_all(0,0,0);
                     led_anim_follower();
                 } else {
-                    pattern.flash.level -= 3;
+                    pattern.flash.level -= FLASH_SPEED;
                 }
             }
         
@@ -86,16 +90,17 @@ void led_frame(void) {
                 followDir = follow->direction;
                 for(uint8_t i = 0; i < 3; i++) {
                     if(followDir & 1) {
-                        if(follow->value[i]++ >= BRIGHTNESS_LEVELS - 1) {
-                            follow->value[i] = BRIGHTNESS_LEVELS - 1;
+                        if(follow->value[i] >= BRIGHTNESS_LEVELS - FOLLOW_SPEED) {
                             follow->direction <<= 1;
                             if(follow->direction == 0b1000) {
                                 follow->direction = 0b001;
                             }
+                        } else {
+                            follow->value[i] += FOLLOW_SPEED;
                         }
                     } else {
-                        if(follow->value[i] > 0) {
-                            follow->value[i]--;
+                        if(follow->value[i] >= FOLLOW_SPEED) {
+                            follow->value[i] -= FOLLOW_SPEED;
                         }
                     }
                     followDir >>= 1;
@@ -109,52 +114,51 @@ void led_frame(void) {
     }
     
     // Knob lights, what shall I do with you?
-    /*//led_set_all(0,0,0);
-    for(uint8_t i = 0; i < 2; i++) {
-        for(uint8_t led = 0; led < 2; led++) {
-            uint8_t r = knobs[i].levels[led] * knobs[i].rgb[0];
-            uint8_t g = knobs[i].levels[led] * knobs[i].rgb[1];
-            uint8_t b = knobs[i].levels[led] * knobs[i].rgb[2];
-            led_set_max(ledCircleMap[knobs[i].leds[led]], r, g, b);
-        }
-    }*/
+    led_set_all(0,0,0);
+    led_knob_light_indiv(&knobs[0], ledLeftCircleMap);
+    led_knob_light_indiv(&knobs[1], ledRightCircleMap);
+}
+
+void led_knob_light_indiv(KnobLights* knob, const uint8_t* map) {
+    for(uint8_t led = 0; led < 2; led++) {
+        uint8_t r = knob->levels[led] * knob->rgb[0];
+        uint8_t g = knob->levels[led] * knob->rgb[1];
+        uint8_t b = knob->levels[led] * knob->rgb[2];
+        //led_set_max(ledCircleMap[knobs[i].leds[led]], r, g, b);
+        led_set(pgm_read_byte(&map[knob->leds[led]]), r, g, b);
+    }
 }
 
 void led_knob_indiv(KnobLights* knob, int8_t value) {
+    if(value == 0)
+        return;
     /* This is annoying and repetitive but don't think there's a nicer way */
+    value *= LED_KNOB_SPEED;
     if(value > 0) {
-        knob->levels[0] += value;
         if(value > knob->levels[1]) {
-            // Not properly doing rollover since the knob doesn't spin that fast
-            knob->levels[1] = 0;
-        } else {
-            knob->levels[1] -= value;
-        }
-        
-        if(knob->levels[0] > BRIGHTNESS_LEVELS) {
+            // Not proper doing rollover since the knob doesn't spin that fast
             knob->levels[0] = 0;
-            knob->levels[1] = BRIGHTNESS_LEVELS - 1;
+            knob->levels[1] = BRIGHTNESS_MAX;
             knob->leds[1] = knob->leds[0];
             if(knob->leds[0] > 0) {
                 knob->leds[0]--;
             } else {
-                knob->leds[0] = LED_COUNT - 1;
+                knob->leds[0] = LED_COUNT/2 - 1;
             }
+        } else {
+            knob->levels[0] += value;
+            knob->levels[1] -= value;
         }
     } else if(value < 0) {
         if(-value > knob->levels[0]) {
-            knob->levels[0] = 0;
-        } else {
-            knob->levels[0] += value;
-        }
-        knob->levels[1] -= value;
-        
-        if(knob->levels[1] > BRIGHTNESS_LEVELS) {
-            knob->levels[0] = BRIGHTNESS_LEVELS - 1;
+            knob->levels[0] = BRIGHTNESS_MAX;
             knob->levels[1] = 0;
             knob->leds[0] = knob->leds[1];
             knob->leds[1]++;
-            knob->leds[1] %= LED_COUNT;
+            knob->leds[1] %= LED_COUNT/2;
+        } else {
+            knob->levels[0] += value;
+            knob->levels[1] -= value;
         }
     }
 }
@@ -166,22 +170,23 @@ void led_knobs_update(int8_t left, int8_t right) {
 
 void led_anim_flash(void) {
     animMode = INIT_FLASH;
-    // starting at 2 stops us getting a frame of red
-    pattern.flash.level = 2;
+    // starting at 2 stops us getting a frame of red if you're not doing white flash
+    //pattern.flash.level = 2;
+    pattern.flash.level = 0;
     pattern.flash.dir = 1;
 }
 
 void led_anim_follower(void) {
     // Generated by FollowerGen.py
-    static uint8_t PROGMEM followStart[][4] = {
-        {63, 0, 0, 0b010},
-        {40, 0, 23, 0b001},
-        {39, 24, 0, 0b010},
-        {16, 0, 47, 0b001},
-        {15, 48, 0, 0b010},
-        {0, 7, 56, 0b100},
-        {0, 55, 8, 0b100},
-        {0, 31, 32, 0b100},
+    static const PROGMEM uint8_t followStart[][4] = {
+        {255, 0, 0, 0b010},
+        {160, 0, 95, 0b001},
+        {159, 96, 0, 0b010},
+        {64, 0, 191, 0b001},
+        {63, 192, 0, 0b010},
+        {0, 31, 224, 0b100},
+        {0, 223, 32, 0b100},
+        {0, 127, 128, 0b100},
     };
     animMode = FOLLOWER;
     

@@ -7,6 +7,13 @@
 #define LED_FRAMERATE 30
 #define LED_MS_PER_FRAME (1000 / LED_FRAMERATE)
 
+// brightness levels per frame
+#define FLASH_SPEED    12
+#define FOLLOW_SPEED   4
+#define LED_KNOB_SPEED 4
+#define LED_KNOB_HOLD  200
+#define LED_KNOB_FADE  12
+
 enum LEDMode {
     NONE = 0,
     INIT_FLASH,

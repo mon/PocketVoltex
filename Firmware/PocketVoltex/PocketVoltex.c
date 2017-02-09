@@ -306,19 +306,27 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         hidTimeout = 0;
         
         LED_Report_t* LEDReport = (LED_Report_t*)ReportData;
-        memcpy((uint8_t*)leds, LEDReport->mainLights, LED_PHYSICAL_COUNT);
+        //memcpy((uint8_t*)leds, LEDReport->mainLights, LED_PHYSICAL_COUNT);
+        // Load the user set colours as R/G/B instead of B/G/R
+        for(uint8_t i = 0; i < LED_PHYSICAL_COUNT; ) {
+            uint8_t offset = i+2;
+            for(uint8_t j = 0; j < 3; j++) {
+                // cast away the volatile for faster ops
+                ((uint8_t*)leds)[i++] = LEDReport->mainLights[offset--];
+            }
+        }
         
         // Keep normal lights but override when we get flashes on BT or FX
         // BT LEDs flash pure white
         for(uint8_t i = 0; i < 4; i++) {
             if(LEDReport->btFx[i]) {
-                led_set(ledMap[i], BRIGHTNESS_LEVELS, BRIGHTNESS_LEVELS, BRIGHTNESS_LEVELS);
+                led_set(ledMap[i], BRIGHTNESS_MAX, BRIGHTNESS_MAX, BRIGHTNESS_MAX);
             }
         }
         // FX LEDs flash orange
         for(uint8_t i = 4; i < 6; i++) {
             if(LEDReport->btFx[i]) {
-                led_set(ledMap[i], BRIGHTNESS_LEVELS, BRIGHTNESS_LEVELS/4, 0);
+                led_set(ledMap[i], BRIGHTNESS_MAX, BRIGHTNESS_LEVELS/4, 0);
             }
         }
     }
