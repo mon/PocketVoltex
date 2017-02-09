@@ -4,16 +4,33 @@
 static enum LEDMode animMode = NONE;
 static uint8_t frameCounter = 0;
 
-// various things for the different modes
-static int8_t flash;
-static int8_t flashDirection;
-
 typedef struct {
     uint8_t value[3];
     uint8_t direction;
 } RGBFader;
 
-static RGBFader followers[LED_COUNT];
+// stuff for the different modes
+// because only 1 mode is active at a time, config is stored in EEPROM, and
+// modes are initialised, we can save a little RAM and store these as a union
+typedef union {
+    struct {
+        int8_t level;
+        int8_t dir;
+    } flash;
+
+    RGB_t singleColour;
+
+    struct {
+        int8_t level;
+        RGB_t colour;
+    } breathe;
+
+    RGBFader followers[LED_COUNT];
+} Patterns_t;
+
+static Patterns_t pattern;
+
+// These can always be active and are thus not unionised. Capitalism wins again.
 
 typedef struct {
     const uint8_t rgb[3];
@@ -21,15 +38,13 @@ typedef struct {
     uint8_t levels[2];
 } KnobLights;
 
+// OPTIONS SHOULD BE: blue, pink, green, yellow
 static KnobLights knobs[2] = {
     // Aqua, top left LEDs
     {{0,1,1}, {0,1}, {BRIGHTNESS_LEVELS-1, 0}},
     // Pink, top right LEDs
     {{1,0,1}, {6,7}, {0, BRIGHTNESS_LEVELS-1}}
 };
-
-// TODO DEBUG DELETE
-uint8_t debugG = 0, debugB = 0;
 
 // Called every 1ms
 void led_frame(void) {
@@ -41,29 +56,33 @@ void led_frame(void) {
     
     switch(animMode) {
         case INIT_FLASH:
-            if(flashDirection) {
-                flash+=3;
-                if(flash >= BRIGHTNESS_LEVELS - 1) {
-                    flash = BRIGHTNESS_LEVELS - 1;
-                    flashDirection = 0;
+            if(pattern.flash.dir) {
+                pattern.flash.level += 3;
+                if(pattern.flash.level >= BRIGHTNESS_LEVELS - 1) {
+                    pattern.flash.level = BRIGHTNESS_LEVELS - 1;
+                    pattern.flash.dir = 0;
                 }
             } else {
-                flash-=3;
-                if(flash <= 0) {
+                if(pattern.flash.level <= 3) {
+                    pattern.flash.level = 0;
                     led_anim_follower();
-                    flash = 0;
+                } else {
+                    pattern.flash.level -= 3;
                 }
             }
         
-            uint8_t bright = pgm_read_byte(&ledLogCurve[flash]);
-            led_set_all(bright, bright/2, 0);
+            uint8_t bright = pgm_read_byte(&ledLogCurve[pattern.flash.level]);
+            // yellowy orange
+            //led_set_all(bright, bright/2, 0);
+            // I think white looks nicer
+            led_set_all(bright, bright, bright);
             break;
         case FOLLOWER:
             for(uint8_t led = 0; led < LED_COUNT; led++) {
                 uint8_t followDir;
                 RGBFader* follow;
                 
-                follow = followers + led;
+                follow = pattern.followers + led;
                 followDir = follow->direction;
                 for(uint8_t i = 0; i < 3; i++) {
                     if(followDir & 1) {
@@ -89,9 +108,9 @@ void led_frame(void) {
             break;
     }
     
-    //led_set_all(64,debugG,debugB);
     // Knob lights, what shall I do with you?
-    /*for(uint8_t i = 0; i < 2; i++) {
+    /*//led_set_all(0,0,0);
+    for(uint8_t i = 0; i < 2; i++) {
         for(uint8_t led = 0; led < 2; led++) {
             uint8_t r = knobs[i].levels[led] * knobs[i].rgb[0];
             uint8_t g = knobs[i].levels[led] * knobs[i].rgb[1];
@@ -141,17 +160,15 @@ void led_knob_indiv(KnobLights* knob, int8_t value) {
 }
 
 void led_knobs_update(int8_t left, int8_t right) {
-    //led_knob_indiv(&knobs[0], left*2);
-    //led_knob_indiv(&knobs[1], right*2);
-    debugG += left;
-    debugB += right;
+    led_knob_indiv(&knobs[0], left*2);
+    led_knob_indiv(&knobs[1], right*2);
 }
 
 void led_anim_flash(void) {
     animMode = INIT_FLASH;
     // starting at 2 stops us getting a frame of red
-    flash = 2;
-    flashDirection = 1;
+    pattern.flash.level = 2;
+    pattern.flash.dir = 1;
 }
 
 void led_anim_follower(void) {
@@ -170,8 +187,8 @@ void led_anim_follower(void) {
     
     for(uint8_t i = 0; i < LED_COUNT; i++) {
         for(uint8_t j = 0; j < 3; j++) {
-            followers[i].value[j] = pgm_read_byte(&followStart[i][j]);
+            pattern.followers[i].value[j] = pgm_read_byte(&followStart[i][j]);
         }
-        followers[i].direction = pgm_read_byte(&followStart[i][3]);
+        pattern.followers[i].direction = pgm_read_byte(&followStart[i][3]);
     }
 }

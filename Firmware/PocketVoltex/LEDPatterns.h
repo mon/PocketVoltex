@@ -10,6 +10,7 @@
 enum LEDMode {
     NONE = 0,
     INIT_FLASH,
+    SINGLE_COLOUR,
     FOLLOWER,
     BREATHE,
 };

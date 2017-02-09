@@ -14,6 +14,10 @@
 #define LED_TOTAL_COUNT (LED_PHYSICAL_COUNT + LED_VIRTUAL_COUNT)
 #define BRIGHTNESS_LEVELS 64
 
+typedef struct {
+    uint8_t r, g, b;
+} RGB_t;
+
 // Arranged left to right, top to bottom
 // LED order is BGR...BGR
 volatile uint8_t leds[LED_PHYSICAL_COUNT];
