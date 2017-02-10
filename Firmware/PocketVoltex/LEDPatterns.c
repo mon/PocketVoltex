@@ -36,26 +36,32 @@ typedef struct {
     const uint8_t rgb[3];
     uint8_t leds[2];
     uint8_t levels[2];
+    uint16_t fadeTimer;
+    uint8_t fadeOut;
+    int8_t fadeBuffer;
 } KnobLights;
 
 // OPTIONS SHOULD BE: blue, pink, green, yellow
 static KnobLights knobs[2] = {
     // Aqua, mid left LEDs
-    {{0,BRIGHTNESS_MAX,BRIGHTNESS_MAX}, {2,3}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}},
+    {{0,BRIGHTNESS_MAX,BRIGHTNESS_MAX}, {2,3}, {BRIGHTNESS_MAX, 0}},
     // Pink, mid right LEDs
-    {{BRIGHTNESS_MAX,0,BRIGHTNESS_MAX}, {0,1}, {BRIGHTNESS_LEVELS/2, BRIGHTNESS_LEVELS/2}}
+    {{BRIGHTNESS_MAX,0,BRIGHTNESS_MAX}, {0,1}, {0, BRIGHTNESS_MAX}}
 };
 
 void led_knob_light_indiv(KnobLights* knob, const uint8_t* map);
 
 uint8_t led_on_frame(void) {
-    return ++frameCounter >= LED_MS_PER_FRAME;
+    if(++frameCounter >= LED_MS_PER_FRAME) {
+        frameCounter = 0;
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 // Called every 1ms
 void led_animate(void) {
-    frameCounter = 0;
-    
     switch(animMode) {
         case INIT_FLASH:
             if(pattern.flash.dir) {
@@ -70,6 +76,7 @@ void led_animate(void) {
                     pattern.flash.level = 0;
                     led_set_all(0,0,0);
                     led_anim_follower();
+                    break;
                 } else {
                     pattern.flash.level -= FLASH_SPEED;
                 }
@@ -112,24 +119,54 @@ void led_animate(void) {
         default:
             break;
     }
-    
+}
+
+void led_knob_lights(void) {
     led_knob_light_indiv(&knobs[0], ledLeftCircleMap);
     led_knob_light_indiv(&knobs[1], ledRightCircleMap);
 }
 
 void led_knob_light_indiv(KnobLights* knob, const uint8_t* map) {
+    if(knob->fadeOut >= BRIGHTNESS_MAX) {
+        return;
+    }
     for(uint8_t led = 0; led < 2; led++) {
         uint8_t r = knob->rgb[0];
         uint8_t g = knob->rgb[1];
         uint8_t b = knob->rgb[2];
+        uint8_t power = knob->levels[led];
+        if(knob->fadeOut > power) {
+            power = 0;
+        } else {
+            power -= knob->fadeOut;
+        }
         //led_set_max(ledCircleMap[knobs[i].leds[led]], r, g, b);
-        led_fade_over(pgm_read_byte(&map[knob->leds[led]]), r, g, b, knob->levels[led]);
+        led_fade_over(pgm_read_byte(&map[knob->leds[led]]), r, g, b, power);
     }
 }
 
 void led_knob_indiv(KnobLights* knob, int8_t value) {
-    if(value == 0)
+    if(value == 0) {
+        // hold before fadeout
+        if(knob->fadeTimer > 0) {
+            knob->fadeTimer--;
+            if(knob->fadeTimer == 0)
+                knob->fadeBuffer = 0;
+        // actually fade out
+        } else if(knob->fadeOut < BRIGHTNESS_MAX - LED_KNOB_FADE) {
+            knob->fadeOut += LED_KNOB_FADE;
+        // completely faded
+        } else {
+            knob->fadeOut = BRIGHTNESS_MAX;
+        }
         return;
+    }
+    knob->fadeBuffer += value;
+    // bumped it enough to reenable lights, or the timeout has yet to occur
+    if(knob->fadeTimer || knob->fadeBuffer > LED_KNOB_SENSITIVITY || knob->fadeBuffer < -LED_KNOB_SENSITIVITY) {
+        knob->fadeTimer = LED_KNOB_HOLD;
+        knob->fadeOut = 0;
+    }
     /* This is annoying and repetitive but don't think there's a nicer way */
     value *= LED_KNOB_SPEED;
     if(value > 0) {

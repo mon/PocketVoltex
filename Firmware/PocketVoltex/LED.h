@@ -13,7 +13,7 @@
 #define LED_VIRTUAL_COUNT 6
 #define LED_TOTAL_COUNT (LED_PHYSICAL_COUNT + LED_VIRTUAL_COUNT)
 // Internally how many brightness levels you can use - for higher res fades
-#define BRIGHTNESS_LEVELS    256
+#define BRIGHTNESS_LEVELS    128
 #define BRIGHTNESS_MAX       (BRIGHTNESS_LEVELS-1)
 // How many are actually PWM'd, because the chip isn't that quick
 // MUST be a multiple of BRIGHTNESS_LEVELS

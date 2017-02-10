@@ -25,12 +25,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
         // at least 1 INPUT is also needed to be recognised by Bemanitools
         HID_RI_USAGE_MINIMUM(8, 1),
         HID_RI_USAGE_MAXIMUM(8, 1),
-        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-        //0x79, STRING_ID_LED_Indiv, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_Indiv),
-        //0x89, STRING_ID_LED_Indiv + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_Indiv + LED_COUNT),
-        //HID_RI_USAGE_MINIMUM(8, 1), // LED 1
-        //HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
-        //HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
+        HID_RI_INPUT(8, HID_IOF_CONSTANT),
     HID_RI_END_COLLECTION(0),
 };
 

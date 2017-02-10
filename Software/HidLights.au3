@@ -13,7 +13,7 @@ Local $lights[8] = [ _
    "Woofer", "Woofer", "Controller", "Controller" _
 ]
 
-Local $colours[3] = ["B", "G", "R"]
+Local $colours[3] = ["R", "G", "B"]
 Local $bt[6] = ["Button A", "Button B", "Button C", "Button D", "FX-L", "FX-R"]
 
 WinWait("BemaniPC Input Configuration")

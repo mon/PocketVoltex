@@ -19,7 +19,7 @@
 
 #define UPDATE_HZ 100
 // prescaler is the div8
-#define TIMER_COMPARE ((F_CPU / 8 / UPDATE_HZ / GND_COUNT / BRIGHTNESS_LEVELS)-1)
+#define TIMER_COMPARE ((F_CPU / 8 / UPDATE_HZ / GND_COUNT / BRIGHTNESS_DOWNSCALE)-1)
 #if TIMER_COMPARE > 255
     #error timer compare too large for timer register
 #endif
@@ -158,6 +158,10 @@ ISR(TIMER0_COMPA_vect) {
         offset = &leds_frontbuffer[0];
         brightness += BRIGHTNESS_INCREMENT;
         // brightness rolls over cleanly due to being a multiple
+        #if BRIGHTNESS_LEVELS != 256
+        if(brightness > BRIGHTNESS_MAX)
+            brightness = 0;
+        #endif
     }
 
     // Faster than loops

@@ -18,7 +18,7 @@
 #define BOOTLOADER_START_ADDRESS  (0x1c00 * 2)
 
 // How long to wait before moving to internal lighting
-#define HID_LED_TIMEOUT 5000
+#define HID_LED_TIMEOUT 2000
 
 typedef struct
 {
@@ -185,7 +185,9 @@ int main(void)
         
         if(updateLEDs) {
             updateLEDs = 0;
-            led_animate();
+            if(hidTimeout >= HID_LED_TIMEOUT)
+                led_animate();
+            led_knob_lights();
             led_commit();
         }
     }
@@ -378,14 +380,14 @@ void EVENT_USB_Device_StartOfFrame(void)
     HID_Device_MillisecondElapsed(&Inputs_HID_Interface);
     HID_Device_MillisecondElapsed(&LED_HID_Interface);
     
-    if(hidTimeout > HID_LED_TIMEOUT) {
-        // we use a sentinel since this is actually inside an interrupt!
-        // less LED flicker if ran outside
-        if(led_on_frame()) {
-            updateLEDs = 1;
-        }
-    } else {
+    if(hidTimeout < HID_LED_TIMEOUT) {
         hidTimeout++;
+    }
+    
+    // we use a sentinel since this is actually inside an interrupt!
+    // less LED flicker if ran outside
+    if(led_on_frame()) {
+        updateLEDs = 1;
     }
     
     macro_on_frame(&switches[SWITCH_COUNT-1]);
