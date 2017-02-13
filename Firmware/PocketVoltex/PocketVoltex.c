@@ -214,8 +214,7 @@ void SetupHardware()
     // Pullups
     PORTB |= SWITCH_MASKB;
     PORTC |= SWITCH_MASKC;
-    // RESET has its own pullup
-    PORTC &= ~_BV(1);
+    PORTC &= ~_BV(1); // RESET has its own pullup
     PORTD |= SWITCH_MASKD;
     
     // RESET held while plugging in
@@ -329,13 +328,13 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         // BT LEDs flash pure white
         for(uint8_t i = 0; i < 4; i++) {
             if(LEDReport->btFx[i]) {
-                led_set(ledMap[i], BRIGHTNESS_MAX, BRIGHTNESS_MAX, BRIGHTNESS_MAX);
+                led_set_rgb(ledMap[i], &sdvxConfig.btColour);
             }
         }
         // FX LEDs flash orange
         for(uint8_t i = 4; i < 6; i++) {
             if(LEDReport->btFx[i]) {
-                led_set(ledMap[i], BRIGHTNESS_MAX, BRIGHTNESS_LEVELS/4, 0);
+                led_set_rgb(ledMap[i], &sdvxConfig.fxColour);
             }
         }
     }

@@ -33,7 +33,6 @@ static Patterns_t pattern;
 // These can always be active and are thus not unionised. Capitalism wins again.
 
 typedef struct {
-    const uint8_t rgb[3];
     uint8_t leds[2];
     uint8_t levels[2];
     uint16_t fadeTimer;
@@ -43,13 +42,13 @@ typedef struct {
 
 // OPTIONS SHOULD BE: blue, pink, green, yellow
 static KnobLights knobs[2] = {
-    // Aqua, mid left LEDs
-    {{0,BRIGHTNESS_MAX,BRIGHTNESS_MAX}, {2,3}, {BRIGHTNESS_MAX, 0}},
-    // Pink, mid right LEDs
-    {{BRIGHTNESS_MAX,0,BRIGHTNESS_MAX}, {0,1}, {0, BRIGHTNESS_MAX}}
+    // mid left LEDs
+    {{2,3}, {BRIGHTNESS_MAX, 0}},
+    // mid right LEDs
+    {{0,1}, {0, BRIGHTNESS_MAX}}
 };
 
-void led_knob_light_indiv(KnobLights* knob, const uint8_t* map);
+void led_knob_light_indiv(KnobLights* knob, RGB_t* colour, const uint8_t* map);
 
 uint8_t led_on_frame(void) {
     if(++frameCounter >= LED_MS_PER_FRAME) {
@@ -122,26 +121,22 @@ void led_animate(void) {
 }
 
 void led_knob_lights(void) {
-    led_knob_light_indiv(&knobs[0], ledLeftCircleMap);
-    led_knob_light_indiv(&knobs[1], ledRightCircleMap);
+    led_knob_light_indiv(&knobs[0], &sdvxConfig.knobColours[0], ledLeftCircleMap);
+    led_knob_light_indiv(&knobs[1], &sdvxConfig.knobColours[1], ledRightCircleMap);
 }
 
-void led_knob_light_indiv(KnobLights* knob, const uint8_t* map) {
+void led_knob_light_indiv(KnobLights* knob, RGB_t* colour, const uint8_t* map) {
     if(knob->fadeOut >= BRIGHTNESS_MAX) {
         return;
     }
     for(uint8_t led = 0; led < 2; led++) {
-        uint8_t r = knob->rgb[0];
-        uint8_t g = knob->rgb[1];
-        uint8_t b = knob->rgb[2];
         uint8_t power = knob->levels[led];
         if(knob->fadeOut > power) {
             power = 0;
         } else {
             power -= knob->fadeOut;
         }
-        //led_set_max(ledCircleMap[knobs[i].leds[led]], r, g, b);
-        led_fade_over(pgm_read_byte(&map[knob->leds[led]]), r, g, b, power);
+        led_fade_over_rgb(pgm_read_byte(&map[knob->leds[led]]), colour, power);
     }
 }
 

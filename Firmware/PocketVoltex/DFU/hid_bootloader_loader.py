@@ -94,7 +94,7 @@ def program_device(hex_data, device_info):
             print("No valid HID device found.")
             sys.exit(1)
         print("Rebooted to bootloader")
-        time.sleep(4)
+        time.sleep(6)
         hid_device = get_hid_device_handle()
         if hid_device is None:
             print("No valid HID device found.")

@@ -68,6 +68,10 @@ void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
     leds[offset+B] = b;
 }
 
+void led_set_rgb(uint8_t num, RGB_t* colour) {
+    led_set(num, colour->r, colour->g, colour->b);
+}
+
 void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
     uint8_t offset = num * 3;
     if(r > leds[offset+R])
@@ -103,6 +107,10 @@ void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strengt
             new = 0;
         leds[offset+i] = new;
     }
+}
+
+void led_fade_over_rgb(uint8_t num, RGB_t* colour, uint8_t strength) {
+    led_fade_over(num, colour->r, colour->g, colour->b, strength);
 }
 
 void led_set_all(uint8_t r, uint8_t g, uint8_t b) {

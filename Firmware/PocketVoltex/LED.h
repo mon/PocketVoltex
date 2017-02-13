@@ -39,8 +39,10 @@ static const PROGMEM uint8_t ledRightCircleMap[] = {7, 5, 3, 1};
 void led_init(void);
 void led_commit(void);
 void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
+void led_set_rgb(uint8_t num, RGB_t* colour);
 void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
 void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strength);
+void led_fade_over_rgb(uint8_t num, RGB_t* colour, uint8_t strength);
 void led_set_all(uint8_t r, uint8_t g, uint8_t b);
 void led_set_indiv(uint8_t num, uint8_t val);
 
