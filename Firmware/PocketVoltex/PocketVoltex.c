@@ -48,8 +48,6 @@ typedef struct
     uint8_t btFx[6];
 } LED_Report_t;
 
-static uint8_t PrevLEDHIDReportBuffer[sizeof(LED_Report_t)];
-
 static uint8_t sendKeyboard = 0;
 static uint8_t updateLEDs = 1;
 static int8_t joystickKnobs[2] = {0, 0};
@@ -85,8 +83,8 @@ USB_ClassInfo_HID_Device_t LED_HID_Interface =
                     .Size                 = LED_EPSIZE,
                     .Banks                = 1,
                 },
-            .PrevReportINBuffer           = PrevLEDHIDReportBuffer,
-            .PrevReportINBufferSize       = sizeof(PrevLEDHIDReportBuffer),
+            .PrevReportINBuffer           = NULL,
+            .PrevReportINBufferSize       = sizeof(LED_Report_t),
         },
 };
 
@@ -197,11 +195,29 @@ int main(void)
             }
         }
         
-        if(updateLEDs) {
+        if(updateLEDs && sdvxConfig.lightsOn) {
             updateLEDs = 0;
-            if(hidTimeout >= HID_LED_TIMEOUT)
+            if(!sdvxConfig.hidLights || hidTimeout >= HID_LED_TIMEOUT) {
                 led_animate();
-            led_knob_lights();
+                if(sdvxConfig.keyLights) {
+                    // Keep normal lights but override when we get flashes on BT or FX
+                    // BT LEDs
+                    for(uint8_t i = 0; i < 4; i++) {
+                        if(switches[i].state) {
+                            led_set_rgb(ledMap[i], &sdvxConfig.btColour);
+                        }
+                    }
+                    // FX LEDs
+                    for(uint8_t i = 4; i < 6; i++) {
+                        if(switches[i].state) {
+                            led_set_rgb(ledMap[i], &sdvxConfig.fxColour);
+                        }
+                    }
+                }
+            }
+            // knob lights go above all
+            if(sdvxConfig.knobLights)
+                led_knob_lights();
             led_commit();
         }
     }
@@ -365,6 +381,8 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const void* ReportData,
                                           const uint16_t ReportSize) {
     if(HIDInterfaceInfo == &LED_HID_Interface && ReportType == HID_REPORT_ITEM_Out) {
+        if(!sdvxConfig.hidLights)
+            return;
         // reset our timeout
         hidTimeout = 0;
         
@@ -380,13 +398,13 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         }
         
         // Keep normal lights but override when we get flashes on BT or FX
-        // BT LEDs flash pure white
+        // BT LEDs
         for(uint8_t i = 0; i < 4; i++) {
             if(LEDReport->btFx[i]) {
                 led_set_rgb(ledMap[i], &sdvxConfig.btColour);
             }
         }
-        // FX LEDs flash orange
+        // FX LEDs
         for(uint8_t i = 4; i < 6; i++) {
             if(LEDReport->btFx[i]) {
                 led_set_rgb(ledMap[i], &sdvxConfig.fxColour);
