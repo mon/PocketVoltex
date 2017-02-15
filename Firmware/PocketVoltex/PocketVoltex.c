@@ -20,6 +20,21 @@
 // How long to wait before moving to internal lighting
 #define HID_LED_TIMEOUT 2000
 
+// If I add more buttons with the macro key I don't need to care
+#if SWITCH_COUNT <= 8
+    #define SWITCH_BITMASK_UINT uint8_t
+#elif SWITCH_COUNT <= 16
+    #define SWITCH_BITMASK_UINT uint16_t
+#else
+    #error TOO MANY SWITCHES
+#endif
+typedef struct
+{
+    int8_t  X; // VOL-L
+    int8_t  Y; // VOL-R
+    SWITCH_BITMASK_UINT Buttons; // bitmask
+} Joystick_Report_t;
+
 typedef struct
 {
     uint8_t Modifier; // Keyboard modifier byte indicating pressed modifier keys (\c HID_KEYBOARD_MODIFER_* masks)
@@ -33,12 +48,11 @@ typedef struct
     uint8_t btFx[6];
 } LED_Report_t;
 
-/** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
-static uint8_t PrevInputsHIDReportBuffer[MAX(sizeof(Keyboard_Report_t), sizeof(USB_MouseReport_Data_t))];
 static uint8_t PrevLEDHIDReportBuffer[sizeof(LED_Report_t)];
 
 static uint8_t sendKeyboard = 0;
 static uint8_t updateLEDs = 1;
+static int8_t joystickKnobs[2] = {0, 0};
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -55,8 +69,8 @@ USB_ClassInfo_HID_Device_t Inputs_HID_Interface =
                     .Size                 = INPUTS_EPSIZE,
                     .Banks                = 1,
                 },
-            .PrevReportINBuffer           = PrevInputsHIDReportBuffer,
-            .PrevReportINBufferSize       = sizeof(PrevInputsHIDReportBuffer),
+            .PrevReportINBuffer           = NULL,
+            .PrevReportINBufferSize       = MAX(MAX(sizeof(Keyboard_Report_t), sizeof(Joystick_Report_t)), sizeof(USB_MouseReport_Data_t)),
         },
 };
 
@@ -247,51 +261,92 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
     if(ReportType != HID_REPORT_ITEM_In || HIDInterfaceInfo != &Inputs_HID_Interface) {
         *ReportSize = 0;
-        return false;
+        return true;
     }
-    sendKeyboard ^= 1;
-    if (sendKeyboard) {
+    // nothing requested so let's make our own
+    if(*ReportID == 0) {
+        // Always runs because we can have KB macros even with joystick
+        sendKeyboard ^= 1;
+        if(sendKeyboard) {
+            *ReportID = HID_REPORTID_KeyboardReport;
+        } else {
+            if(sdvxConfig.joystickMode) {
+                *ReportID = HID_REPORTID_JoystickReport;
+            } else {
+                *ReportID = HID_REPORTID_MouseReport;
+            }
+        }
+    }
+    
+    if(*ReportID == HID_REPORTID_KeyboardReport) {
         Keyboard_Report_t* KeyboardReport = (Keyboard_Report_t*)ReportData;
         
         // Only the first 4 bytes are read by bemanitools, so let's use the first
         uint8_t macroUpdated = macro_make_report(&KeyboardReport->KeyCode[0]);
-        update_switches();
         
-        if(!switchesChanged && !macroUpdated) {
+        if(!macroUpdated && (sdvxConfig.joystickMode || !switchesChanged)) {
             *ReportSize = 0;
-            return false;
+            return true;
         }
         
-        // NOTE: using SWITCH_COUNT-1 so we don't write the report for the macro pin
-        for(uint8_t i = 0; i < SWITCH_COUNT-1; i++) {
-            // i+1 to take care of the shift from above
-            KeyboardReport->KeyCode[i+1] = switches[i].state ? sdvxConfig.switches[i] : 0;
-            switches[i].lastReport = switches[i].state;
-            // Update blinkenlights
-            if(switches[i].state) {
-                //if(sdvxConfig.ledsOn) {
-                //    // TODO
-                //}
+        if(!sdvxConfig.joystickMode) {
+            // NOTE: using SWITCH_COUNT-1 so we don't write the report for the macro pin
+            for(uint8_t i = 0; i < SWITCH_COUNT-1; i++) {
+                // i+1 to take care of the shift from above
+                KeyboardReport->KeyCode[i+1] = switches[i].state ? sdvxConfig.switches[i] : 0;
+                switches[i].lastReport = switches[i].state;
             }
+            switchesChanged = 0;
         }
-         
-        *ReportID = HID_REPORTID_KeyboardReport;
+        
         *ReportSize = sizeof(Keyboard_Report_t);
-         
-        switchesChanged = 0;
     } else {
-        USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
-        
-        MouseReport->X = encoder_get(0);
-        MouseReport->Y = encoder_get(1);
-        
-        led_knobs_update(MouseReport->X, MouseReport->Y);
-        
+        int8_t x = encoder_get(0);
+        int8_t y = encoder_get(1);
+        led_knobs_update(x, y);
         encoder_set(0, 0);
         encoder_set(1, 0);
+        
+        if(*ReportID == HID_REPORTID_MouseReport) {
+            if(x == 0 && y == 0) {
+                *ReportSize = 0;
+                return true;
+            }
+            USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
+            
+            MouseReport->X = x;
+            MouseReport->Y = y;
 
-        *ReportID = HID_REPORTID_MouseReport;
-        *ReportSize = sizeof(USB_MouseReport_Data_t);
+            *ReportSize = sizeof(USB_MouseReport_Data_t);
+        } else { // joystick
+            if(x == 0 && y == 0 && !switchesChanged) {
+                *ReportSize = 0;
+                return true;
+            }
+            Joystick_Report_t* JoyReport = (Joystick_Report_t*)ReportData;
+            
+            joystickKnobs[0] += x;
+            joystickKnobs[1] += y;
+            for(uint8_t i = 0; i < 2; i++) {
+                if(joystickKnobs[i] < 0)
+                    joystickKnobs[i] += JOYSTICK_PPR;
+                if(joystickKnobs[i] >= JOYSTICK_PPR)
+                    joystickKnobs[i] -= JOYSTICK_PPR;
+            }
+            
+            JoyReport->X = joystickKnobs[0];
+            JoyReport->Y = joystickKnobs[1];
+            
+            // going backwards to make bitshifts nice
+            for(int8_t i = SWITCH_COUNT-1; i >= 0; i--) {
+                JoyReport->Buttons <<= 1;
+                JoyReport->Buttons |= switches[i].state;
+                switches[i].lastReport = switches[i].state;
+            }
+            switchesChanged = 0;
+            
+            *ReportSize = sizeof(Joystick_Report_t);
+        }
     }
     return true;
 }
@@ -376,6 +431,8 @@ void EVENT_USB_Device_ControlRequest(void)
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void)
 {
+    update_switches();
+    macro_on_frame(&switches[SWITCH_COUNT-1]);
     HID_Device_MillisecondElapsed(&Inputs_HID_Interface);
     HID_Device_MillisecondElapsed(&LED_HID_Interface);
     
@@ -388,8 +445,6 @@ void EVENT_USB_Device_StartOfFrame(void)
     if(led_on_frame()) {
         updateLEDs = 1;
     }
-    
-    macro_on_frame(&switches[SWITCH_COUNT-1]);
     
     for(int i = 0; i < SWITCH_COUNT; i++) {
         if(switches[i].debounce) {

@@ -8,6 +8,7 @@
 
 // 7 gameplay switches + macro combo switch
 #define SWITCH_COUNT 8
+#define JOYSTICK_PPR (24 * 4)
 #define MAGIC_RESET_NUMBER 42
 // divide by 10 for actual version
 #define FIRMWARE_VERSION 1
@@ -21,15 +22,17 @@ typedef struct {
     RGB_t btColour;
     RGB_t fxColour;
     RGB_t knobColours[2];
-    bool lightsOn;
-    bool hidLights;
-    bool keyLights;
-    bool knobLights;
+    uint8_t lightsOn;
+    uint8_t hidLights;
+    uint8_t keyLights;
+    uint8_t knobLights;
     uint8_t lightPattern;
     // When tapping or long-pressing the macro key
     uint8_t macroClick;
+    uint8_t macroHold;
     uint8_t macroPin[4];
-} sdvx_config_t;
+    uint8_t joystickMode;
+} ATTR_PACKED sdvx_config_t;
 
 #define CONFIG_BYTES sizeof(sdvx_config_t)
 

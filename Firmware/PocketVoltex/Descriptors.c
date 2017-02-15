@@ -100,6 +100,36 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM InputsReport[] =
 		HID_RI_REPORT_SIZE(8, 0x08),
 		HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_ARRAY | HID_IOF_ABSOLUTE),
 	HID_RI_END_COLLECTION(0),
+    
+    /* Joystick report adjusted from HID_DESCRIPTOR_JOYSTICK */
+    HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
+    HID_RI_USAGE(8, 0x05), /* Game pad */
+    HID_RI_COLLECTION(8, 0x01), /* Application */
+        HID_RI_REPORT_ID(8, HID_REPORTID_JoystickReport),
+        HID_RI_USAGE(8, 0x01), /* Pointer */
+        HID_RI_COLLECTION(8, 0x00), /* Physical */
+            HID_RI_USAGE(8, 0x30), /* X axis */
+            HID_RI_USAGE(8, 0x31), /* Y axis */
+            HID_RI_LOGICAL_MINIMUM(16, 0),
+            HID_RI_LOGICAL_MAXIMUM(16, JOYSTICK_PPR-1),
+            HID_RI_PHYSICAL_MINIMUM(16, -1),
+            HID_RI_PHYSICAL_MAXIMUM(16, 1),
+            HID_RI_REPORT_COUNT(8, 2), /* 2 axis */
+            HID_RI_REPORT_SIZE(8, 8),
+            HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+        HID_RI_END_COLLECTION(0),
+        HID_RI_USAGE_PAGE(8, 0x09), /* Button */
+        HID_RI_USAGE_MINIMUM(8, 0x01), /* Button 1 */
+        HID_RI_USAGE_MAXIMUM(8, SWITCH_COUNT), /* Button x */
+        HID_RI_LOGICAL_MINIMUM(8, 0x00),
+        HID_RI_LOGICAL_MAXIMUM(8, 0x01),
+        HID_RI_REPORT_SIZE(8, 0x01),
+        HID_RI_REPORT_COUNT(8, SWITCH_COUNT),
+        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+        HID_RI_REPORT_SIZE(8, (SWITCH_COUNT % 8) ? (8 - (SWITCH_COUNT % 8)) : 0),
+        HID_RI_REPORT_COUNT(8, 0x01),
+        HID_RI_INPUT(8, HID_IOF_CONSTANT),
+    HID_RI_END_COLLECTION(0)
 };
 
 
