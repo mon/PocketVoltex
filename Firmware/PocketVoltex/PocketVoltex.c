@@ -174,8 +174,8 @@ int main(void)
         
         Endpoint_SelectEndpoint(CONFIG_OUT_EPADDR);
         if (Endpoint_IsOUTReceived()) {
-            uint8_t ReceivedData[CONFIG_EPSIZE];
-            Endpoint_Read_Stream_LE(ReceivedData, CONFIG_EPSIZE, NULL);
+            uint8_t ReceivedData[COMMAND_BYTES];
+            Endpoint_Read_Stream_LE(ReceivedData, COMMAND_BYTES, NULL);
             Endpoint_ClearOUT();
             
             command_response_t respond = HandleConfig(ReceivedData);
@@ -183,7 +183,7 @@ int main(void)
                 // we are returning the requested data
                 case RESPOND:
                     Endpoint_SelectEndpoint(CONFIG_IN_EPADDR);
-                    Endpoint_Write_Stream_LE(ReceivedData, CONFIG_EPSIZE, NULL);
+                    Endpoint_Write_Stream_LE(ReceivedData, COMMAND_BYTES, NULL);
                     Endpoint_ClearIN();
                     break;
                 case REBOOT:
