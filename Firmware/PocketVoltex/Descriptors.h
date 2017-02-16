@@ -75,21 +75,20 @@
         #define CONFIG_IN_EPADDR             (ENDPOINT_DIR_IN  | 2)
 		#define INPUTS_EPADDR                (ENDPOINT_DIR_IN  | 3)
         #define LED_EPADDR                   (ENDPOINT_DIR_IN  | 4)
-
-        // the board only supports endpoints of 8, 16, 32 or 64 bytes
-        #define ROUND_UP(bytes) ((bytes) <= 8 ? 8 :   \
-                                 (bytes) <= 16 ? 16 : \
-                                 (bytes) <= 32 ? 32 : 64) // if it's larger than 64 bytes, you're out of luck
         
-        /* acts like a union
-         *     keyboard is switches + modifiers and reserved byte
-         *     mouse is 8 bytes
-         *     joystick is 2 axis + buttons as bitmask
-         *     add 1 for report ID */
-		#define INPUTS_EPSIZE    ROUND_UP(1+MAX(MAX(SWITCH_COUNT + 2, 8), 3 + SWITCH_COUNT/8))
-        #define LED_EPSIZE       ROUND_UP(LED_TOTAL_COUNT)
+        /* Contrary to my incorrect earlier assumptions, this is NOT the size
+         * of reports that can go out to the host - that's defined by the HID
+         * report descriptor. Instead, it's the maximum packet size for the transfer,
+         * which will be split up as needed to fit all the bytes in the report.
+         * For ease of use, I've set this to the control endpoint size.
+         *
+         * I can only hope this is finally correct - buffer overflow could also
+         * cause this I think, but I have so much free RAM I don't think so */
+		#define INPUTS_EPSIZE    FIXED_CONTROL_ENDPOINT_SIZE
+        #define LED_EPSIZE       FIXED_CONTROL_ENDPOINT_SIZE
         // ignoring board limits, bulk endpoints MUST be 8, 16, 32 or 64 bytes
-        #define CONFIG_EPSIZE    ROUND_UP(COMMAND_BYTES+1)
+        // set to max EP size of the atmega16u2, to give room to grow and not eat frames
+        #define CONFIG_EPSIZE    64
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
