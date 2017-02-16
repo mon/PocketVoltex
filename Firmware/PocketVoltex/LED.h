@@ -25,7 +25,7 @@ typedef struct {
 
 // Arranged left to right, top to bottom
 // LED order is BGR...BGR
-uint8_t leds[LED_PHYSICAL_COUNT];
+extern uint8_t leds[LED_PHYSICAL_COUNT];
 
 // Maps BT/FX keys to their associated LED
 // Order is BT-1-4, FX-L, FX-R

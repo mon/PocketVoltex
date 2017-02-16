@@ -28,6 +28,7 @@
 #define G 1
 #define B 0
 
+uint8_t leds[LED_PHYSICAL_COUNT];
 static volatile uint8_t leds_frontbuffer[LED_PHYSICAL_COUNT];
 
 void led_init() {
@@ -128,15 +129,15 @@ void led_set_indiv(uint8_t num, uint8_t val) {
    if(*led++ > brightness)
        out |= _BV(outPin)
 */
-#define LED_PIN_SET(led, outPin)                                   \
-    __asm__ volatile(                                              \
-        "ld __tmp_reg__, %a["#led"]+                           \n\t\
-         cp %[bright], __tmp_reg__                             \n\t\
-         brcc skip%=                                           \n\t\
-         ori %[out], (1 << "#outPin")                          \n\t\
-         skip%=:"                                                  \
-        : [out] "=r" (out), "=z" (led)              /* outputs */  \
-        : "r" (out), [led] "z" (led), [bright] "r" (brightness) /* inputs */ )
+#define LED_PIN_SET(led, outPin)                            \
+    __asm__ volatile(                                       \
+        "ld __tmp_reg__, %a["#led"]+                    \n\t\
+         cp %[bright], __tmp_reg__                      \n\t\
+         brcc skip%=                                    \n\t\
+         ori %[out], (1 << "#outPin")                   \n\t\
+         skip%=:"                                           \
+        : [out] "+a" (out), [led] "+z" (led) /* outputs */  \
+        : [bright] "r" (brightness)          /* inputs */ )
 
 // This function once took about 279 clock cycles.
 // Optimised GND accesses got it to 157
