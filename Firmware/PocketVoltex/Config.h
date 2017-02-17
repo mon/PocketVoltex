@@ -4,14 +4,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <LUFA/Drivers/USB/USB.h>
-#include "LED.h"
+#include "LEDPatterns.h"
 
 // 7 gameplay switches + macro combo switch
 #define SWITCH_COUNT 8
 #define JOYSTICK_PPR (24 * 4)
 #define MAGIC_RESET_NUMBER 42
 // divide by 10 for actual version
-#define FIRMWARE_VERSION 1
+#define FIRMWARE_VERSION 10
 
 // not configurable since they're all the same switches
 #define SWITCH_DEBOUNCE 30
@@ -21,6 +21,7 @@ typedef struct {
     uint8_t switches[SWITCH_COUNT];
     RGB_t btColour;
     RGB_t fxColour;
+    RGB_t breatheColour;
     RGB_t knobColours[2];
     uint8_t lightsOn;
     uint8_t hidLights;
@@ -37,13 +38,14 @@ typedef struct {
 #define CONFIG_BYTES sizeof(sdvx_config_t)
 
 typedef struct {
-    uint8_t version;
+    uint16_t version;
     uint16_t serial;
 } version_t;
 
 typedef enum {
     GETCONFIG = 1,
     SETCONFIG = 2,
+    VERSION = 3,
     RESET = MAGIC_RESET_NUMBER
 } command_action_t;
 

@@ -17,7 +17,7 @@
 #define BRIGHTNESS_MAX       (BRIGHTNESS_LEVELS-1)
 // How many are actually PWM'd, because the chip isn't that quick
 // MUST be a multiple of BRIGHTNESS_LEVELS
-#define BRIGHTNESS_DOWNSCALE 64
+#define BRIGHTNESS_DOWNSCALE 128
 
 typedef struct {
     uint8_t r, g, b;
@@ -39,12 +39,16 @@ static const PROGMEM uint8_t ledRightCircleMap[] = {7, 5, 3, 1};
 void led_init(void);
 void led_commit(void);
 void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
-void led_set_rgb(uint8_t num, RGB_t* colour);
-void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b);
 void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strength);
-void led_fade_over_rgb(uint8_t num, RGB_t* colour, uint8_t strength);
+void led_fade_all(uint8_t r, uint8_t g, uint8_t b, uint8_t strength);
 void led_set_all(uint8_t r, uint8_t g, uint8_t b);
 void led_set_indiv(uint8_t num, uint8_t val);
+
+void led_set_rgb(uint8_t num, RGB_t* colour);
+void led_fade_over_rgb(uint8_t num, RGB_t* colour, uint8_t strength);
+void led_fade_all_rgb(RGB_t* colour, uint8_t strength);
+void led_set_all_rgb(RGB_t* colour);
+
 
 // http://electronics.stackexchange.com/a/11100/95969
 PROGMEM const static uint8_t ledLogCurve[] = {

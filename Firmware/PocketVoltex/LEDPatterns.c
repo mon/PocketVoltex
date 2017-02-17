@@ -16,14 +16,16 @@ typedef union {
     struct {
         uint8_t level;
         int8_t dir;
+        RGB_t colour;
     } flash;
-
-    RGB_t singleColour;
-
+    
     struct {
         uint8_t level;
+        uint8_t dir;
         RGB_t colour;
     } breathe;
+
+    RGB_t singleColour;
 
     RGBFader followers[LED_COUNT];
 } Patterns_t;
@@ -49,6 +51,7 @@ static KnobLights knobs[2] = {
 };
 
 void led_knob_light_indiv(KnobLights* knob, RGB_t* colour, const uint8_t* map);
+void led_update_breather(uint8_t speed);
 
 uint8_t led_on_frame(void) {
     if(++frameCounter >= LED_MS_PER_FRAME) {
@@ -63,29 +66,11 @@ uint8_t led_on_frame(void) {
 void led_animate(void) {
     switch(animMode) {
         case INIT_FLASH:
-            if(pattern.flash.dir) {
-                if(pattern.flash.level >= BRIGHTNESS_LEVELS - FLASH_SPEED) {
-                    pattern.flash.level = BRIGHTNESS_MAX;
-                    pattern.flash.dir = 0;
-                } else {
-                    pattern.flash.level += FLASH_SPEED;
-                }
-            } else {
-                if(pattern.flash.level <= FLASH_SPEED) {
-                    pattern.flash.level = 0;
-                    led_set_all(0,0,0);
-                    led_anim_follower();
-                    break;
-                } else {
-                    pattern.flash.level -= FLASH_SPEED;
-                }
+            led_update_breather(FLASH_SPEED);
+            if(pattern.flash.level == 0) {
+                led_anim_breathe();
+                break;
             }
-        
-            uint8_t bright = pgm_read_byte(&ledLogCurve[pattern.flash.level]);
-            // yellowy orange
-            //led_set_all(bright, bright/2, 0);
-            // I think white looks nicer
-            led_set_all(bright, bright, bright);
             break;
         case FOLLOWER:
             for(uint8_t led = 0; led < LED_COUNT; led++) {
@@ -115,6 +100,8 @@ void led_animate(void) {
             }
             break;
         case BREATHE:
+            led_update_breather(BREATHE_SPEED);
+            break;
         default:
             break;
     }
@@ -198,12 +185,40 @@ void led_knobs_update(int8_t left, int8_t right) {
     led_knob_indiv(&knobs[1], right*2);
 }
 
+void led_update_breather(uint8_t speed) {
+    if(pattern.flash.dir) {
+        if(pattern.flash.level >= BRIGHTNESS_LEVELS - speed) {
+            pattern.flash.level = BRIGHTNESS_MAX;
+            pattern.flash.dir = 0;
+        } else {
+            pattern.flash.level += speed;
+        }
+    } else {
+        if(pattern.flash.level <= speed) {
+            pattern.flash.level = 0;
+            pattern.flash.dir = 1;
+        } else {
+            pattern.flash.level -= speed;
+        }
+    }
+    
+    uint8_t bright = pattern.flash.level;
+    //uint8_t bright = pgm_read_byte(&ledLogCurve[pattern.flash.level]);
+    led_fade_all_rgb(&pattern.flash.colour, bright);
+}
+
 void led_anim_flash(void) {
     animMode = INIT_FLASH;
-    // starting at 2 stops us getting a frame of red if you're not doing white flash
-    //pattern.flash.level = 2;
     pattern.flash.level = 0;
     pattern.flash.dir = 1;
+    pattern.flash.colour = (RGB_t){BRIGHTNESS_MAX, BRIGHTNESS_MAX, BRIGHTNESS_MAX};
+}
+
+void led_anim_breathe(void) {
+    animMode = BREATHE;
+    pattern.flash.level = 0;
+    pattern.flash.dir = 1;
+    pattern.flash.colour = sdvxConfig.breatheColour;
 }
 
 void led_anim_follower(void) {

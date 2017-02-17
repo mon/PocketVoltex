@@ -69,20 +69,6 @@ void led_set(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
     leds[offset+B] = b;
 }
 
-void led_set_rgb(uint8_t num, RGB_t* colour) {
-    led_set(num, colour->r, colour->g, colour->b);
-}
-
-void led_set_max(uint8_t num, uint8_t r, uint8_t g, uint8_t b) {
-    uint8_t offset = num * 3;
-    if(r > leds[offset+R])
-        leds[offset+R] = r;
-    if(g > leds[offset+G])
-        leds[offset+G] = g;
-    if(b > leds[offset+B])
-        leds[offset+B] = b;
-}
-
 // Applies a crossfade between the current colour and an overlay colour with a given strength
 void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strength) {
     uint8_t offset = num * 3;
@@ -110,8 +96,31 @@ void led_fade_over(uint8_t num, uint8_t r, uint8_t g, uint8_t b, uint8_t strengt
     }
 }
 
-void led_fade_over_rgb(uint8_t num, RGB_t* colour, uint8_t strength) {
-    led_fade_over(num, colour->r, colour->g, colour->b, strength);
+// goes from a setpoint of 0 instead
+void led_fade_all(uint8_t r, uint8_t g, uint8_t b, uint8_t strength) {
+    // going outside max val for a signed int8
+    int16_t scales[3];
+    // colour distances from setpoint of 0
+    scales[R] = r;
+    scales[G] = g;
+    scales[B] = b;
+    for(uint8_t i = 0; i < 3; i++) {
+        // perform scaling with div0 check
+        if(scales[i] == 0) {
+            scales[i] = BRIGHTNESS_LEVELS;
+        } else {
+            // won't ever be 0, don't check later
+            scales[i] = BRIGHTNESS_LEVELS / scales[i];
+        }
+        int16_t new = strength/scales[i];
+        // Integer division strikes again
+        if(new > BRIGHTNESS_MAX)
+            new = BRIGHTNESS_MAX;
+        if(new < 0)
+            new = 0;
+        scales[i] = new;
+    }
+    led_set_all(scales[0], scales[1], scales[2]);
 }
 
 void led_set_all(uint8_t r, uint8_t g, uint8_t b) {
@@ -122,6 +131,22 @@ void led_set_all(uint8_t r, uint8_t g, uint8_t b) {
 
 void led_set_indiv(uint8_t num, uint8_t val) {
     leds[num] = val;
+}
+
+void led_set_rgb(uint8_t num, RGB_t* colour) {
+    led_set(num, colour->r, colour->g, colour->b);
+}
+
+void led_fade_over_rgb(uint8_t num, RGB_t* colour, uint8_t strength) {
+    led_fade_over(num, colour->r, colour->g, colour->b, strength);
+}
+
+void led_fade_all_rgb(RGB_t* colour, uint8_t strength) {
+    led_fade_all(colour->r, colour->g, colour->b, strength);
+}
+
+void led_set_all_rgb(RGB_t* colour) {
+    led_set_all(colour->r, colour->g, colour->b);
 }
 
 /* Straight voodoo magic, consult the Inline Assembler Cookbook

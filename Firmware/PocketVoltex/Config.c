@@ -1,7 +1,8 @@
-#include <Config.h>
-
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
+
+#include "Config.h"
+#include "Macro.h"
 
 #define MAGIC_NUMBER 42
 
@@ -22,6 +23,7 @@ static const PROGMEM sdvx_config_t defaults = {
         HID_KEYBOARD_SC_KEYPAD_PLUS}, // macro
     .btColour = {BRIGHTNESS_MAX, BRIGHTNESS_MAX, BRIGHTNESS_MAX}, // white
     .fxColour = {BRIGHTNESS_MAX, BRIGHTNESS_MAX/4, 0},            // orange
+    .breatheColour = {BRIGHTNESS_MAX/2, BRIGHTNESS_MAX/8, 0},     // dim orange
     .knobColours = {
         {0,BRIGHTNESS_MAX,BRIGHTNESS_MAX},                        // aqua
         {BRIGHTNESS_MAX,0,BRIGHTNESS_MAX}                         // pink
