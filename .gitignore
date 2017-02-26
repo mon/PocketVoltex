@@ -8,7 +8,6 @@ Hardware/__Previews/
 *.eep
 *.bin
 *.elf
-Firmware/Bootloader/
 *.hex
 Firmware/LUFA/
 Hardware/Project Outputs for SDVX_Mini/
