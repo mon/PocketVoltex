@@ -1,0 +1,28 @@
+.hidden {
+    display: none;
+}
+
+.disabled {
+    opacity: 0.4;
+}
+
+.configBox {
+    background-image: url("../img/topdown-small.png");
+    width: 800px;
+    height: 571px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.connect {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 285px;
+    display:flex;
+    justify-content:center;
+}
+
+.connect > button {
+    font-size: 40pt;
+}

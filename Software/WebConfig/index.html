@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Pocket Voltex - Config</title>
+        <link rel="stylesheet" href="css/style.css">
+        <script type="text/javascript" src="js/usbWrapper.js"></script>
+        <script type="text/javascript" src="js/config.js"></script>
+        <script type="text/javascript">
+            window.addEventListener("load", function() {
+                if(UsbWrapper.hasUSB) {
+                    document.getElementById("compat-failure").classList.add("hidden");
+                    document.getElementsByClassName("configBox")[0].classList.remove("hidden");
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <div id="compat-failure">
+        This configurator requires Javascript, Windows 8+ (or OSX/Linux) and a WebUSB capable browser (Chrome 55+). If you lack these, give the exe config app a go.
+        </div>
+        <div id="configBox" class="configBox hidden disabled">
+        </div>
+        <div id="connect" class="connect">
+            <button id="connectBtn" onclick="Config.connect()">Connect</button>
+        </div>
+        <div id="logview"></div>
+    </body>
+</html>
