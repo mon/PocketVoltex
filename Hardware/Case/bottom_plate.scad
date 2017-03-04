@@ -1,3 +1,3 @@
 use <case.scad>;
 
-bottom_plate();
+bottom_plate_outline();

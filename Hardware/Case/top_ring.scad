@@ -1,3 +1,3 @@
 use <case.scad>;
 
-top_ring();
+top_ring_outline();

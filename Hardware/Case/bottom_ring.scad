@@ -1,3 +1,7 @@
 use <case.scad>;
 
-bottom_ring();
+difference() {
+    bottom_ring_outline();
+    encoderHoles();
+    switches_fx();
+}

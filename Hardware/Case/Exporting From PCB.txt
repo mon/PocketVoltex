@@ -38,7 +38,7 @@ For tracks:
     Path->Combine
     Path->Stroke to path
 
-For artwork:
+For artwork laser cutting output:
     Cross reference with altium to make layers for tracks
         1.5mm
         1.2mm

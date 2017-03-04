@@ -22,6 +22,7 @@ $win = WinGetHandle("BemaniPC Input Configuration")
 WinActivate($win)
 ControlClick($win, "", "[CLASS:SysTabControl32; INSTANCE:1]")
 Send("{LEFT}{LEFT}{LEFT}{RIGHT}")
+Sleep(200)
 ControlCommand ($win,"", "ComboBox1","SelectString","Pocket Voltex LEDs")
 
 $list = ControlGetHandle($win, "", "SysListView321")

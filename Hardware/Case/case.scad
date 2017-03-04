@@ -85,6 +85,13 @@ module switch(holetype){
 	}
 }
 
+module switches_fx() {
+    for(i = [5:6]) {
+        translate([switches[i][0], switches[i][1]])
+        switch(holetype);
+    }
+}
+
 module switches() {
     for(sw = switches) {
         translate([sw[0], sw[1]])
@@ -208,18 +215,38 @@ module board_encoderhole() {
     }
 }
 
-module top_plate() {
-    difference() {
-        offset(delta = -wallOverlap)
+module top_plate_outline() {
+    offset(delta = -wallOverlap)
         difference() {
             board();
             encoders();
         }
-        switches();
-        bolts();
-        translate([macroHole[0], macroHole[1], 0])
-        circle(d = macroDiam, center = true);
+}
+
+module top_plate_holes() {
+    switches();
+    bolts();
+    translate([macroHole[0], macroHole[1], 0])
+    circle(d = macroDiam, center = true);
+}
+
+module top_plate() {
+    difference() {
+        top_plate_outline();
+        top_plate_holes();
     }
+}
+
+module top_ring_outline() {
+    difference() {
+        board_encoderhole();
+        offset(delta = -wallStrength)
+            board_encoderhole();
+        // Room for FX/START
+        switches();
+    };
+    import("imports/RING_TOP_SUPPORTS.dxf");
+    bolts_expansion();
 }
 
 module top_ring() {
@@ -250,7 +277,7 @@ module artwork() {
     import("imports/Artwork.dxf");
 }
 
-module bottom_ring() {
+module bottom_ring_outline() {
     difference() {
         union() {
             difference() {
@@ -261,11 +288,23 @@ module bottom_ring() {
             import("imports/RING_BOT_SUPPORTS.dxf");
             bolts_expansion();
         }
-        bolt_spacers();
-        encoderHoles();
         translate([usbPos[0], usbPos[1], 0])
         usb();
     }
+}
+
+module bottom_ring() {
+    difference() {
+        bottom_ring_outline();
+        bolt_spacers();
+        encoderHoles();
+        // Room for FX
+        switches();
+    }
+}
+
+module bottom_plate_outline() {
+    board();
 }
 
 module bottom_plate() {
