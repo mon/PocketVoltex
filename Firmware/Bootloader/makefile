@@ -14,14 +14,16 @@
 MCU          = atmega16u2
 ARCH         = AVR8
 BOARD        = USER
-F_CPU        = 8000000
+F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
-TARGET       = BootloaderHID
+TARGET       = Bootloader
 SRC          = $(TARGET).c Descriptors.c $(LUFA_SRC_USB)
 LUFA_PATH    = ../LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
 LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET)
+
+AVRDUDE      = avrdude -B 8 -c usbasp -p $(MCU)
 
 # Flash size and bootloader section sizes of the target, in KB. These must
 # match the target's total FLASH size and the bootloader size set in the
@@ -46,3 +48,6 @@ include $(LUFA_PATH)/Build/lufa_cppcheck.mk
 include $(LUFA_PATH)/Build/lufa_doxygen.mk
 include $(LUFA_PATH)/Build/lufa_avrdude.mk
 include $(LUFA_PATH)/Build/lufa_atprogram.mk
+
+flash: all
+	$(AVRDUDE) -U flash:w:Bootloader.hex:i

@@ -1,72 +1,43 @@
-/*
-             LUFA Library
-     Copyright (C) Dean Camera, 2014.
-
-  dean [at] fourwalledcubicle [dot] com
-           www.lufa-lib.org
-*/
-
-/*
-  Copyright 2014  Dean Camera (dean [at] fourwalledcubicle [dot] com)
-
-  Permission to use, copy, modify, distribute, and sell this
-  software and its documentation for any purpose is hereby granted
-  without fee, provided that the above copyright notice appear in
-  all copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting
-  documentation, and that the name of the author not be used in
-  advertising or publicity pertaining to distribution of the
-  software without specific, written prior permission.
-
-  The author disclaims all warranties with regard to this
-  software, including all implied warranties of merchantability
-  and fitness.  In no event shall the author be liable for any
-  special, indirect or consequential damages or any damages
-  whatsoever resulting from loss of use, data or profits, whether
-  in an action of contract, negligence or other tortious action,
-  arising out of or in connection with the use or performance of
-  this software.
-*/
-
-/** \file
- *
- *  USB Device Descriptors, for library use when in USB device mode. Descriptors are special
- *  computer-readable structures which the host requests upon device enumeration, to determine
- *  the device's capabilities and functions.
- */
-
 #include "Descriptors.h"
 
-/** HID class report descriptor. This is a special descriptor constructed with values from the
- *  USBIF HID class specification to describe the reports and capabilities of the HID device. This
- *  descriptor is parsed by the host and its contents used to determine what data (and in what encoding)
- *  the device will send, and what it may be sent back from the host. Refer to the HID specification for
- *  more details on HID report descriptors.
- */
-const USB_Descriptor_HIDReport_Datatype_t HIDReport[] =
+const USB_Descriptor_URL_t ConfigURL = URL_STRING_DESCRIPTOR(URL_HTTPS, "mon.im");
+const USB_Descriptor_URL_t LocalhostURL = URL_STRING_DESCRIPTOR(URL_HTTP, "localhost");
+const USB_Descriptor_String_t ProductString = USB_STRING_DESCRIPTOR(L"VoltexBoot");
+const USB_Descriptor_String_t LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
+
+const uint8_t MS_OS_Descriptor[] =
 {
-	HID_RI_USAGE_PAGE(16, 0xFFDC), /* Vendor Page 0xDC */
-	HID_RI_USAGE(8, 0xFB), /* Vendor Usage 0xFB */
-	HID_RI_COLLECTION(8, 0x01), /* Vendor Usage 1 */
-		HID_RI_USAGE(8, 0x02), /* Vendor Usage 2 */
-		HID_RI_LOGICAL_MINIMUM(8, 0x00),
-		HID_RI_LOGICAL_MAXIMUM(8, 0xFF),
-		HID_RI_REPORT_SIZE(8, 0x08),
-		HID_RI_REPORT_COUNT(16, (sizeof(uint16_t) + SPM_PAGESIZE)),
-		HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
-	HID_RI_END_COLLECTION(0),
+    MS_OS_DESCRIPTOR_SET
+    (
+        MS_OS_COMPAT_ID_WINUSB
+    )
 };
 
-/** Device descriptor structure. This descriptor, located in SRAM memory, describes the overall
- *  device characteristics, including the supported USB version, control endpoint size and the
- *  number of device configurations. The descriptor is read out by the USB host when the enumeration
- *  process begins.
- */
+const uint8_t WebUSBAllowedOrigins[] = {
+    WEBUSB_ALLOWED_ORIGINS_HEADER
+    (
+        0, // no config header
+        // Config interface accessible from the web, 2 valid URLs
+        URL_ID_Config, URL_ID_Localhost
+    )
+};
+
+const uint8_t BOSDescriptor[] =
+{
+    BOS_DESCRIPTOR
+    (
+        2, // 2 capability descriptors in use
+        WEBUSB_CAPABILITY_DESCRIPTOR(WEBUSB_ID, URL_ID_Config), // Vendor request ID, URL ID
+        // Required to force WinUSB driver for driverless WebUSB compatibility
+        MS_OS_20_CAPABILITY_DESCRIPTOR(MS_OS_ID, sizeof(MS_OS_Descriptor)) // Vendor request ID, Descriptor set length
+    )
+};
+
 const USB_Descriptor_Device_t DeviceDescriptor =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
-	.USBSpecification       = VERSION_BCD(1,1,0),
+	.USBSpecification       = VERSION_BCD(2,1,0),
 	.Class                  = USB_CSCP_NoDeviceClass,
 	.SubClass               = USB_CSCP_NoDeviceSubclass,
 	.Protocol               = USB_CSCP_NoDeviceProtocol,
@@ -79,17 +50,12 @@ const USB_Descriptor_Device_t DeviceDescriptor =
 	.ReleaseNumber          = VERSION_BCD(0,0,1),
 
 	.ManufacturerStrIndex   = NO_DESCRIPTOR,
-	.ProductStrIndex        = NO_DESCRIPTOR,
+	.ProductStrIndex        = STRING_ID_Product,
 	.SerialNumStrIndex      = NO_DESCRIPTOR,
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
 
-/** Configuration descriptor structure. This descriptor, located in SRAM memory, describes the usage
- *  of the device in one of its supported configurations, including information about any device interfaces
- *  and endpoints. The descriptor is read out by the USB host during the enumeration process when selecting
- *  a configuration so that the host may correctly communicate with the USB device.
- */
 const USB_Descriptor_Configuration_t ConfigurationDescriptor =
 {
 	.Config =
@@ -106,44 +72,70 @@ const USB_Descriptor_Configuration_t ConfigurationDescriptor =
 
 			.MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
 		},
-
-	.HID_Interface =
+        
+	.Config_Interface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
-			.InterfaceNumber        = INTERFACE_ID_Printer,
-			.AlternateSetting       = 0x00,
+			.InterfaceNumber        = INTERFACE_ID_Config,
+			.AlternateSetting       = 0,
 
-			.TotalEndpoints         = 1,
+			.TotalEndpoints         = 0,
 
-			.Class                  = HID_CSCP_HIDClass,
-			.SubClass               = HID_CSCP_NonBootSubclass,
-			.Protocol               = HID_CSCP_NonBootProtocol,
+			.Class                  = 0xFF,
+			.SubClass               = 0xFF,
+			.Protocol               = 0xFF,
 
 			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
-
-	.HID_VendorHID =
-		{
-			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
-
-			.HIDSpec                = VERSION_BCD(1,1,1),
-			.CountryCode            = 0x00,
-			.TotalReportDescriptors = 1,
-			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(HIDReport)
-		},
-
-	.HID_ReportINEndpoint =
-		{
-			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
-
-			.EndpointAddress        = HID_IN_EPADDR,
-			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
-			.EndpointSize           = HID_IN_EPSIZE,
-			.PollingIntervalMS      = 0x05
-		},
 };
+
+void USB_Process_BOS(void) {
+    const void* Address = NULL;
+	uint16_t    Size    = 0;
+    
+    /* Caller does this check */
+    //if(!(Endpoint_IsSETUPReceived())) {
+    //    return;
+    //}
+    if(USB_ControlRequest.bmRequestType != (REQDIR_DEVICETOHOST | REQTYPE_VENDOR | REQREC_DEVICE)) {
+        return;
+    }
+    
+    switch(USB_ControlRequest.bRequest) {
+        case WEBUSB_ID:
+            switch(USB_ControlRequest.wIndex) {
+                case WEBUSB_REQUEST_GET_ALLOWED_ORIGINS:
+                    Address = &WebUSBAllowedOrigins;
+                    Size = sizeof(WebUSBAllowedOrigins);
+                    break;
+                case WEBUSB_REQUEST_GET_URL:
+                    switch(USB_ControlRequest.wValue) {
+                        case URL_ID_Localhost:
+                            Address = &LocalhostURL;
+                            Size = LocalhostURL.Header.Size;
+                            break;
+                        case URL_ID_Config:
+                            Address = &ConfigURL;
+                            Size = ConfigURL.Header.Size;
+                            break;
+                    }
+                    break;
+            }
+            break;
+        case MS_OS_ID:
+            if(USB_ControlRequest.wIndex == MS_OS_20_DESCRIPTOR_INDEX) {
+                Address = &MS_OS_Descriptor;
+                Size    = sizeof(MS_OS_Descriptor);
+            }
+            break;
+    }
+    if(Address != NULL) {
+        Endpoint_ClearSETUP();
+        Endpoint_Write_Control_Stream_LE(Address, Size);
+        Endpoint_ClearOUT();
+    }
+}
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given
@@ -152,10 +144,11 @@ const USB_Descriptor_Configuration_t ConfigurationDescriptor =
  *  USB host.
  */
 uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
-                                    const uint8_t wIndex,
+                                    const uint16_t wIndex,
                                     const void** const DescriptorAddress)
 {
 	const uint8_t DescriptorType   = (wValue >> 8);
+    const uint8_t  DescriptorNumber = (wValue & 0xFF);
 
 	const void* Address = NULL;
 	uint16_t    Size    = NO_DESCRIPTOR;
@@ -171,16 +164,23 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 		Address = &ConfigurationDescriptor;
 		Size    = sizeof(USB_Descriptor_Configuration_t);
 	}
-	else if (DescriptorType == HID_DTYPE_HID)
-	{
-		Address = &ConfigurationDescriptor.HID_VendorHID;
-		Size    = sizeof(USB_HID_Descriptor_HID_t);
-	}
-	else
-	{
-		Address = &HIDReport;
-		Size    = sizeof(HIDReport);
-	}
+    else if (DescriptorType == DTYPE_BOS) {
+        Address = &BOSDescriptor;
+        Size    = sizeof(BOSDescriptor);
+    }
+    else if (DescriptorType == DTYPE_String) {
+        switch (DescriptorNumber)
+        {
+            case STRING_ID_Language:
+                Address = &LanguageString;
+                Size    = LanguageString.Header.Size;
+                break;
+            case STRING_ID_Product:
+                Address = &ProductString;
+                Size    = ProductString.Header.Size;
+                break;
+        }
+    }
 
 	*DescriptorAddress = Address;
 	return Size;

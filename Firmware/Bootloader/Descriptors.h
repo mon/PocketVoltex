@@ -36,45 +36,44 @@
 #ifndef _DESCRIPTORS_H_
 #define _DESCRIPTORS_H_
 
+    #define WEBUSB_ID 0x01
+    #define MS_OS_ID 0x02
+    #define CONFIG_ID 0x03
+
 	/* Includes: */
 		#include <LUFA/Drivers/USB/USB.h>
-
-	/* Type Defines: */
-		/** Type define for the device configuration descriptor structure. This must be defined in the
-		 *  application code, as the configuration descriptor contains several sub-descriptors which
-		 *  vary between devices, and which describe the device's usage to the host.
-		 */
+        
 		typedef struct
 		{
 			USB_Descriptor_Configuration_Header_t Config;
-
-			// Generic HID Interface
-			USB_Descriptor_Interface_t            HID_Interface;
-			USB_HID_Descriptor_HID_t              HID_VendorHID;
-			USB_Descriptor_Endpoint_t             HID_ReportINEndpoint;
+            USB_Descriptor_Interface_t            Config_Interface;
 		} USB_Descriptor_Configuration_t;
-
-		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
-		 *  should have a unique ID index associated with it, which can be used to refer to the
-		 *  interface from other descriptors.
-		 */
+        
 		enum InterfaceDescriptors_t
 		{
-			INTERFACE_ID_Printer = 0, /**< Printer interface descriptor ID */
+            INTERFACE_ID_Config   = 0, /**< Config interface descriptor ID  */
 		};
-
-	/* Macros: */
-		/** Endpoint address of the HID data IN endpoint. */
-		#define HID_IN_EPADDR                (ENDPOINT_DIR_IN | 1)
-
-		/** Size in bytes of the HID reporting IN endpoint. */
-		#define HID_IN_EPSIZE                64
+        
+        enum URLDescriptors_t
+        {
+            URL_ID_Localhost  = 1,
+            URL_ID_Config     = 2,
+        };
+        
+        enum StringDescriptors_t
+		{
+			STRING_ID_Language     = 0, /**< Supported Languages string descriptor ID (must be zero) */
+			STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
+			STRING_ID_Product      = 2, /**< Product string ID */
+		};
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
-		                                    const uint8_t wIndex,
+		                                    const uint16_t wIndex,
 		                                    const void** const DescriptorAddress)
 		                                    ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
+        
+        void USB_Process_BOS(void);
 
 #endif
 
