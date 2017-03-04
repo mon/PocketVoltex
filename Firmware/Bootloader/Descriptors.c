@@ -2,7 +2,7 @@
 
 const USB_Descriptor_URL_t ConfigURL = URL_STRING_DESCRIPTOR(URL_HTTPS, "mon.im");
 const USB_Descriptor_URL_t LocalhostURL = URL_STRING_DESCRIPTOR(URL_HTTP, "localhost");
-const USB_Descriptor_String_t ProductString = USB_STRING_DESCRIPTOR(L"VoltexBoot");
+const USB_Descriptor_String_t ProductString = USB_STRING_DESCRIPTOR(L"Voltex Boot");
 const USB_Descriptor_String_t LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
 
 const uint8_t MS_OS_Descriptor[] =

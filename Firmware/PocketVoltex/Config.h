@@ -45,7 +45,7 @@ typedef struct {
 typedef enum {
     GETCONFIG = 1,
     SETCONFIG = 2,
-    VERSION = 3,
+    VERSION = 3, // synced with bootloader, DO NOT CHANGE
     RESET = MAGIC_RESET_NUMBER
 } command_action_t;
 

@@ -13,10 +13,6 @@
 // D 4,5,6,7
 #define SWITCH_MASKD 0b11110000
 
-#define MAGIC_BOOT_KEY            0xDEADBE7A
-// offset * word size
-#define BOOTLOADER_START_ADDRESS  (0x1c00 * 2)
-
 // How long to wait before moving to internal lighting
 #define HID_LED_TIMEOUT 2000
 
@@ -94,26 +90,11 @@ static uint8_t switchesChanged = 1;
 // Set to max already so we have our init flash
 static uint16_t hidTimeout = HID_LED_TIMEOUT;
 
-uint32_t Boot_Key ATTR_NO_INIT;
-
-void Bootloader_Jump_Check(void) ATTR_INIT_SECTION(3);
-void Bootloader_Jump_Check(void)
-{
-    // If the reset source was the bootloader and the key is correct, clear it and jump to the bootloader
-    if ((MCUSR & (1 << WDRF)) && (Boot_Key == MAGIC_BOOT_KEY))
-    {
-        Boot_Key = 0;
-        ((void (*)(void))BOOTLOADER_START_ADDRESS)();
-    }
-}
-
 void RebootToBootloader(void) {
-    // With this uncommented, reboot fails. Odd.
-    //USB_Disable();
-    cli();
+	/* Disconnect from the host - USB interface will be reset later along with the AVR */
+	USB_Detach();
 
     // Back to the bootloader
-    Boot_Key = MAGIC_BOOT_KEY;
     wdt_enable(WDTO_250MS);
     while(1);
 }
@@ -246,11 +227,6 @@ void SetupHardware()
     PORTC |= SWITCH_MASKC;
     PORTC &= ~_BV(1); // RESET has its own pullup
     PORTD |= SWITCH_MASKD;
-    
-    // RESET held while plugging in
-    if(!(PINC & _BV(1))) {
-        RebootToBootloader();
-    }
 
     /* Hardware Initialization */
     encoder_init();

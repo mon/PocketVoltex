@@ -54,7 +54,10 @@ rfuse:
 	$(AVRDUDE) -U hfuse:r:-:h -U lfuse:r:-:h -U efuse:r:-:h
 
 wfuse:
-	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9b:m -U efuse:w:0xf6:m
+	# no more HWB, boot directly to bootloader
+	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0xda:m -U efuse:w:0xfe:m
+	# reset disabled
+	#$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9a:m -U efuse:w:0xfe:m
 
 # To make this hex, compile HID Bootloader in LUFA
 # FLASH_SIZE_KB        := 16
