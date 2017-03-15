@@ -15,7 +15,9 @@ switches = [[0,0, 1],
 bolts = [[30.025, 6.65],
          [71, -16.925],
          [71, 16.5],
-         [42.732, -82.791]];
+         [42.732, -82.791],
+         // Middle hole, remove if not needed
+         [0, -37.592]];
 // Not the encoders themselves, but the circle that surrounds them
 encoders = [[-64,0.4],
             [ 64,0.4]];
@@ -23,8 +25,19 @@ encoderRadius = 13;
 
 // encoder solder points hit the case unless we cut these out
 // x, y, hole size
-encoderHoles = [[71.6, 0.4, 3.4],
-                [69, -10.1, 1.6]];
+encoderHoles = [[-8, 0, 3],
+                [ 8, 0, 3]];
+// the 3 A/B/Gnd connections + room for their decoupling caps
+// x (mirrored), y, hole size
+encoderHull = [5, -11, 5];
+
+// x, y, rotation
+leds = [[-26.475, -13.625, 35],
+        [-55.5, -37.25, 90],
+        [-47, -57.25, 135],
+        [-13.5, -65, 180]];
+ledDims = [6, 3];
+ledTopLength = 10;
                 
 macroHole = [0,-75.692];
 macroDiam = 3;
@@ -150,16 +163,21 @@ module encoders() {
     }
 }
 
-module encoderHoles() {
-    encoderHoles_half();
-    mirror([1,0,0])
-    encoderHoles_half();
-}
-
-module encoderHoles_half() {
-    for(enc = encoderHoles) {
-        translate([enc[0], enc[1]])
-        circle(d=enc[2], center = true);
+module encoder_holes() {
+    for(enc = encoders) {
+        translate([enc[0], enc[1]]) {
+            // A/B/Gnd
+            hull() {
+                translate([encoderHull[0], encoderHull[1]])
+                circle(d=encoderHull[2], center = true);
+                translate([-encoderHull[0], encoderHull[1]])
+                circle(d=encoderHull[2], center = true);
+            }
+            for(hole = encoderHoles) {
+                translate([hole[0], hole[1]])
+                    circle(d=hole[2], center = true);
+            }
+        }
     }
 }
 
@@ -176,6 +194,42 @@ module encoder_model_full() {
     for(enc = encoders) {
         translate([enc[0], enc[1]])
         encoder_model();
+    }
+}
+
+module led_holes() {
+    led_holes_half();
+    mirror([1,0,0])
+    led_holes_half();
+}
+
+module led_holes_half() {
+    for(led = leds) {
+        translate([led[0], led[1]])
+        rotate([0,0,led[2]]) {
+            translate([-ledDims[0]/2, -ledDims[1]/2])
+            square([ledDims[0], ledTopLength]);
+        }
+    }
+}
+
+module led_leg_holes() {
+    led_leg_holes_half();
+    mirror([1,0,0])
+    led_leg_holes_half();
+}
+
+module led_leg_holes_half() {
+    for(led = leds) {
+        translate([led[0], led[1]])
+        rotate([0,0,led[2]])
+        hull() {
+            offset = ledDims[1]/2 - ledDims[0]/2;
+            translate([offset,0])
+            circle(d=3, center = true);
+            translate([-offset,0])
+            circle(d=3, center = true);
+        }
     }
 }
 
@@ -238,30 +292,16 @@ module top_plate() {
 }
 
 module top_ring_outline() {
-    difference() {
-        board_encoderhole();
-        offset(delta = -wallStrength)
-            board_encoderhole();
-        // Room for FX/START
-        switches();
-    };
-    import("imports/RING_TOP_SUPPORTS.dxf");
-    bolts_expansion();
+    board_encoderhole();
 }
 
 module top_ring() {
     difference() {
-        union() {
-            difference() {
-                board_encoderhole();
-                offset(delta = -wallStrength)
-                    board_encoderhole();
-                // Room for FX/START
-                switches();
-            };
-            import("imports/RING_TOP_SUPPORTS.dxf");
-            bolts_expansion();
-        }
+        top_ring_outline();
+        switches();
+        led_holes();
+        translate(macroHole)
+            square(10, center = true);
         bolt_spacers();
     }
 }
@@ -279,25 +319,28 @@ module artwork() {
 
 module bottom_ring_outline() {
     difference() {
-        union() {
-            difference() {
-                board();
-                offset(delta = -wallStrength)
-                    board();
-            };
-            import("imports/RING_BOT_SUPPORTS.dxf");
-            bolts_expansion();
-        }
-        translate([usbPos[0], usbPos[1], 0])
+        board();
+        translate(usbPos)
         usb();
     }
+}
+
+module mcu_hole() {
+    polygon([[-13.3, 3.9],
+             [-13.3, -8],
+             [-20.15, -17],
+             [-33.65, -17],
+             [-40.5, -8],
+             [-40.5, 3.9]]);
 }
 
 module bottom_ring() {
     difference() {
         bottom_ring_outline();
         bolt_spacers();
-        encoderHoles();
+        encoder_holes();
+        led_leg_holes();
+        mcu_hole();
         // Room for FX
         switches();
     }
