@@ -68,7 +68,7 @@ void led_animate(void) {
         case INIT_FLASH:
             led_update_breather(FLASH_SPEED);
             if(pattern.flash.level == 0) {
-                led_anim_breathe();
+                led_anim_follower();
                 break;
             }
             break;

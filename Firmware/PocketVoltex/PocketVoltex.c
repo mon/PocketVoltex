@@ -253,7 +253,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
     if(ReportType != HID_REPORT_ITEM_In || HIDInterfaceInfo != &Inputs_HID_Interface) {
         *ReportSize = 0;
-        return true;
+        return false;
     }
     // nothing requested so let's make our own
     if(*ReportID == 0) {
@@ -278,7 +278,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         
         if(!macroUpdated && (sdvxConfig.joystickMode || !switchesChanged)) {
             *ReportSize = 0;
-            return true;
+            return false;
         }
         
         if(!sdvxConfig.joystickMode) {
@@ -302,7 +302,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         if(*ReportID == HID_REPORTID_MouseReport) {
             if(x == 0 && y == 0) {
                 *ReportSize = 0;
-                return true;
+                return false;
             }
             USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
             
@@ -313,7 +313,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         } else { // joystick
             if(x == 0 && y == 0 && !switchesChanged) {
                 *ReportSize = 0;
-                return true;
+                return false;
             }
             Joystick_Report_t* JoyReport = (Joystick_Report_t*)ReportData;
             

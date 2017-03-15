@@ -47,7 +47,8 @@ const USB_Descriptor_Device_t DeviceDescriptor =
     // mon.im VID/PID pair, unique!
 	.VendorID               = 0x16D0,
 	.ProductID              = 0x0A6D,
-	.ReleaseNumber          = VERSION_BCD(0,0,1),
+    // To provide uniqueness
+	.ReleaseNumber          = VERSION_BCD(0,0,2),
 
 	.ManufacturerStrIndex   = NO_DESCRIPTOR,
 	.ProductStrIndex        = STRING_ID_Product,

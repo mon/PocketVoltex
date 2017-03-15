@@ -112,7 +112,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM InputsReport[] =
             HID_RI_USAGE(8, 0x31), /* Y axis */
             HID_RI_LOGICAL_MINIMUM(16, 0),
             HID_RI_LOGICAL_MAXIMUM(16, JOYSTICK_PPR-1),
-            HID_RI_PHYSICAL_MINIMUM(16, -1),
+            HID_RI_PHYSICAL_MINIMUM(16, 0),
             HID_RI_PHYSICAL_MAXIMUM(16, 1),
             HID_RI_REPORT_COUNT(8, 2), /* 2 axis */
             HID_RI_REPORT_SIZE(8, 8),
@@ -186,7 +186,8 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
     // mon.im VID/PID pair, unique!
 	.VendorID               = 0x16D0,
 	.ProductID              = 0x0A6D,
-	.ReleaseNumber          = VERSION_BCD(0,0,1),
+    // To provide uniqueness
+	.ReleaseNumber          = VERSION_BCD(0,0,3),
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
 	.ProductStrIndex        = STRING_ID_Product,
