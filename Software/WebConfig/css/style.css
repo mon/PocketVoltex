@@ -1,17 +1,14 @@
-.hidden {
-    display: none;
-}
-
-.disabled {
-    opacity: 0.4;
+.center {
+    position: relative;
+    display:flex;
+    align-items:center;
+    flex-direction: column;
 }
 
 .configBox {
     background-image: url("../img/topdown-small.png");
     width: 800px;
     height: 571px;
-    margin-left:auto;
-    margin-right:auto;
 }
 
 .connect {
@@ -25,4 +22,38 @@
 
 .connect > button {
     font-size: 40pt;
+}
+
+.configOptions {
+    margin-left: 180px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    height: 400px;
+    width: 600px;
+}
+
+.configOptions > div, .configOptions > p {
+    width: 50%;
+}
+
+.colourPicker {
+    width: 50px;
+    height: 20px;
+}
+
+.pinEntry {
+    width: 40px;
+}
+
+.nestedSetting {
+    margin-left: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.disabled {
+    opacity: 0.4;
 }

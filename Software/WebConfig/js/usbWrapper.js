@@ -1,3 +1,6 @@
+// Perhaps at some point I will release an Electron app, too
+// This will facilitate that.
+
 (function(window, document, navigator) {
 "use strict";
 

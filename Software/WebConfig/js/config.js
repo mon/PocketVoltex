@@ -8,6 +8,7 @@ var UsbWrapper = window.UsbWrapper;
 var device;
 
 var SWITCH_COUNT = 8;
+var BRIGHTNESS_MAX = 127;
 var CONFIG_OUT_EPADDR = 1;
 var CONFIG_IN_EPADDR  = 2;
 var packetSize = 64;
@@ -19,11 +20,52 @@ var commands = {
     RESET :     42
 };
 
+var configDisplay = [
+    {id: 'joystickMode', name: 'Input mode', display : 'radio',
+        options : [{name: 'Keyboard/Mouse', val: 0}, {name: 'Joystick', val: 1}]},
+    {id: 'macroClick', name: 'Macro click', display : 'key'},
+    {id: 'macroHold', name: 'Macro longpress', display : 'bool'},
+    {id: 'macroPin', name: 'Macro PIN', display : 'pin'},
+    {id: 'lightsOn', name: 'Enable LEDs', display : 'bool', children: [
+        {id: 'hidLights', name: 'HID Lights', display : 'bool'},
+        {id: 'keyLights', name: 'Key lights', display : 'bool', children: [        
+            {id: 'btColour', name: 'BT colour', display: 'rgb'},
+            {id: 'fxColour', name: 'FX colour', display: 'rgb'},
+        ]},
+        {id: 'knobLights', name: 'Knob lights', display : 'bool', children: [
+            {id: 'knobL', name: 'VOL-L colour', display : 'rgb'},
+            {id: 'knobR', name: 'VOL-R colour', display : 'rgb'},
+        ]},
+        {id: 'lightPattern', name: 'Lights pattern', display : 'radio',
+            options : [{name: 'Solid', val: 2}, {name: 'Follower', val: 3}, {name: 'Breathe', val: 4}]},
+        {id: 'breatheColour', name: 'Solid/Breathe colour', display : 'rgb'},
+    ]},
+];
+
+// to match with firmware
+var settingOrder = [
+    'switches',
+    'btColour',
+    'fxColour',
+    'breatheColour',
+    'knobL',
+    'knobR',
+    'lightsOn',
+    'hidLights',
+    'keyLights',
+    'knobLights',
+    'lightPattern',
+    'macroClick',
+    'macroHold',
+    'macroPin',
+    'joystickMode'
+];
+
 var defaultConfig = {
     switches   : [],
     ledsOn     : true,
     //macroClick : KP_PLUS,
-    macroPin   : [1,2,3,4]
+    macroPin   : [1,2,3,4],
 }
 
 var visibleLog = function(html) {
@@ -31,60 +73,289 @@ var visibleLog = function(html) {
     document.getElementById('logview').innerHTML += html + '<br/>';
 }
 
-var ConfigValues = function(view) {
-    // skip the returned command byte
-    var offset = 1;
-    
-    this.switches = this.getKeys(view, offset, SWITCH_COUNT);
-    offset += SWITCH_COUNT;
-    this.btColour = this.getColour(view, offset);
-    offset += 3;
-    this.fxColour = this.getColour(view, offset);
-    offset += 3;
-    this.knobColours = [];
-    for(var i = 0; i < 2; i++) {
-        this.knobColours[i] = this.getColour(view, offset);
-        offset += 3;
+class BinaryBuffer {
+    constructor(view) {
+        this.view = view;
+        this.offset = 0;
     }
     
-    this.lightsOn = !!(view.getUint8(offset++));
-    this.hidLights = !!(view.getUint8(offset++));
-    this.keyLights = !!(view.getUint8(offset++));
-    this.knobLights = !!(view.getUint8(offset++));
-    this.lightPattern = view.getUint8(offset++);
-    this.macroClick = this.getKey(view, offset++);
-    this.macroPin = this.getArray(view, offset, 4);
-    offset += 4;
-    this.joystickMode = !!(view.getUint8(offset++));
-}
-
-ConfigValues.prototype.getArray = function(view, offset, size) {
-    var ret = [];
-    for(var i = 0; i < size; i++) {
-        ret[i] = view.getUint8(offset+i);
+    read(size) {
+        let ret;
+        if(size == 1) {
+            ret = this.view.getUint8(this.offset);
+        } else {
+            ret = [];
+            for(var i = 0; i < size; i++) {
+                ret[i] = this.view.getUint8(this.offset+i);
+            }
+        }
+        this.offset += size;
+        return ret;
     }
-    return ret;
-};
-
-ConfigValues.prototype.getColour = function(view, offset) {
-    return 'rgb(' + this.getArray(view, offset, 3).join() + ')';
-};
-
-ConfigValues.prototype.getKeys = function(view, offset, size) {
-    var keys = [];
-    for(let i = 0; i < size; i++) {
-        keys[i] = this.getKey(view, offset++);
+    
+    write(data) {
+        if(Array.isArray(data)) {
+            for(let i = 0; i < data.length; i++) {
+                this.view[this.offset+i] = data[i];
+            }
+            this.offset += data.length;
+        } else {
+            this.view[this.offset++] = data;
+        }
     }
-    return keys;
+    
+    rewind() {
+        this.offset = 0;
+    }
 }
 
-ConfigValues.prototype.getKey = function(view, offset) {
-    var key = view.getUint8(offset);
-    return scancodes.find(code => {return code.value == key});
+class Setting {
+    setCallback(callback) {
+        this.callback = callback;
+    }
+    
+    fireCallback() {
+        if(this.callback)
+            this.callback(this);
+    }
 }
 
-var Config = new function() {
-    this.connect = () => {
+// All settings must have createUI, read and write.
+// When the UI changes, call fireCallback to update the device config
+class SettingBool extends Setting {
+    read(reader) {
+        this.box.checked = !!reader.read(1);
+    }
+    
+    write(reader) {
+        reader.write(this.box.checked ? 1 : 0);
+    }
+    
+    createUI(setting) {
+        var container = document.createElement('div');
+        var check = document.createElement('input');
+        check.type = 'checkbox';
+        check.id = 'check-' + setting.id;
+        check.onclick = this.fireCallback.bind(this);
+        this.box = check;
+        
+        var label = document.createElement('label');
+        label.htmlFor = check.id;
+        label.textContent = setting.name;
+        
+        container.appendChild(check);
+        container.appendChild(label);
+        return container;
+    }
+}
+
+class SettingRGB extends Setting {
+    read(reader) {
+        var rgb = [];
+        for(var i = 0; i < 3; i++)
+            rgb[i] = (reader.read(1) / BRIGHTNESS_MAX) * 255;
+        this.picker.fromRGB(rgb[0], rgb[1], rgb[2]);
+    }
+    
+    write(reader) {
+        for(var i = 0; i < 3; i++)
+            reader.write((this.picker.rgb[i] / 255) * BRIGHTNESS_MAX);
+    }
+    
+    createUI(setting) {
+        var label = document.createElement('p');
+        label.textContent = setting.name + ':';
+        
+        var colourPicker = document.createElement('input');
+        colourPicker.className = 'colourPicker jscolor {valueElement:null}';
+        colourPicker.onchange = this.fireCallback.bind(this);
+        this.picker = new jscolor(colourPicker)
+        
+        label.appendChild(colourPicker);
+        return label;
+    }
+}
+
+class SettingRadio extends Setting {
+    read(buffer) {
+        var val = buffer.read(1);
+        
+        for(var i = 0; i < this.options.length; i++) {
+            let opt = this.options[i];
+            if(opt.val == val) {
+                opt.radio.checked = true;
+                return;
+            }
+        }
+        // sane default
+        this.options[0].radio.checked = true;
+    }
+    
+    write(buffer) {
+        for(var i = 0; i < this.options.length; i++) {
+            let opt = this.options[i];
+            if(opt.radio.checked) {
+                buffer.write(opt.val);
+                return;
+            }
+        }
+        // sane default
+        buffer.write(this.options[0].val);
+    }
+    
+    createUI(setting) {
+        this.options = setting.options;
+        var container = document.createElement('div');
+        container.textContent = setting.name + ':';
+        
+        var radioDiv = document.createElement('div');
+        radioDiv.className = 'nestedSetting';
+
+        for(var i = 0; i < setting.options.length; i++) {
+            var opt = setting.options[i];
+            
+            var radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.id = setting.id + '-' + i;
+            radio.name = setting.id;
+            radio.onclick = this.fireCallback.bind(this);
+            opt.radio = radio;
+            
+            var label = document.createElement('label');
+            label.htmlFor = radio.id;
+            label.textContent = opt.name;
+            
+            var radioContainer = document.createElement('p');
+            radioContainer.appendChild(radio);
+            radioContainer.appendChild(label);
+            radioDiv.appendChild(radioContainer);
+        }
+        
+        container.appendChild(radioDiv);
+        return container;
+    }
+}
+
+class SettingKeys extends Setting {
+    constructor(switchCount) {
+        super();
+        this.switchCount = switchCount;
+    }
+    
+    read(reader) {
+        this.keys = reader.read(this.switchCount);
+    }
+    
+    write(reader) {
+        reader.write(this.keys);
+    }
+    
+    createUI(setting) {
+        var entry = document.createElement('p');
+        entry.textContent = setting.name + ':';
+        
+        var select = document.createElement("select");
+        scancodes.forEach(function(code) {
+            var option = document.createElement("option");
+            option.value = code.value;
+            option.textContent = code.name;
+            select.appendChild(option);
+        });
+        
+        entry.appendChild(select);
+        return entry;
+    }
+}
+
+class SettingPin extends Setting {
+    createUI(setting) {
+        var entry = document.createElement('p');
+        entry.textContent = setting.name + ':';
+        
+        var input = document.createElement('input');
+        input.type = 'password';
+        input.className = 'pinEntry';
+        input.textContent = '0000';
+        
+        entry.appendChild(input);
+        return entry;
+    }
+}
+
+class ConfigValues {
+    constructor() {
+        this.switches      = new SettingKeys(SWITCH_COUNT);
+        this.btColour      = new SettingRGB();
+        this.fxColour      = new SettingRGB();
+        this.breatheColour = new SettingRGB();
+        this.knobL         = new SettingRGB();
+        this.knobR         = new SettingRGB();
+        this.lightsOn      = new SettingBool();
+        this.hidLights     = new SettingBool();
+        this.keyLights     = new SettingBool();
+        this.knobLights    = new SettingBool();
+        this.lightPattern  = new SettingRadio();
+        this.macroClick    = new SettingKeys(1);
+        this.macroHold     = new SettingBool();
+        this.macroPin      = new SettingKeys(4);
+        this.joystickMode  = new SettingBool();
+    }
+    
+    read(view, writeCallback) {
+        var buffer = new BinaryBuffer(view);
+        // skip the returned command byte
+        buffer.read(1);
+        
+        settingOrder.forEach(setting => {
+            this[setting].read(buffer);
+            this[setting].setCallback(writeCallback);
+        });
+    }
+
+    write(view) {
+        var buffer = new BinaryBuffer(view);
+        buffer.write(commands.SETCONFIG);
+        
+        settingOrder.forEach(setting => {
+            this[setting].write(buffer);
+        });
+    }
+
+    getArray(view, offset, size) {
+        var ret = [];
+        for(var i = 0; i < size; i++) {
+            ret[i] = view.getUint8(offset+i);
+        }
+        return ret;
+    };
+
+    getColour(view, offset) {
+        return 'rgb(' + this.getArray(view, offset, 3).join() + ')';
+    };
+
+    getKeys(view, offset, size) {
+        var keys = [];
+        for(let i = 0; i < size; i++) {
+            keys[i] = this.getKey(view, offset++);
+        }
+        return keys;
+    }
+
+    getKey(view, offset) {
+        var key = view.getUint8(offset);
+        return scancodes.find(code => {return code.value == key});
+    }
+}
+
+class Config {
+    constructor() {
+        this.optionsDiv = document.getElementById('configOptions');
+        this.config = new ConfigValues();
+        // DEBUG
+        //this.enableUI();
+    }
+    
+    connect() {
         return UsbWrapper.connect(vid, pid)
         .then(selectedDevice => {
             device = selectedDevice;
@@ -105,12 +376,8 @@ var Config = new function() {
         })
         .then(version => {
             console.log("Found Pocket Voltex v" + version/10.0);
+            this.enableUI();
             return this.readConfig();
-        })
-        .then(result => {console.log(result);})
-        .then( () => {
-            if(device && device.opened)
-                device.close();
         })
         .catch(error => {
             //alert(error);
@@ -118,9 +385,9 @@ var Config = new function() {
             if(device && device.opened)
                 device.close();
         });
-    };
+    }
     
-    this.readVersion = () => {
+    readVersion() {
         if(!device || !device.opened)
             return Promise.reject("Device not opened");
         
@@ -134,9 +401,9 @@ var Config = new function() {
             // version int exists at offset 1
             return result.data.getUint16(1, true);
         })
-    };
+    }
     
-    this.readConfig = () => {
+    readConfig() {
         if(!device || !device.opened)
             return Promise.reject("Device not opened");
         var data = new Uint8Array(packetSize);
@@ -145,25 +412,67 @@ var Config = new function() {
         .then(() => device.transferIn(CONFIG_IN_EPADDR, packetSize))
         .then(result => {
             console.log("Got config response of len", result.data.buffer.byteLength);
-            return new ConfigValues(result.data);
+            this.config.read(result.data, this.writeConfig.bind(this));
         });
-    };
+    }
     
-    this.close = () => {
+    writeConfig() {
+        if(!device || !device.opened)
+            return Promise.reject("Device not opened");
+        
+        console.log("Writing config");
+        var data = new Uint8Array(packetSize);
+        this.config.write(data);
+        return device.transferOut(CONFIG_OUT_EPADDR, data);
+    }
+    
+    close() {
         if(!device || !device.opened)
             return Promise.reject("Device not opened");
         visibleLog("Closing device...");
         return device.close();
-    };
+    }
     
-    this.rebootToBootloader = () => {
+    rebootToBootloader() {
         if(!device || !device.opened)
             return Promise.reject("Device not opened");
         var data = new Uint8Array(packetSize);
         data[0] = commands.RESET;
-        return device.transferOut(1, data);
+        return device.transferOut(CONFIG_OUT_EPADDR, data);
     };
-}
+    
+    populateSettings(parent, settings) {
+        settings.forEach(setting => {
+            var settingObj = this.config[setting.id];
+            var container = settingObj.createUI(setting);
+            settingObj.setCallback(this.writeConfig.bind(this));
+            
+            if(setting.children) {
+                var newParent = document.createElement('div');
+                newParent.className = 'nestedSetting';
+                
+                this.populateSettings(newParent, setting.children);
+                container.appendChild(newParent);
+            }
+            parent.appendChild(container);
+        });
+    }
+    
+    enableUI() {
+        //document.getElementById('configBox').classList.remove('hidden', 'disabled');
+        document.getElementById('connect').classList.add('hidden');
+        this.populateSettings(this.optionsDiv, configDisplay);
+    }
+    
+    createSetting(parent, setting) {
+        var func = this.settingsMap[setting.display];
+        if(func) {
+            func(parent, setting);
+        } else {
+            console.log('Unknown setting type', setting.display);
+        }
+    }
+};
 
 window.Config = Config;
 
@@ -264,143 +573,5 @@ var scancodes = [
   {name: "NUM 0", value: 0x62},
   {name: "NUM .", value: 0x63}
 ];
-
-//{name: "NON US BACKSLASH AND PIPE", value: 0x64},
-//{name: "APPLICATION", value: 0x65},
-//{name: "POWER", value: 0x66},
-//{name: "KEYPAD EQUAL SIGN", value: 0x67},
-//{name: "F13", value: 0x68},
-//{name: "F14", value: 0x69},
-//{name: "F15", value: 0x6A},
-//{name: "F16", value: 0x6B},
-//{name: "F17", value: 0x6C},
-//{name: "F18", value: 0x6D},
-//{name: "F19", value: 0x6E},
-//{name: "F20", value: 0x6F},
-//{name: "F21", value: 0x70},
-//{name: "F22", value: 0x71},
-//{name: "F23", value: 0x72},
-//{name: "F24", value: 0x73},
-//{name: "EXECUTE", value: 0x74},
-//{name: "HELP", value: 0x75},
-//{name: "MENU", value: 0x76},
-//{name: "SELECT", value: 0x77},
-//{name: "STOP", value: 0x78},
-//{name: "AGAIN", value: 0x79},
-//{name: "UNDO", value: 0x7A},
-//{name: "CUT", value: 0x7B},
-//{name: "COPY", value: 0x7C},
-//{name: "PASTE", value: 0x7D},
-//{name: "FIND", value: 0x7E},
-//{name: "MUTE", value: 0x7F},
-//{name: "VOLUME UP", value: 0x80},
-//{name: "VOLUME DOWN", value: 0x81},
-//{name: "LOCKING CAPS LOCK", value: 0x82},
-//{name: "LOCKING NUM LOCK", value: 0x83},
-//{name: "LOCKING SCROLL LOCK", value: 0x84},
-//{name: "KEYPAD COMMA", value: 0x85},
-//{name: "KEYPAD EQUAL SIGN AS400", value: 0x86},
-//{name: "INTERNATIONAL1", value: 0x87},
-//{name: "INTERNATIONAL2", value: 0x88},
-//{name: "INTERNATIONAL3", value: 0x89},
-//{name: "INTERNATIONAL4", value: 0x8A},
-//{name: "INTERNATIONAL5", value: 0x8B},
-//{name: "INTERNATIONAL6", value: 0x8C},
-//{name: "INTERNATIONAL7", value: 0x8D},
-//{name: "INTERNATIONAL8", value: 0x8E},
-//{name: "INTERNATIONAL9", value: 0x8F},
-//{name: "LANG1", value: 0x90},
-//{name: "LANG2", value: 0x91},
-//{name: "LANG3", value: 0x92},
-//{name: "LANG4", value: 0x93},
-//{name: "LANG5", value: 0x94},
-//{name: "LANG6", value: 0x95},
-//{name: "LANG7", value: 0x96},
-//{name: "LANG8", value: 0x97},
-//{name: "LANG9", value: 0x98},
-//{name: "ALTERNATE ERASE", value: 0x99},
-//{name: "SYSREQ", value: 0x9A},
-//{name: "CANCEL", value: 0x9B},
-//{name: "CLEAR", value: 0x9C},
-//{name: "PRIOR", value: 0x9D},
-//{name: "RETURN", value: 0x9E},
-//{name: "SEPARATOR", value: 0x9F},
-//{name: "OUT", value: 0xA0},
-//{name: "OPER", value: 0xA1},
-//{name: "CLEAR AND AGAIN", value: 0xA2},
-//{name: "CRSEL AND PROPS", value: 0xA3},
-//{name: "EXSEL", value: 0xA4},
-//{name: "KEYPAD 00", value: 0xB0},
-//{name: "KEYPAD 000", value: 0xB1},
-//{name: "THOUSANDS SEPARATOR", value: 0xB2},
-//{name: "DECIMAL SEPARATOR", value: 0xB3},
-//{name: "CURRENCY UNIT", value: 0xB4},
-//{name: "CURRENCY SUB UNIT", value: 0xB5},
-//{name: "KEYPAD OPENING PARENTHESIS", value: 0xB6},
-//{name: "KEYPAD CLOSING PARENTHESIS", value: 0xB7},
-//{name: "KEYPAD OPENING BRACE", value: 0xB8},
-//{name: "KEYPAD CLOSING BRACE", value: 0xB9},
-//{name: "KEYPAD TAB", value: 0xBA},
-//{name: "KEYPAD BACKSPACE", value: 0xBB},
-//{name: "KEYPAD A", value: 0xBC},
-//{name: "KEYPAD B", value: 0xBD},
-//{name: "KEYPAD C", value: 0xBE},
-//{name: "KEYPAD D", value: 0xBF},
-//{name: "KEYPAD E", value: 0xC0},
-//{name: "KEYPAD F", value: 0xC1},
-//{name: "KEYPAD XOR", value: 0xC2},
-//{name: "KEYPAD CARET", value: 0xC3},
-//{name: "KEYPAD PERCENTAGE", value: 0xC4},
-//{name: "KEYPAD LESS THAN SIGN", value: 0xC5},
-//{name: "KEYPAD GREATER THAN SIGN", value: 0xC6},
-//{name: "KEYPAD AMP", value: 0xC7},
-//{name: "KEYPAD AMP AMP", value: 0xC8},
-//{name: "KEYPAD PIPE", value: 0xC9},
-//{name: "KEYPAD PIPE PIPE", value: 0xCA},
-//{name: "KEYPAD COLON", value: 0xCB},
-//{name: "KEYPAD HASHMARK", value: 0xCC},
-//{name: "KEYPAD SPACE", value: 0xCD},
-//{name: "KEYPAD AT", value: 0xCE},
-//{name: "KEYPAD EXCLAMATION SIGN", value: 0xCF},
-//{name: "KEYPAD MEMORY STORE", value: 0xD0},
-//{name: "KEYPAD MEMORY RECALL", value: 0xD1},
-//{name: "KEYPAD MEMORY CLEAR", value: 0xD2},
-//{name: "KEYPAD MEMORY ADD", value: 0xD3},
-//{name: "KEYPAD MEMORY SUBTRACT", value: 0xD4},
-//{name: "KEYPAD MEMORY MULTIPLY", value: 0xD5},
-//{name: "KEYPAD MEMORY DIVIDE", value: 0xD6},
-//{name: "KEYPAD PLUS AND MINUS", value: 0xD7},
-//{name: "KEYPAD CLEAR", value: 0xD8},
-//{name: "KEYPAD CLEAR ENTRY", value: 0xD9},
-//{name: "KEYPAD BINARY", value: 0xDA},
-//{name: "KEYPAD OCTAL", value: 0xDB},
-//{name: "KEYPAD DECIMAL", value: 0xDC},
-//{name: "KEYPAD HEXADECIMAL", value: 0xDD},
-//{name: "LEFT CONTROL", value: 0xE0},
-//{name: "LEFT SHIFT", value: 0xE1},
-//{name: "LEFT ALT", value: 0xE2},
-//{name: "LEFT GUI", value: 0xE3},
-//{name: "RIGHT CONTROL", value: 0xE4},
-//{name: "RIGHT SHIFT", value: 0xE5},
-//{name: "RIGHT ALT", value: 0xE6},
-//{name: "RIGHT GUI", value: 0xE7},
-//{name: "MEDIA PLAY", value: 0xE8},
-//{name: "MEDIA STOP", value: 0xE9},
-//{name: "MEDIA PREVIOUS TRACK", value: 0xEA},
-//{name: "MEDIA NEXT TRACK", value: 0xEB},
-//{name: "MEDIA EJECT", value: 0xEC},
-//{name: "MEDIA VOLUME UP", value: 0xED},
-//{name: "MEDIA VOLUME DOWN", value: 0xEE},
-//{name: "MEDIA MUTE", value: 0xEF},
-//{name: "MEDIA WWW", value: 0xF0},
-//{name: "MEDIA BACKWARD", value: 0xF1},
-//{name: "MEDIA FORWARD", value: 0xF2},
-//{name: "MEDIA CANCEL", value: 0xF3},
-//{name: "MEDIA SEARCH", value: 0xF4},
-//{name: "MEDIA SLEEP", value: 0xF8},
-//{name: "MEDIA LOCK", value: 0xF9},
-//{name: "MEDIA RELOAD", value: 0xFA},
-//{name: "MEDIA CALCULATOR", value: 0xFB}
-//{name: "NON_US_HASHMARK_AND_TILDE", value: 0x32},
 
 })(window, document);

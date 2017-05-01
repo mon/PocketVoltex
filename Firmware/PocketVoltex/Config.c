@@ -57,8 +57,21 @@ void SetConfig(sdvx_config_t* config) {
 }
 
 command_response_t HandleConfig(uint8_t* buffer) {
-    if(buffer[0] == MAGIC_RESET_NUMBER) {
-        return REBOOT;
+    command_t *command = (command_t*)buffer;
+    switch(command->command) {
+        case VERSION:
+            command->data.version.version = FIRMWARE_VERSION;
+            command->data.version.serial = 0xDEAD; // TODO set properly later
+            return RESPOND;
+        case GETCONFIG:
+            memcpy(&command->data.config, &sdvxConfig, CONFIG_BYTES);
+            return RESPOND;
+        case SETCONFIG:
+            SetConfig(&command->data.config);
+            return IGNORE;
+        case RESET:
+            return REBOOT;
+        default:
+            return IGNORE;
     }
-    return IGNORE;
 }
