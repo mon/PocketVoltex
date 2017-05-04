@@ -1,7 +1,6 @@
 #include "Descriptors.h"
 
 const USB_Descriptor_URL_t ConfigURL = URL_STRING_DESCRIPTOR(URL_HTTPS, "mon.im");
-const USB_Descriptor_URL_t LocalhostURL = URL_STRING_DESCRIPTOR(URL_HTTP, "localhost");
 const USB_Descriptor_String_t ProductString = USB_STRING_DESCRIPTOR(L"Voltex Boot");
 const USB_Descriptor_String_t LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
 
@@ -10,15 +9,6 @@ const uint8_t MS_OS_Descriptor[] =
     MS_OS_DESCRIPTOR_SET
     (
         MS_OS_COMPAT_ID_WINUSB
-    )
-};
-
-const uint8_t WebUSBAllowedOrigins[] = {
-    WEBUSB_ALLOWED_ORIGINS_HEADER
-    (
-        0, // no config header
-        // Config interface accessible from the web, 2 valid URLs
-        URL_ID_Config, URL_ID_Localhost
     )
 };
 
@@ -105,23 +95,10 @@ void USB_Process_BOS(void) {
     
     switch(USB_ControlRequest.bRequest) {
         case WEBUSB_ID:
-            switch(USB_ControlRequest.wIndex) {
-                case WEBUSB_REQUEST_GET_ALLOWED_ORIGINS:
-                    Address = &WebUSBAllowedOrigins;
-                    Size = sizeof(WebUSBAllowedOrigins);
-                    break;
-                case WEBUSB_REQUEST_GET_URL:
-                    switch(USB_ControlRequest.wValue) {
-                        case URL_ID_Localhost:
-                            Address = &LocalhostURL;
-                            Size = LocalhostURL.Header.Size;
-                            break;
-                        case URL_ID_Config:
-                            Address = &ConfigURL;
-                            Size = ConfigURL.Header.Size;
-                            break;
-                    }
-                    break;
+            if(USB_ControlRequest.wIndex == WEBUSB_REQUEST_GET_URL &&
+                    USB_ControlRequest.wValue == URL_ID_Config) {
+                Address = &ConfigURL;
+                Size = ConfigURL.Header.Size;
             }
             break;
         case MS_OS_ID:

@@ -149,19 +149,6 @@ const uint8_t PROGMEM MS_OS_Descriptor[] =
     )
 };
 
-const uint8_t PROGMEM WebUSBAllowedOrigins[] = {
-    WEBUSB_ALLOWED_ORIGINS_HEADER
-    (
-        1, // 1 config header present
-        WEBUSB_CONFIG_SUBSET_HEADER
-        (
-            0x00, 1, // Config 0, 1 function header
-            // Config interface accessible from the web, 2 valid URLs
-            WEBUSB_FUNCTION_SUBSET_HEADER(INTERFACE_ID_Config, URL_ID_Config, URL_ID_Localhost)
-        )
-    )
-};
-
 const uint8_t PROGMEM BOSDescriptor[] =
 {
     BOS_DESCRIPTOR
@@ -380,23 +367,10 @@ void USB_Process_BOS(void) {
     }
     switch(USB_ControlRequest.bRequest) {
         case WEBUSB_ID:
-            switch(USB_ControlRequest.wIndex) {
-                case WEBUSB_REQUEST_GET_ALLOWED_ORIGINS:
-                    Address = &WebUSBAllowedOrigins;
-                    Size = sizeof(WebUSBAllowedOrigins);
-                    break;
-                case WEBUSB_REQUEST_GET_URL:
-                    switch(USB_ControlRequest.wValue) {
-                        case URL_ID_Localhost:
-                            Address = &LocalhostURL;
-                            Size = pgm_read_byte(&LocalhostURL.Header.Size);
-                            break;
-                        case URL_ID_Config:
-                            Address = &ConfigURL;
-                            Size = pgm_read_byte(&ConfigURL.Header.Size);
-                            break;
-                    }
-                    break;
+            if(USB_ControlRequest.wIndex == WEBUSB_REQUEST_GET_URL &&
+                    USB_ControlRequest.wValue == URL_ID_Config) {
+                Address = &ConfigURL;
+                Size = pgm_read_byte(&ConfigURL.Header.Size);
             }
             break;
         case MS_OS_ID:

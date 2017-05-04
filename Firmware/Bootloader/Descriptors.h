@@ -56,8 +56,7 @@
         
         enum URLDescriptors_t
         {
-            URL_ID_Localhost  = 1,
-            URL_ID_Config     = 2,
+            URL_ID_Config     = 1,
         };
         
         enum StringDescriptors_t
