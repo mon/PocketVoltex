@@ -143,9 +143,6 @@ int main(void)
     SetupHardware();
 
     GlobalInterruptEnable();
-    
-    // Blink to show we're not in bootloader
-    led_anim_flash();
 
     for (;;)
     {
@@ -179,7 +176,7 @@ int main(void)
         if(updateLEDs && sdvxConfig.lightsOn) {
             updateLEDs = 0;
             if(!sdvxConfig.hidLights || hidTimeout >= HID_LED_TIMEOUT) {
-                led_animate();
+                led_pattern_animate();
                 if(sdvxConfig.keyLights) {
                     // Keep normal lights but override when we get flashes on BT or FX
                     // BT LEDs
@@ -198,7 +195,10 @@ int main(void)
             }
             // knob lights go above all
             if(sdvxConfig.knobLights)
-                led_knob_lights();
+                led_overlay_knobs();
+            led_commit();
+        } else if(!sdvxConfig.lightsOn) {
+            led_set_all(0,0,0);
             led_commit();
         }
     }
@@ -231,6 +231,7 @@ void SetupHardware()
     /* Hardware Initialization */
     encoder_init();
     led_init();
+    led_pattern_init();
     
     USB_Init();
 }

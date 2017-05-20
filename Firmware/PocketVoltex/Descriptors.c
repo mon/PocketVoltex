@@ -1,5 +1,8 @@
 #include "Descriptors.h"
 
+#include "Config.h"
+#include "LED.h"
+
 #define WEBUSB_ID 0x01
 #define MS_OS_ID 0x02
 

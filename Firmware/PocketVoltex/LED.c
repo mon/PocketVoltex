@@ -120,7 +120,7 @@ void led_fade_all(uint8_t r, uint8_t g, uint8_t b, uint8_t strength) {
             new = 0;
         scales[i] = new;
     }
-    led_set_all(scales[0], scales[1], scales[2]);
+    led_set_all(scales[R], scales[G], scales[B]);
 }
 
 void led_set_all(uint8_t r, uint8_t g, uint8_t b) {

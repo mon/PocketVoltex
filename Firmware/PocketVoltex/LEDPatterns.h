@@ -3,8 +3,8 @@
 
 // circular dependency with Config.h requires this to be here
 enum LEDMode {
-    NONE = 0,
-    INIT_FLASH = 1,
+    INIT_FLASH = 0,
+    NONE = 1,
     SINGLE_COLOUR = 2,
     FOLLOWER = 3,
     BREATHE = 4,
@@ -28,11 +28,10 @@ enum LEDMode {
 #define LED_KNOB_SENSITIVITY 5
 
 uint8_t led_on_frame(void);
-void led_animate(void);
-void led_anim_flash(void);
-void led_anim_breathe(void);
-void led_anim_follower(void);
-void led_knob_lights(void);
+void led_pattern_init(void);
+void led_pattern_animate(void);
+void led_pattern_next(void);
+void led_overlay_knobs(void);
 void led_knobs_update(int8_t left, int8_t right);
 
 #endif
