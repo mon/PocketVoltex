@@ -83,9 +83,9 @@ class BinaryBuffer {
         this.offset = 0;
     }
     
-    read(size) {
+    read(size, forceArray = false) {
         let ret;
-        if(size == 1) {
+        if(size == 1 && !forceArray) {
             ret = this.view.getUint8(this.offset);
         } else {
             ret = [];
@@ -250,7 +250,7 @@ class SettingKeys extends Setting {
     }
     
     read(buffer) {
-        var keys = buffer.read(this.byteCount);
+        var keys = buffer.read(this.byteCount, true);
         for(var i = 0; i < this.switchCount; i++) {
             this.selects[i].value = keys[i];
         }
@@ -303,19 +303,38 @@ class SettingPin extends Setting {
 }
 
 class SettingMacro extends Setting {
+    constructor() {
+        super();
+        this.action = new SettingRadio();
+        this.keypress = new SettingKeys(1);
+        this.action.setCallback(this.fireCallback.bind(this));
+        this.keypress.setCallback(this.fireCallback.bind(this));
+    }
+    
     createUI(setting) {
         var entry = document.createElement('p');
         entry.textContent = setting.name + ':';
+        
+        entry.appendChild(this.action.createUI({
+            id: setting.id + '-action', name: 'Action',
+            options : [{name: 'Keypress', val: 0},
+                       {name: 'Macro PIN', val: 1},
+                       {name: 'Cycle LED pattern', val: 2},
+                       {name: 'Toggle LEDs', val: 3}]
+        }));
+        entry.appendChild(this.keypress.createUI({name: 'Key'}));
         
         return entry;
     }
     
     read(buffer) {
-        this.keys = buffer.read(2);
+        this.action.read(buffer);
+        this.keypress.read(buffer);
     }
     
     write(buffer) {
-        buffer.write(this.keys);
+        this.action.write(buffer);
+        this.keypress.write(buffer);
     }
 }
 
@@ -528,6 +547,7 @@ class Config {
 window.Config = Config;
 
 var scancodes = [
+  {name: "None", value: 0x00},
   {name: "A", value: 0x04},
   {name: "B", value: 0x05},
   {name: "C", value: 0x06},

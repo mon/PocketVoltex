@@ -66,11 +66,11 @@ uint8_t led_on_frame(void) {
 void led_pattern_animate(void) {
     if(flash) {
         led_update_breather(FLASH_SPEED);
-        if(pattern.breathe.level < 5) {
+        if(pattern.breathe.level == 0) {
             led_init_breathe();
             flash = 0;
-            return;
         }
+        return;
     }
     switch(sdvxConfig.lightPattern) {
         case NONE:
@@ -92,9 +92,11 @@ void led_pattern_animate(void) {
 
 void led_pattern_next(void) {
     sdvxConfig.lightPattern++;
-    if(sdvxConfig.lightPattern > BREATHE)
+    if(sdvxConfig.lightPattern > BREATHE) {
         // since we don't want the init flash
         sdvxConfig.lightPattern = NONE;
+    }
+    UpdateConfig();
 }
 
 void led_overlay_knobs(void) {

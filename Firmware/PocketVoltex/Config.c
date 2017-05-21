@@ -51,8 +51,8 @@ static const PROGMEM sdvx_config_t defaults = {
 void InitConfig(void) {
     if (eeprom_read_byte(&firstRun) != MAGIC_NUMBER) { // store defaults
         memcpy_P(&sdvxConfig, &defaults, sizeof(sdvx_config_t));
-        eeprom_write_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
-        eeprom_write_byte(&firstRun, MAGIC_NUMBER); // defaults set
+        eeprom_update_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
+        eeprom_update_byte(&firstRun, MAGIC_NUMBER); // defaults set
     }
     eeprom_read_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
 }
