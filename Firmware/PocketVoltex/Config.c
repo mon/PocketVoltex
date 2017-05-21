@@ -33,11 +33,18 @@ static const PROGMEM sdvx_config_t defaults = {
     .keyLights = 1,
     .knobLights = 1,
     .lightPattern = FOLLOWER,
-    .macroClick = HID_KEYBOARD_SC_KEYPAD_PLUS,
+    .macroClick = {
+        .action = KEYPRESS,
+        .keypress = HID_KEYBOARD_SC_KEYPAD_PLUS
+    },
+    .macroHold = {
+        .action = PIN_ENTRY,
+        .keypress = 0
+    },
     .macroPin = {HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
                  HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
                  HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
-                 HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT}
+                 HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT},
     .joystickMode = 1,
 };
 
@@ -53,7 +60,11 @@ void InitConfig(void) {
 void SetConfig(sdvx_config_t* config) {
     memcpy(&sdvxConfig, config, sizeof(sdvx_config_t));
     
-    eeprom_write_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
+    eeprom_update_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
+}
+
+void UpdateConfig(void) {
+    eeprom_update_block(&sdvxConfig, &eeConfig, sizeof(sdvx_config_t));
 }
 
 command_response_t HandleConfig(uint8_t* buffer) {

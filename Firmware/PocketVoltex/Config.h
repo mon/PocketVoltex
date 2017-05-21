@@ -5,13 +5,14 @@
 #include <stdbool.h>
 #include <LUFA/Drivers/USB/USB.h>
 #include "LEDPatterns.h"
+#include "Macro.h"
 
 // 7 gameplay switches + macro combo switch
 #define SWITCH_COUNT 8
 #define JOYSTICK_PPR (24 * 4)
 #define MAGIC_RESET_NUMBER 42
 // divide by 10 for actual version
-#define FIRMWARE_VERSION 10
+#define FIRMWARE_VERSION 11
 
 // not configurable since they're all the same switches
 #define SWITCH_DEBOUNCE 30
@@ -29,8 +30,9 @@ typedef struct {
     uint8_t knobLights;
     uint8_t lightPattern;
     // When tapping or long-pressing the macro key
-    uint8_t macroClick;
-    uint8_t macroHold;
+    Macro_t macroClick;
+    Macro_t macroHold;
+    // Reused for both
     uint8_t macroPin[4];
     uint8_t joystickMode;
 } ATTR_PACKED sdvx_config_t;
@@ -69,6 +71,7 @@ extern sdvx_config_t sdvxConfig;
 
 extern void InitConfig(void);
 extern void SetConfig(sdvx_config_t* config);
+void UpdateConfig(void);
 extern command_response_t HandleConfig(uint8_t* buffer);
 
 #endif

@@ -21,24 +21,28 @@ var commands = {
 };
 
 var configDisplay = [
-    {id: 'joystickMode', name: 'Input mode', display : 'radio',
+    {id: 'joystickMode', name: 'Input mode',
         options : [{name: 'Keyboard/Mouse', val: 0}, {name: 'Joystick', val: 1}]},
-    {id: 'macroClick', name: 'Macro click', display : 'key'},
-    {id: 'macroHold', name: 'Macro longpress', display : 'bool'},
-    {id: 'macroPin', name: 'Macro PIN', display : 'pin'},
-    {id: 'lightsOn', name: 'Enable LEDs', display : 'bool', children: [
-        {id: 'hidLights', name: 'HID Lights', display : 'bool'},
-        {id: 'keyLights', name: 'Key lights', display : 'bool', children: [        
-            {id: 'btColour', name: 'BT colour', display: 'rgb'},
-            {id: 'fxColour', name: 'FX colour', display: 'rgb'},
+    {id: 'switches', name: 'Keyboard bindings'},
+    {id: 'macroClick', name: 'Macro click'},
+    {id: 'macroHold', name: 'Macro longpress'},
+    {id: 'macroPin', name: 'Macro PIN'},
+    {id: 'lightsOn', name: 'Enable LEDs', children: [
+        {id: 'hidLights', name: 'HID Lights'},
+        {id: 'keyLights', name: 'Key lights', children: [        
+            {id: 'btColour', name: 'BT colour'},
+            {id: 'fxColour', name: 'FX colour'},
         ]},
-        {id: 'knobLights', name: 'Knob lights', display : 'bool', children: [
-            {id: 'knobL', name: 'VOL-L colour', display : 'rgb'},
-            {id: 'knobR', name: 'VOL-R colour', display : 'rgb'},
+        {id: 'knobLights', name: 'Knob lights', children: [
+            {id: 'knobL', name: 'VOL-L colour'},
+            {id: 'knobR', name: 'VOL-R colour'},
         ]},
-        {id: 'lightPattern', name: 'Lights pattern', display : 'radio',
-            options : [{name: 'Solid', val: 2}, {name: 'Follower', val: 3}, {name: 'Breathe', val: 4}]},
-        {id: 'breatheColour', name: 'Solid/Breathe colour', display : 'rgb'},
+        {id: 'lightPattern', name: 'Lights pattern',
+            options : [{name: 'None',     val : 1},
+                       {name: 'Solid',    val: 2},
+                       {name: 'Breathe',  val: 4},
+                       {name: 'Follower', val: 3}]},
+        {id: 'breatheColour', name: 'Solid/Breathe colour'},
     ]},
 ];
 
@@ -65,7 +69,7 @@ var defaultConfig = {
     switches   : [],
     ledsOn     : true,
     //macroClick : KP_PLUS,
-    macroPin   : [1,2,3,4],
+    macroPin   : [0,0,0,0],
 }
 
 var visibleLog = function(html) {
@@ -123,12 +127,12 @@ class Setting {
 // All settings must have createUI, read and write.
 // When the UI changes, call fireCallback to update the device config
 class SettingBool extends Setting {
-    read(reader) {
-        this.box.checked = !!reader.read(1);
+    read(buffer) {
+        this.box.checked = !!buffer.read(1);
     }
     
-    write(reader) {
-        reader.write(this.box.checked ? 1 : 0);
+    write(buffer) {
+        buffer.write(this.box.checked ? 1 : 0);
     }
     
     createUI(setting) {
@@ -150,16 +154,16 @@ class SettingBool extends Setting {
 }
 
 class SettingRGB extends Setting {
-    read(reader) {
+    read(buffer) {
         var rgb = [];
         for(var i = 0; i < 3; i++)
-            rgb[i] = (reader.read(1) / BRIGHTNESS_MAX) * 255;
+            rgb[i] = (buffer.read(1) / BRIGHTNESS_MAX) * 255;
         this.picker.fromRGB(rgb[0], rgb[1], rgb[2]);
     }
     
-    write(reader) {
+    write(buffer) {
         for(var i = 0; i < 3; i++)
-            reader.write((this.picker.rgb[i] / 255) * BRIGHTNESS_MAX);
+            buffer.write((this.picker.rgb[i] / 255) * BRIGHTNESS_MAX);
     }
     
     createUI(setting) {
@@ -237,32 +241,48 @@ class SettingRadio extends Setting {
 }
 
 class SettingKeys extends Setting {
-    constructor(switchCount) {
+    constructor(switchCount, ignoreLast = false) {
         super();
-        this.switchCount = switchCount;
+        this.byteCount = switchCount;
+        // hacks upon hacks, this stuff
+        this.ignoreLast = ignoreLast;
+        this.switchCount = ignoreLast ? switchCount - 1 : switchCount;
     }
     
-    read(reader) {
-        this.keys = reader.read(this.switchCount);
+    read(buffer) {
+        var keys = buffer.read(this.byteCount);
+        for(var i = 0; i < this.switchCount; i++) {
+            this.selects[i].value = keys[i];
+        }
     }
     
-    write(reader) {
-        reader.write(this.keys);
+    write(buffer) {
+        for(var i = 0; i < this.selects.length; i++) {
+            buffer.write(this.selects[i].value);
+        }
+        if(this.ignoreLast) {
+            buffer.write(0);
+        }
     }
     
     createUI(setting) {
         var entry = document.createElement('p');
         entry.textContent = setting.name + ':';
         
-        var select = document.createElement("select");
-        scancodes.forEach(function(code) {
-            var option = document.createElement("option");
-            option.value = code.value;
-            option.textContent = code.name;
-            select.appendChild(option);
-        });
-        
-        entry.appendChild(select);
+        this.selects = [];
+        for(var i = 0; i < this.switchCount; i++) {
+            var select = document.createElement("select");
+            scancodes.forEach(function(code) {
+                var option = document.createElement("option");
+                option.value = code.value;
+                option.textContent = code.name;
+                select.appendChild(option);
+            });
+            
+            select.onchange = this.fireCallback.bind(this);
+            entry.appendChild(select);
+            this.selects.push(select);
+        }
         return entry;
     }
 }
@@ -282,9 +302,26 @@ class SettingPin extends Setting {
     }
 }
 
+class SettingMacro extends Setting {
+    createUI(setting) {
+        var entry = document.createElement('p');
+        entry.textContent = setting.name + ':';
+        
+        return entry;
+    }
+    
+    read(buffer) {
+        this.keys = buffer.read(2);
+    }
+    
+    write(buffer) {
+        buffer.write(this.keys);
+    }
+}
+
 class ConfigValues {
     constructor() {
-        this.switches      = new SettingKeys(SWITCH_COUNT);
+        this.switches      = new SettingKeys(SWITCH_COUNT, true);
         this.btColour      = new SettingRGB();
         this.fxColour      = new SettingRGB();
         this.breatheColour = new SettingRGB();
@@ -295,10 +332,10 @@ class ConfigValues {
         this.keyLights     = new SettingBool();
         this.knobLights    = new SettingBool();
         this.lightPattern  = new SettingRadio();
-        this.macroClick    = new SettingKeys(1);
-        this.macroHold     = new SettingBool();
+        this.macroClick    = new SettingMacro();
+        this.macroHold     = new SettingMacro();
         this.macroPin      = new SettingKeys(4);
-        this.joystickMode  = new SettingBool();
+        this.joystickMode  = new SettingRadio();
     }
     
     read(view, writeCallback) {
@@ -367,9 +404,38 @@ class Config {
             return device.selectConfiguration(1)
         })
         .then(() => {
-            console.log("Selected, claiming interface...");
-            return device.claimInterface(0);
+            if(device.productName == 'Voltex Boot') {
+                return this.loadFirmware();
+            } else {
+                return this.loadConfig();
+            }
         })
+        .catch(error => {
+            //alert(error);
+            visibleLog(error);
+            if(device && device.opened)
+                device.close();
+        });
+    }
+    
+    loadFirmware() {
+        visibleLog("Downloading fimware...");
+        return getLatest()
+        .then(info => {
+            return downloadLatest(info.version);
+        })
+        .then(firmware => {
+            visibleLog("Flashing firmware...");
+            return programLatest(device, firmware);
+        })
+        .then(() => {
+            visibleLog("Done!");
+        })
+    }
+    
+    loadConfig() {
+        console.log("Selected, claiming interface...");
+        return device.claimInterface(0)
         .then(() => {
             visibleLog("Opened!");
             return this.readVersion();
@@ -379,12 +445,6 @@ class Config {
             this.enableUI();
             return this.readConfig();
         })
-        .catch(error => {
-            //alert(error);
-            visibleLog(error);
-            if(device && device.opened)
-                device.close();
-        });
     }
     
     readVersion() {
@@ -462,15 +522,6 @@ class Config {
         //document.getElementById('configBox').classList.remove('hidden', 'disabled');
         document.getElementById('connect').classList.add('hidden');
         this.populateSettings(this.optionsDiv, configDisplay);
-    }
-    
-    createSetting(parent, setting) {
-        var func = this.settingsMap[setting.display];
-        if(func) {
-            func(parent, setting);
-        } else {
-            console.log('Unknown setting type', setting.display);
-        }
     }
 };
 

@@ -1,5 +1,5 @@
-#ifndef _KEYBOARD_H_
-#define _KEYBOARD_H_
+#ifndef _POCKETVOLTEX_H_
+#define _POCKETVOLTEX_H_
 
 	/* Includes: */
 		#include <avr/io.h>
