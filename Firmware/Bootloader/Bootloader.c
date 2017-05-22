@@ -158,7 +158,7 @@ void EVENT_USB_Device_ControlRequest(void)
             /* Re-enable RWW section */
             boot_rww_enable();
         } else if(USB_ControlRequest.wIndex == COMMAND_VERSION) {
-            Endpoint_Write_16_LE(65000);
+            Endpoint_Write_16_LE(11);
             Endpoint_ClearIN();
         } else if(USB_ControlRequest.wIndex == COMMAND_STARTAPPLICATION) {
             RunBootloader = false;
