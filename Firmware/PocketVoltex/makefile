@@ -43,7 +43,7 @@ include $(LUFA_PATH)/Build/lufa_atprogram.mk
 debug: CC_FLAGS += -DDEBUG
 debug: clean flash
 
-init: erase wfuse flashboot flash
+init: erase wfuse flashboot disablereset flash
 
 initboot: erase wfuse flashboot
 
@@ -56,16 +56,16 @@ rfuse:
 wfuse:
 	# no more HWB, boot directly to bootloader
 	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0xda:m -U efuse:w:0xfe:m
-	# reset disabled
-	#$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9a:m -U efuse:w:0xfe:m
+	
+disablereset:
+	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9a:m -U efuse:w:0xfe:m
 
-# To make this hex, compile HID Bootloader in LUFA
-# FLASH_SIZE_KB        := 16
-# BOOT_SECTION_SIZE_KB := 2
-# MCU          = atmega16u2
-# ARCH         = AVR8
+# To make this hex, compile the bootloader up a level
 flashboot:
-	$(AVRDUDE) -U flash:w:DFU/BootloaderHID.hex:i
+	$(AVRDUDE) -U flash:w:DFU/BootloaderUSB.hex:i
 
 flash: all
-	cd DFU && python control_bootloader.py atmega16u2 ../PocketVoltex.hex
+	cd DFU && python control_bootloader.py atmega16u2 ../$(TARGET).hex
+
+md5: all
+	md5sum $(TARGET).bin
