@@ -12,7 +12,9 @@
 #define JOYSTICK_PPR (24 * 4)
 #define MAGIC_RESET_NUMBER 42
 // divide by 10 for actual version
-#define FIRMWARE_VERSION 11
+#define FIRMWARE_VERSION 12
+// increment whenever config structure has breaking changes
+#define CONFIG_VERSION 1
 
 // not configurable since they're all the same switches
 #define SWITCH_DEBOUNCE 30

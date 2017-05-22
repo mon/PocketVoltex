@@ -146,7 +146,26 @@ const uint8_t PROGMEM MS_OS_Descriptor[] =
             MS_OS_FUNCTION_SUBSET_HEADER
             (
                 INTERFACE_ID_Config, // Interface ID
-                MS_OS_COMPAT_ID_WINUSB
+                MS_OS_COMPAT_ID_WINUSB,
+                
+                
+                /* I'm not entirely convinced this is actually required,
+                   but USB on Windows is finnicky at best, and apparently
+                   this is a good idea for composite devices. It's a mystery. */
+                0x84, 0x00,   //wLength: 
+                MS_OS_20_FEATURE_REG_PROPERTY, 0x00,   // wDescriptorType: MS_OS_20_FEATURE_REG_PROPERTY: 0x04 (Table 9)
+                0x07, 0x00,   //wPropertyDataType: REG_MULTI_SZ (Table 15)
+                0x2a, 0x00,   //wPropertyNameLength: 
+                //bPropertyName: "DeviceInterfaceGUID"
+                'D', 0x00, 'e', 0x00, 'v', 0x00, 'i', 0x00, 'c', 0x00, 'e', 0x00, 'I', 0x00, 'n', 0x00, 't', 0x00, 'e', 0x00, 
+                'r', 0x00, 'f', 0x00, 'a', 0x00, 'c', 0x00, 'e', 0x00, 'G', 0x00, 'U', 0x00, 'I', 0x00, 'D', 0x00, 's', 0x00, 
+                0x00, 0x00,
+                0x50, 0x00,   // wPropertyDataLength
+                //bPropertyData: "{975F44D9-0D08-43FD-8B3E-127CA8AFEF9D}".
+                '{', 0x00, '9', 0x00, '7', 0x00, '5', 0x00, 'F', 0x00, '4', 0x00, '4', 0x00, 'D', 0x00, '9', 0x00, '-', 0x00, 
+                '0', 0x00, 'D', 0x00, '0', 0x00, '8', 0x00, '-', 0x00, '4', 0x00, '3', 0x00, 'F', 0x00, 'D', 0x00, '-', 0x00, 
+                '8', 0x00, 'B', 0x00, '3', 0x00, 'E', 0x00, '-', 0x00, '1', 0x00, '2', 0x00, '7', 0x00, 'C', 0x00, 'A', 0x00, 
+                '8', 0x00, 'A', 0x00, 'F', 0x00, 'E', 0x00, 'F', 0x00, '9', 0x00, 'D', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00
             )
         )
     )
