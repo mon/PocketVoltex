@@ -9,7 +9,7 @@ You will also need to go to chrome://flags and enable
 June/July, as the WebUSB feature will be shipping in Chrome 60.
 
 If you are using b\*\*\*\*\*tools, configure as normal.
-For fast configuration of the HID lighting, download and run [this exe](../Software/HidLights.exe)
+For fast configuration of the HID lighting, download and run [this exe](https://github.com/mon/PocketVoltex/raw/master/Software/HidLights.exe)
 while config.exe is open and the controller is connected.
 
 ## HID Lighting fix
