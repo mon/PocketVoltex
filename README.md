@@ -9,7 +9,7 @@ A tiny controller for K-Shoot MANIA/Sound Voltex or other similar games
 
 [Controller configuration](Docs/Configuration.md)
 
-Features:
+## Features
 * Gateron mechanical switches
 * Rock solid Bourns encoders with hardware smoothing
 * 8 RGB LEDs
