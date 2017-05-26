@@ -2,10 +2,11 @@
 
 A tiny controller for K-Shoot MANIA/Sound Voltex or other similar games
 
-![Pocket Voltex](ProductShot.png)
+![Pocket Voltex](ProductShot.jpg)
 
 ## Documentation
 [DIY Kit assembly](Docs/Assembly.md)
+
 [Controller configuration](Docs/Configuration.md)
 
 Features:
