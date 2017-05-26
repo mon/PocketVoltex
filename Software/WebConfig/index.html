@@ -6,33 +6,37 @@
         <link rel="stylesheet" href="css/style.css">
         <script type="text/javascript" src="js/usbWrapper.js"></script>
         <script type="text/javascript" src="js/config.js"></script>
+        <script type="text/javascript" src="js/settings.js"></script>
         <script type="text/javascript" src="js/updater.js"></script>
+        <script type="text/javascript" src="js/md5.min.js"></script>
         <script type="text/javascript" src="js/jscolor.min.js"></script>
         <script type="text/javascript">
             window.addEventListener("load", function() {
                 if(UsbWrapper.hasUSB) {
                     document.getElementById("compat-failure").classList.add("hidden");
-                    //document.getElementById("configBox").classList.remove("hidden");
+                    document.getElementById("connectBtn").classList.remove("hidden");
                     
                     config = new Config();
                 }
             });
         </script>
+        <!-- Origin Trial Token, feature = WebUSB (For Chrome M57+), origin = https://mon.im, expires = 2017-07-02 -->
+        <meta http-equiv="origin-trial" data-feature="WebUSB (For Chrome M57+)" data-expires="2017-07-02" content="AhzuiYytgNCrxPIuPxB9c3Eoyr7CbrPzl5hRLm4me+5OpcNSWk+eb6QGaPfktLvGaF/vMFPS531rJ48h7wiDWgwAAABHeyJvcmlnaW4iOiJodHRwczovL21vbi5pbTo0NDMiLCJmZWF0dXJlIjoiV2ViVVNCMiIsImV4cGlyeSI6MTQ5OTA1Njk5OH0="> 
     </head>
     <body>
-        <div id="compat-failure">
-        This configurator requires Javascript, Windows 8+ (or OSX/Linux) and a WebUSB capable browser (Chrome 55+). If you lack these, give the exe config app a go.
-        </div>
         <div class="center">
+            <div id="compat-failure">
+            This configurator requires Javascript, Windows 7+ (or OSX/Linux) and a WebUSB capable browser (Chrome 57+). If you lack these, harass mon for an exe config app.
+            </div>
             <div>
+                <div id="logview"></div>
                 <!--<div id="configBox" class="configBox hidden disabled">
                 </div>-->
                 <div id="connect" class="connect">
-                    <button id="connectBtn" onclick="config.connect()">Connect</button>
+                    <button id="connectBtn" class="hidden" onclick="config.connect()">Connect</button>
                 </div>
                 <div id="configOptions" class="configOptions">
                 </div>
-                <div id="logview"></div>
             </div>
         </div>
     </body>

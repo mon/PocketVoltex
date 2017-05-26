@@ -31,15 +31,18 @@ function getLatest() {
     });
 };
 
-function downloadLatest(version) {
+function downloadLatest(versionInfo) {
     return new Promise ((resolve, reject) => {
         var req = new XMLHttpRequest();
-        req.open("GET", "firmwares/PocketVoltex_" + version + ".bin", true);
+        req.open("GET", "firmwares/PocketVoltex_" + versionInfo.version + ".bin", true);
         req.responseType = "arraybuffer";
 
         req.onload = function (oEvent) {
             var arrayBuffer = req.response;
             if (arrayBuffer) {
+                if(md5(arrayBuffer) != versionInfo.md5) {
+                    reject(Error("Firmware md5 does not match, download may be corrupt!"));
+                }
                 var view = new Uint8Array(arrayBuffer);
                 if(view.length <= flashSize) {
                     resolve(view);
@@ -47,7 +50,7 @@ function downloadLatest(version) {
                     reject(Error("Firmware too big! Must be under " +flashSize + ", got " + arrayBuffer.length));
                 }
             } else {
-                reject(Error(req.status + ": Could not fetch firmware version " + version));
+                reject(Error(req.status + ": Could not fetch firmware version " + versionInfo.version));
             }
         };
 
@@ -79,13 +82,31 @@ function programLatest(device, hex) {
                 recipient: 'device',
                 request: CONFIG_ID,
                 value: 0,
-                index: COMMAND_STARTAPPLICATION}, []);
+                index: COMMAND_STARTAPPLICATION}, new ArrayBuffer([]));
     });
     return p;
+}
+
+function getBootloaderVersion(device) {
+    // read bootloader version, 16 bits
+    return device.controlTransferIn({
+            requestType: 'vendor',
+            recipient: 'device',
+            request: CONFIG_ID,
+            value: 0,
+            index: COMMAND_VERSION}, 2)
+    .then(retVal => {
+        if(retVal.status == "stall") {
+            return Promise.reject("Could not get bootloader version");
+        }
+        var view = new Uint16Array(retVal.data);
+        return view[0];
+    });
 }
 
 window.downloadLatest = downloadLatest;
 window.getLatest = getLatest;
 window.programLatest = programLatest;
+window.getBootloaderVersion = getBootloaderVersion;
 
 })(window, document);
