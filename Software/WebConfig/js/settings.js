@@ -164,6 +164,13 @@ class SettingKeys extends Setting {
         
         this.selects = [];
         for(var i = 0; i < this.switchCount; i++) {
+            var label = null;
+            if(setting.labels) {
+                label = document.createElement("div");
+                label.textContent = setting.labels[i] + ': ';
+                label.className = 'keySelection';
+                entry.appendChild(label);
+            }
             var select = document.createElement("select");
             scancodes.forEach(function(code) {
                 var option = document.createElement("option");
@@ -173,7 +180,11 @@ class SettingKeys extends Setting {
             });
             
             select.onchange = this.fireCallback.bind(this);
-            entry.appendChild(select);
+            if(label) {
+                label.appendChild(select);
+            } else {
+                entry.appendChild(select);
+            }
             this.selects.push(select);
         }
         return entry;

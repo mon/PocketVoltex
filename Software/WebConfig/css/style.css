@@ -4,6 +4,15 @@ body, html {
     margin: 0;
 }
 
+#logview {
+    height: 100px;
+    min-width: 100px;
+    font-family: monospace;
+    background-color: #EEE;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
 .center {
     position: relative;
     display:flex;
@@ -21,6 +30,7 @@ body, html {
     height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .connect > button {
@@ -31,6 +41,10 @@ body, html {
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
+}
+
+.keySelection {
+    margin-left: 5px;
 }
 
 .colourPicker {

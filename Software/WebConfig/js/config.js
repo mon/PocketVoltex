@@ -23,7 +23,7 @@ var commands = {
 var configDisplay = [
     {id: 'joystickMode', name: 'Input mode',
         options : [{name: 'Keyboard/Mouse', val: 0}, {name: 'Joystick', val: 1}]},
-    {id: 'switches', name: 'Keyboard bindings'},
+    {id: 'switches', name: 'Keyboard bindings', labels: ['BT-A','BT-B','BT-C','BT-D','FX-L','FX-R','START']},
     {id: 'macroClick', name: 'Macro click'},
     {id: 'macroHold', name: 'Macro longpress'},
     {id: 'macroPin', name: 'Macro PIN'},
@@ -74,7 +74,9 @@ var defaultConfig = {
 
 var visibleLog = function(html) {
     console.log(html);
-    document.getElementById('logview').innerHTML += html + '<br/>';
+    var log = document.getElementById('logview');
+    log.innerHTML += html + '<br/>';
+    log.scrollTop = log.scrollHeight;
 }
 
 class BinaryBuffer {
@@ -180,6 +182,7 @@ class ConfigValues {
 
 class Config {
     constructor() {
+        visibleLog("Welcome to the Pocket Voltex Configurator");
         this.optionsDiv = document.getElementById('configOptions');
         this.config = new ConfigValues();
         // DEBUG
@@ -189,6 +192,9 @@ class Config {
     connect() {
         return UsbWrapper.connect(vid, pid)
         .then(selectedDevice => {
+            if(!selectedDevice) {
+                return Promise.reject('No device selected');
+            }
             device = selectedDevice;
             visibleLog("Opening device...");
             return device.open();
@@ -331,5 +337,6 @@ class Config {
 };
 
 window.Config = Config;
+window.visibleLog = visibleLog;
 
 })(window, document);

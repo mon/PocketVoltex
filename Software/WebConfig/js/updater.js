@@ -66,7 +66,7 @@ function programLatest(device, hex) {
             // pad to 0s when size smaller
             let packet = new Uint8Array(new ArrayBuffer(pageSize));
             packet.set(page);
-            console.log(Math.round(addr / hex.length * 100) + '%');
+            visibleLog(Math.round(addr / hex.length * 100) + '%');
             return device.controlTransferOut({
                 requestType: 'vendor',
                 recipient: 'device',
@@ -76,7 +76,7 @@ function programLatest(device, hex) {
         });
     }
     p = p.then(() => {
-        console.log("Rebooting...");
+        visibleLog("Rebooting...");
         return device.controlTransferOut({
                 requestType: 'vendor',
                 recipient: 'device',
