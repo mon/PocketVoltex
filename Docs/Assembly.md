@@ -19,6 +19,8 @@ Insert the LEDs roughly to the red line, then bend them over:
 Work on a slightly raised surface and place the board face down to solder, with the MACRO switch off the edge. This ensures all the LEDs are flush with the board surface.
 ![ledSandwich](img/6_ledSandwich.jpg)
 
+I recommend soldering one leg of each LED to keep it in place, then cutting off all the leads. This makes soldering the rest of the connections much easier.
+
 The bend doesn't have to be perfect - the acrylic will diffuse the light.
 ![ledSolder](img/7_ledSolder.jpg)
 
