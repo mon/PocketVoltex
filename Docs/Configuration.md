@@ -15,3 +15,11 @@ while config.exe is open and the controller is connected.
 ## HID Lighting fix
 By default, HID lighting will crash after a few minutes of gameplay. To fix
 this, simply patch libinput.dll using [this tool](https://mon.im/bemanipatcher/pocketvoltex.html).
+
+## NetworkError: Unable to claim interface.
+This seems to be caused by broken drivers. Give Zadig a try!
+- Download and run [Zadig](http://zadig.akeo.ie/)
+- Click Options -> List All Devices
+- Select 'Pocket Voltex Config' in the list
+- Select WinUSB and click "Replace Driver"
+- Config should now work!
