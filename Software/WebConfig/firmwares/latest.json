@@ -1,4 +1,5 @@
 {
-	"version": 12,
-	"md5": "6620eb96cde1ecdcc0c5caefac7f9d03"
+	"version": 14,
+	"md5": "a07ab17b2ac21c9e0f165eac30f40e99",
+    "changelog" : "Add support for e-AMUSEMENT CLOUD native input"
 }

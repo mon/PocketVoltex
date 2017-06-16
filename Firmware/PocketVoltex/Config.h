@@ -12,16 +12,25 @@
 #define JOYSTICK_PPR (24 * 4)
 #define MAGIC_RESET_NUMBER 42
 // divide by 10 for actual version
-#define FIRMWARE_VERSION 12
+#define FIRMWARE_VERSION 14
 // increment whenever config structure has breaking changes
-#define CONFIG_VERSION 1
+#define CONFIG_VERSION 2
 
 // not configurable since they're all the same switches
 #define SWITCH_DEBOUNCE 30
 
+typedef enum {
+    CONTROL_KEYBOARD_MOUSE = 0,
+    CONTROL_JOYSTICK = 1,
+    CONTROL_EAC = 2
+} control_mode_t;
+
 typedef struct {
-    // SWITCH ORDER: A-D, FXL-R, START
+    // So we can detect and upgrade without losing settings
+    uint16_t configVersion;
+    // SWITCH ORDER: START, A-D, FXL-R
     uint8_t switches[SWITCH_COUNT];
+    uint8_t controlMode;
     RGB_t btColour;
     RGB_t fxColour;
     RGB_t breatheColour;
@@ -34,12 +43,12 @@ typedef struct {
     // When tapping or long-pressing the macro key
     Macro_t macroClick;
     Macro_t macroHold;
-    // Reused for both
+    // Reused for both tap or hold, at the end in case I decide to extend
+    uint8_t macroLen; // placeholder not used yet
     uint8_t macroPin[4];
-    uint8_t joystickMode;
 } ATTR_PACKED sdvx_config_t;
 
-#define CONFIG_BYTES sizeof(sdvx_config_t)
+#define CONFIG_SIZE sizeof(sdvx_config_t)
 
 typedef struct {
     uint16_t version;

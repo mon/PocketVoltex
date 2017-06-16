@@ -182,7 +182,7 @@ const uint8_t PROGMEM BOSDescriptor[] =
     )
 };
 
-const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
+const USB_Descriptor_Device_t PROGMEM DeviceDescriptor_Standard =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
@@ -195,6 +195,29 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
     // mon.im VID/PID pair, unique!
 	.VendorID               = 0x16D0,
 	.ProductID              = 0x0A6D,
+    // To provide uniqueness
+	.ReleaseNumber          = VERSION_BCD(0,0,3),
+
+	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
+	.ProductStrIndex        = STRING_ID_Product,
+	.SerialNumStrIndex      = USE_INTERNAL_SERIAL,
+
+	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
+};
+
+const USB_Descriptor_Device_t PROGMEM DeviceDescriptor_EAC =
+{
+	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
+
+	.USBSpecification       = VERSION_BCD(2,1,0),
+	.Class                  = USB_CSCP_NoDeviceClass,
+	.SubClass               = USB_CSCP_NoDeviceSubclass,
+	.Protocol               = USB_CSCP_NoDeviceProtocol,
+
+	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
+    // to pretend we are someone else
+	.VendorID               = 0x1CCF,
+	.ProductID              = 0x1014,
     // To provide uniqueness
 	.ReleaseNumber          = VERSION_BCD(0,0,3),
 
@@ -433,8 +456,12 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 	switch (DescriptorType)
 	{
 		case DTYPE_Device:
-			Address = &DeviceDescriptor;
-			Size    = sizeof(USB_Descriptor_Device_t);
+            if(sdvxConfig.controlMode == CONTROL_EAC) {
+                Address = &DeviceDescriptor_EAC;
+            } else {
+                Address = &DeviceDescriptor_Standard;
+            }
+            Size    = sizeof(USB_Descriptor_Device_t);
 			break;
 		case DTYPE_Configuration:
 			Address = &ConfigurationDescriptor;

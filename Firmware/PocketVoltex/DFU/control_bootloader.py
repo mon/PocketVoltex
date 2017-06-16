@@ -36,7 +36,7 @@ COMMAND_VERSION           = 0x03
 COMMAND_STARTAPPLICATION  = 0x04
 COMMAND_PROGRAM           = 0x05
 
-BOOTLOADER_VERSION = 65000
+BOOTLOADER_VERSION = 11
 
 # Device information table
 device_info_map = dict()
@@ -84,10 +84,6 @@ def program_device(hex_data, device_info):
 
     if device is None:
         print("No valid device found.")
-        sys.exit(1)
-
-    if get_version(device) != BOOTLOADER_VERSION:
-        print("Device not in bootloader. TODO: reboot")
         sys.exit(1)
 
     try:

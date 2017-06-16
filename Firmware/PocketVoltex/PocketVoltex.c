@@ -105,16 +105,16 @@ uint8_t load_switches(void) {
     uint8_t result = 0;
     
     tmp = PINB;
-    LOAD_SWITCH(tmp, 1, result, 0); // PINB1, A
-    LOAD_SWITCH(tmp, 0, result, 4); // PINB0, FX L
+    LOAD_SWITCH(tmp, 1, result, 1); // PINB1, A
+    LOAD_SWITCH(tmp, 0, result, 5); // PINB0, FX L
     tmp = PINC;
-    LOAD_SWITCH(tmp, 2, result, 6); // PINC2, START
+    LOAD_SWITCH(tmp, 2, result, 0); // PINC2, START
     LOAD_SWITCH(tmp, 1, result, 7); // PINC1, MACRO
     tmp = PIND;
-    LOAD_SWITCH(tmp, 7, result, 1); // PIND7, B
-    LOAD_SWITCH(tmp, 5, result, 2); // PIND5, C
-    LOAD_SWITCH(tmp, 4, result, 3); // PIND4, D
-    LOAD_SWITCH(tmp, 6, result, 5); // PIND6, FX L
+    LOAD_SWITCH(tmp, 7, result, 2); // PIND7, B
+    LOAD_SWITCH(tmp, 5, result, 3); // PIND5, C
+    LOAD_SWITCH(tmp, 4, result, 4); // PIND4, D
+    LOAD_SWITCH(tmp, 6, result, 6); // PIND6, FX R
     
     return result;
 }
@@ -180,15 +180,15 @@ int main(void)
                 if(sdvxConfig.keyLights) {
                     // Keep normal lights but override when we get flashes on BT or FX
                     // BT LEDs
-                    for(uint8_t i = 0; i < 4; i++) {
+                    for(uint8_t i = 1; i < 5; i++) {
                         if(switches[i].state) {
-                            led_set_rgb(ledMap[i], &sdvxConfig.btColour);
+                            led_set_rgb(ledMap[i-1], &sdvxConfig.btColour);
                         }
                     }
                     // FX LEDs
-                    for(uint8_t i = 4; i < 6; i++) {
+                    for(uint8_t i = 5; i < 7; i++) {
                         if(switches[i].state) {
-                            led_set_rgb(ledMap[i], &sdvxConfig.fxColour);
+                            led_set_rgb(ledMap[i-1], &sdvxConfig.fxColour);
                         }
                     }
                 }
@@ -263,7 +263,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         if(sendKeyboard) {
             *ReportID = HID_REPORTID_KeyboardReport;
         } else {
-            if(sdvxConfig.joystickMode) {
+            if(sdvxConfig.controlMode != CONTROL_KEYBOARD_MOUSE) {
                 *ReportID = HID_REPORTID_JoystickReport;
             } else {
                 *ReportID = HID_REPORTID_MouseReport;
@@ -277,12 +277,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         // Only the first 4 bytes are read by bemanitools, so let's use the first
         uint8_t macroUpdated = macro_make_report(&KeyboardReport->KeyCode[0]);
         
-        if(!macroUpdated && (sdvxConfig.joystickMode || !switchesChanged)) {
+        if(!macroUpdated && (sdvxConfig.controlMode != CONTROL_KEYBOARD_MOUSE || !switchesChanged)) {
             *ReportSize = 0;
             return false;
         }
         
-        if(!sdvxConfig.joystickMode) {
+        if(sdvxConfig.controlMode == CONTROL_KEYBOARD_MOUSE) {
             // NOTE: using SWITCH_COUNT-1 so we don't write the report for the macro pin
             for(uint8_t i = 0; i < SWITCH_COUNT-1; i++) {
                 // i+1 to take care of the shift from above

@@ -17,11 +17,25 @@
                     document.getElementById("connectBtn").classList.remove("hidden");
                     
                     config = new Config();
+                    
+                    navigator.usb.getDevices()
+                    .then(devices => {
+                        if(devices.length) {
+                            config.connect(devices[0]);
+                        }
+                    });
+                    
+                    navigator.usb.addEventListener('connect', event => {
+                        config.connect(event.device);
+                    });
+                    navigator.usb.addEventListener('disconnect', event => {
+                        config.disableUI();
+                    });
                 }
             });
         </script>
-        <!-- Origin Trial Token, feature = WebUSB (For Chrome M57+), origin = https://mon.im, expires = 2017-07-02 -->
-        <meta http-equiv="origin-trial" data-feature="WebUSB (For Chrome M57+)" data-expires="2017-07-02" content="AhzuiYytgNCrxPIuPxB9c3Eoyr7CbrPzl5hRLm4me+5OpcNSWk+eb6QGaPfktLvGaF/vMFPS531rJ48h7wiDWgwAAABHeyJvcmlnaW4iOiJodHRwczovL21vbi5pbTo0NDMiLCJmZWF0dXJlIjoiV2ViVVNCMiIsImV4cGlyeSI6MTQ5OTA1Njk5OH0="> 
+        <!-- Origin Trial Token, feature = WebUSB (For Chrome M57+), origin = https://mon.im, expires = 2017-07-17 -->
+        <meta http-equiv="origin-trial" data-feature="WebUSB (For Chrome M57+)" data-expires="2017-07-17" content="AtfCI+37VRHohPe+OASF7EuEDM1ZhH6Dr1W2je8iRI885ETbV5VT/RGnIyg06SGJiGUgNrl20HrAH47shlEyjwsAAABHeyJvcmlnaW4iOiJodHRwczovL21vbi5pbTo0NDMiLCJmZWF0dXJlIjoiV2ViVVNCMiIsImV4cGlyeSI6MTUwMDMwMjYwNn0="> 
     </head>
     <body>
         <div class="center">
@@ -33,7 +47,7 @@
                 <!--<div id="configBox" class="configBox hidden disabled">
                 </div>-->
                 <div id="connect" class="connect">
-                    <button id="connectBtn" class="hidden" onclick="config.connect()">Connect</button>
+                    <button id="connectBtn" class="hidden" onclick="config.connectNew()">Connect</button>
                 </div>
                 <div id="configOptions" class="configOptions">
                 </div>

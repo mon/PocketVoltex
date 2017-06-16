@@ -14,6 +14,25 @@ class Setting {
 
 // All settings must have createUI, read and write.
 // When the UI changes, call fireCallback to update the device config
+class SettingPlaceholder extends Setting {
+    constructor(bytes) {
+        super();
+        this.bytes = bytes;
+    }
+    
+    read(buffer) {
+        this.val = buffer.read(this.bytes);
+    }
+    
+    write(buffer) {
+        buffer.write(this.val);
+    }
+    
+    createUI(setting) {
+        return null;
+    }
+}
+
 class SettingBool extends Setting {
     read(buffer) {
         this.box.checked = !!buffer.read(1);
@@ -341,6 +360,7 @@ var scancodes = [
   {name: "NUM .", value: 0x63}
 ];
 
+window.SettingPlaceholder = SettingPlaceholder;
 window.SettingBool = SettingBool;
 window.SettingRGB = SettingRGB;
 window.SettingRadio = SettingRadio;

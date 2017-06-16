@@ -1,8 +1,9 @@
 (function(window, document) {
 "use strict";
 
-var vid = 0x16D0;
-var pid = 0x0A6D;
+// could be monim, could be pretending
+var vids = [0x16D0, 0x1CCF];
+var pids = [0x0A6D, 0x1014];
 var UsbWrapper = window.UsbWrapper;
 
 var device;
@@ -21,9 +22,11 @@ var commands = {
 };
 
 var configDisplay = [
-    {id: 'joystickMode', name: 'Input mode',
-        options : [{name: 'Keyboard/Mouse', val: 0}, {name: 'Joystick', val: 1}]},
-    {id: 'switches', name: 'Keyboard bindings', labels: ['BT-A','BT-B','BT-C','BT-D','FX-L','FX-R','START']},
+    {id: 'controlMode', name: 'Input mode',
+        options : [{name: 'Keyboard/Mouse', val: 0},
+                   {name: 'Joystick', val: 1},
+                   {name: 'e-AMUSEMENT CLOUD (reconnect after change)', val: 2}]},
+    {id: 'switches', name: 'Keyboard bindings', labels: ['START','BT-A','BT-B','BT-C','BT-D','FX-L','FX-R']},
     {id: 'macroClick', name: 'Macro click'},
     {id: 'macroHold', name: 'Macro longpress'},
     {id: 'macroPin', name: 'Macro PIN'},
@@ -48,7 +51,9 @@ var configDisplay = [
 
 // to match with firmware
 var settingOrder = [
+    'version',
     'switches',
+    'controlMode',
     'btColour',
     'fxColour',
     'breatheColour',
@@ -61,8 +66,8 @@ var settingOrder = [
     'lightPattern',
     'macroClick',
     'macroHold',
+    'macroLen',
     'macroPin',
-    'joystickMode'
 ];
 
 var defaultConfig = {
@@ -117,7 +122,9 @@ class BinaryBuffer {
 
 class ConfigValues {
     constructor() {
+        this.version       = new SettingPlaceholder(2);
         this.switches      = new SettingKeys(SWITCH_COUNT, true);
+        this.controlMode   = new SettingRadio();
         this.btColour      = new SettingRGB(BRIGHTNESS_MAX);
         this.fxColour      = new SettingRGB(BRIGHTNESS_MAX);
         this.breatheColour = new SettingRGB(BRIGHTNESS_MAX);
@@ -130,8 +137,8 @@ class ConfigValues {
         this.lightPattern  = new SettingRadio();
         this.macroClick    = new SettingMacro();
         this.macroHold     = new SettingMacro();
+        this.macroLen      = new SettingPlaceholder(1);
         this.macroPin      = new SettingKeys(4);
-        this.joystickMode  = new SettingRadio();
     }
     
     read(view, writeCallback) {
@@ -189,16 +196,21 @@ class Config {
         //this.enableUI();
     }
     
-    connect() {
-        return UsbWrapper.connect(vid, pid)
+    connectNew() {
+        return UsbWrapper.connect(vids, pids)
         .then(selectedDevice => {
             if(!selectedDevice) {
                 return Promise.reject('No device selected');
             }
-            device = selectedDevice;
-            visibleLog("Opening device...");
-            return device.open();
+            this.connect(selectedDevice);
         })
+    }
+    
+    connect(selectedDevice) {
+        console.log(selectedDevice);
+        device = selectedDevice;
+        visibleLog("Opening device...");
+        return device.open()
         .then(() => {
             console.log("Opened, selecting configuration...");
             return device.selectConfiguration(1)
@@ -248,6 +260,7 @@ class Config {
         .then(latestInfo => {
             if(latestInfo.version > this.version) {
                 alert("Firmware update required. Device will be rebooted. Connect again to update");
+                visibleLog("Firmware update required. Connect again to update");
                 this.rebootToBootloader();
                 return Promise.reject("Rebooted to bootloader, config read aborted");
             }
@@ -333,6 +346,12 @@ class Config {
         //document.getElementById('configBox').classList.remove('hidden', 'disabled');
         document.getElementById('connect').classList.add('hidden');
         this.populateSettings(this.optionsDiv, configDisplay);
+    }
+    
+    disableUI() {
+        visibleLog('Device disconnected');
+        document.getElementById('connect').classList.remove('hidden');
+        this.optionsDiv.innerHTML = '';
     }
 };
 
