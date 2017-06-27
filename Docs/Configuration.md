@@ -12,6 +12,11 @@ If you are using b\*\*\*\*\*tools, configure as normal.
 For fast configuration of the HID lighting, download and run [this exe](https://github.com/mon/PocketVoltex/raw/master/Software/HidLights.exe)
 while config.exe is open and the controller is connected.
 
+## KShootMania configuration
+I recommend using the mouse+keyboard mode, as I have noticed slight jitter when using joystick mode - it appears to be caused when the knob rolls over from its maximum value to its minimum value. This also lets you bind START to the enter key, which lets you begin songs with the controller.
+
+However, if you would like to use gamepad mode, simply bind the keys as normal (page 3 of the input selection) and select `Analog X/Y` as the knob input. I find sensitivity at 100 works best.
+
 ## HID Lighting fix
 By default, HID lighting will crash after a few minutes of gameplay. To fix
 this, simply patch libinput.dll using [this tool](https://mon.im/bemanipatcher/pocketvoltex.html).
