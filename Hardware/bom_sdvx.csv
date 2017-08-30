@@ -1,4 +1,4 @@
-Part/Designator,Mfr,Mfr. Part#,Quantity,comment
+Reference,Manufacturer,MPN,Quantity,Description
 C1,YAGEO,CC0603KRX5R5BB105,1,0603 1uf
 C2,YAGEO,CC0402MRX5R5BB106,1,0603 10uf
 "C3,C4,C5,C6",YAGEO,CC0603KRX7R9BB103,4,0603 10nF
