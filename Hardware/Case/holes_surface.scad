@@ -1,3 +1,0 @@
-use <case.scad>;
-
-bolts();
