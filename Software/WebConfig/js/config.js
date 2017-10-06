@@ -4,7 +4,6 @@
 // could be monim, could be pretending
 var vids = [0x16D0, 0x1CCF];
 var pids = [0x0A6D, 0x1014];
-var UsbWrapper = window.UsbWrapper;
 
 var device;
 
@@ -197,7 +196,7 @@ class Config {
     }
     
     connectNew() {
-        return UsbWrapper.connect(vids, pids)
+        return window.UsbWrapper.connect(vids, pids)
         .then(selectedDevice => {
             if(!selectedDevice) {
                 return Promise.reject('No device selected');
