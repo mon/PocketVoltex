@@ -6,12 +6,22 @@
 #include "Macro.h"
 
 #define LOAD_SWITCH(source, sourceBit, result, resultBit) result |= !((source) & _BV(sourceBit)) << resultBit
-// B 0,1
-#define SWITCH_MASKB 0b00000011
-// C 1,2
-#define SWITCH_MASKC 0b00000110
-// D 4,5,6,7
-#define SWITCH_MASKD 0b11110000
+
+#ifdef SOFT_LEDS
+    // B 0,1
+    #define SWITCH_MASKB 0b00000011
+    // C 1,2
+    #define SWITCH_MASKC 0b00000110
+    // D 4,5,6,7
+    #define SWITCH_MASKD 0b11110000
+#else
+    // B 0,4,5
+    #define SWITCH_MASKB 0b00110001
+    // C 2
+    #define SWITCH_MASKC 0b00000100
+    // D 4,5,6,7
+    #define SWITCH_MASKD 0b11110000
+#endif
 
 // How long to wait before moving to internal lighting
 #define HID_LED_TIMEOUT 2000
@@ -104,12 +114,21 @@ uint8_t load_switches(void) {
     uint8_t tmp;
     uint8_t result = 0;
     
+#ifdef SOFT_LEDS
     tmp = PINB;
     LOAD_SWITCH(tmp, 1, result, 1); // PINB1, A
     LOAD_SWITCH(tmp, 0, result, 5); // PINB0, FX L
     tmp = PINC;
     LOAD_SWITCH(tmp, 2, result, 0); // PINC2, START
     LOAD_SWITCH(tmp, 1, result, 7); // PINC1, MACRO
+#else
+    tmp = PINB;
+    LOAD_SWITCH(tmp, 4, result, 1); // PINB4, A
+    LOAD_SWITCH(tmp, 0, result, 5); // PINB0, FX L
+    LOAD_SWITCH(tmp, 5, result, 7); // PINB5, MACRO
+    tmp = PINC;
+    LOAD_SWITCH(tmp, 2, result, 0); // PINC2, START
+#endif
     tmp = PIND;
     LOAD_SWITCH(tmp, 7, result, 2); // PIND7, B
     LOAD_SWITCH(tmp, 5, result, 3); // PIND5, C
@@ -208,9 +227,8 @@ int main(void)
 void SetupHardware()
 {
     uint8_t i;
-    
     /* Disable watchdog if enabled by bootloader/fuses */
-    MCUSR &= ~(1 << WDRF);
+    MCUSR &= ~_BV(WDRF);
     wdt_disable();
     
     for(i = 0; i < SWITCH_COUNT; i++) {
@@ -225,7 +243,9 @@ void SetupHardware()
     // Pullups
     PORTB |= SWITCH_MASKB;
     PORTC |= SWITCH_MASKC;
+#ifdef SOFT_LEDS
     PORTC &= ~_BV(1); // RESET has its own pullup
+#endif
     PORTD |= SWITCH_MASKD;
 
     /* Hardware Initialization */
@@ -364,15 +384,17 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
         hidTimeout = 0;
         
         LED_Report_t* LEDReport = (LED_Report_t*)ReportData;
-        //memcpy((uint8_t*)leds, LEDReport->mainLights, LED_PHYSICAL_COUNT);
+#ifdef SOFT_LEDS
         // Load the user set colours as R/G/B instead of B/G/R
         for(uint8_t i = 0; i < LED_PHYSICAL_COUNT; ) {
             uint8_t offset = i+2;
             for(uint8_t j = 0; j < 3; j++) {
-                // cast away the volatile for faster ops
                 leds[i++] = LEDReport->mainLights[offset--];
             }
         }
+#else
+        memcpy((uint8_t*)leds, LEDReport->mainLights, LED_PHYSICAL_COUNT);
+#endif
         
         // Keep normal lights but override when we get flashes on BT or FX
         // BT LEDs

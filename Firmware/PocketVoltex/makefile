@@ -23,7 +23,7 @@ LUFA_PATH    = ../LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
 LD_FLAGS     =
 
-AVRDUDE      = avrdude -B 8 -c usbasp -p $(MCU)
+AVRDUDE      = avrdude -c usbasp -p $(MCU)
 
 
 # Default target
@@ -40,12 +40,23 @@ include $(LUFA_PATH)/Build/lufa_hid.mk
 include $(LUFA_PATH)/Build/lufa_avrdude.mk
 include $(LUFA_PATH)/Build/lufa_atprogram.mk
 
+# This does not work with variables as pre-requisites. Use `make test TARGET=TestingApp`
+#test: TARGET = TestingApp
+test: all
+	cat TestingApp.hex | grep -v '^:00000001FF' > TestFull.hex
+	cat DFU/BootloaderUSB.hex >> TestFull.hex
+
 debug: CC_FLAGS += -DDEBUG
 debug: clean flash
 
-init: erase wfuse flashboot disablereset flash
+rev4: CC_FLAGS += -DSOFT_LEDS
+rev4: clean all
 
 initboot: erase wfuse flashboot
+initboot_rev4: erase wfuse flashboot_rev4
+
+init: initboot flash
+init_rev4: initboot_rev4 disablereset flash
 
 erase:
 	$(AVRDUDE) -e
@@ -61,11 +72,16 @@ disablereset:
 	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9a:m -U efuse:w:0xfe:m
 
 # To make this hex, compile the bootloader up a level
+flashboot_rev4:
+	$(AVRDUDE) -U flash:w:DFU/BootloaderUSB_rev4.hex:i
 flashboot:
 	$(AVRDUDE) -U flash:w:DFU/BootloaderUSB.hex:i
 
 flash: all
 	cd DFU && python control_bootloader.py atmega16u2 ../$(TARGET).hex
+
+testflash: test wfuse
+	$(AVRDUDE) -U flash:w:TestFull.hex:i
 
 md5: all
 	md5sum $(TARGET).bin

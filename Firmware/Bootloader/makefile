@@ -49,5 +49,5 @@ include $(LUFA_PATH)/Build/lufa_doxygen.mk
 include $(LUFA_PATH)/Build/lufa_avrdude.mk
 include $(LUFA_PATH)/Build/lufa_atprogram.mk
 
-flash: all
-	$(AVRDUDE) -U flash:w:Bootloader.hex:i
+rev4: CC_FLAGS += -DSOFT_LEDS
+rev4: clean all

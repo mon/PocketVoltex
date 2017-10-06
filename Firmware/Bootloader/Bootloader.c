@@ -50,6 +50,7 @@ uint16_t MagicBootKey ATTR_NO_INIT;
  */
 void Application_Jump_Check(void)
 {
+#ifdef SOFT_LEDS
     /* Always boot bootloader if RESET held
      * NOTE: This makes the assumption that
      *  A) No code on the device uses RESET as an output
@@ -58,6 +59,14 @@ void Application_Jump_Check(void)
      */
     if(!(PINC & _BV(1)))
         return;
+#else
+    /* New board - enable pullup for MACRO switch on PB6 */
+    DDRB &= ~_BV(5);
+    PORTB |= _BV(5);
+    _delay_us(500);
+    if(!(PINB & _BV(5)))
+        return;
+#endif
 	/* If power on boot or magic key set */
 	if ((MCUSR & _BV(PORF)) || MagicBootKey == MAGIC_BOOT_KEY)
 	{
@@ -104,7 +113,7 @@ static void SetupHardware(void)
 	/* Relocate the interrupt vector table to the bootloader section */
 	MCUCR = (1 << IVCE);
 	MCUCR = (1 << IVSEL);
-
+    
 	/* Initialize USB subsystem */
 	USB_Init();
 }
