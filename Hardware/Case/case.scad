@@ -4,20 +4,20 @@ key_profile_index = 11;
 
 $fn = 64;
 
-// x, y, keycap width in units, isBlack
-switches = [[0,0, 1],
-            [-42.862,-37.592, 1.25],
-            [ 42.862,-37.592, 1.25],
-            [-14.287,-37.592, 1.25],
-            [ 14.287,-37.592, 1.25],
-            [-28.5,-75.692, 1.75, 1],
-            [ 28.5,-75.692, 1.75, 1]];
+black = [0.1,0.1,0.1];
+blue = [0,0.6,1];
+// x, y, keycap width in units, rotation, colour
+switches = [[0,0, 1, 0, blue],
+            [-42.862,-37.592, 1.25, 0, "white"],
+            [ 42.862,-37.592, 1.25, 0, "white"],
+            [-14.287,-37.592, 1.25, 0, "white"],
+            [ 14.287,-37.592, 1.25, 0, "white"],
+            [-37.9,-70.8, 1.75, -22.5, black],
+            [ 37.9,-70.8, 1.75, 22.5, black]];
 bolts = [[30.025, 6.65],
          [71, -16.925],
          [71, 16.5],
-         [42.732, -82.791],
-         // Middle hole, remove if not needed
-         //[0, -37.592]
+         [42.732, -82.791]
          ];
 // Not the encoders themselves, but the circle that surrounds them
 encoders = [[-64,0.4],
@@ -28,17 +28,16 @@ encoderRadius = 13;
 // x, y, hole size
 encoderHoles = [[-8, 0, 4],
                 [ 8, 0, 4]];
-// the 3 A/B/Gnd connections + room for their decoupling caps
+// the 3 A/B/Gnd connections
 // x (mirrored), y, hole size
-encoderHull = [5, -11.2, 5];
+encoderHull = [5, -10.5, 3];
 
-// x, y, rotation
-leds = [[-26.475, -13.625, 35],
-        [-55.5, -37.25, 90],
-        [-47, -57.25, 135],
-        [-13.5, -65, 180]];
-ledDims = [6, 3];
-ledTopLength = 10;
+// x, y
+leds = [[-39.9, -1.4],
+        [-53.6, -26.2],
+        [-54.8, -57.9],
+        [-17.3, -75.7]];
+ledDims = [6.5, 6.5];
                 
 macroHole = [0,-75.692];
 macroDiam = 3;
@@ -56,7 +55,7 @@ wallOverlap = 1;
 boltDiam = 2;
 boltFudge = 0.1;
 boltSize = boltDiam + boltFudge;
-spacerSize = boltSize + 1;
+spacerSize = boltSize + 1 + fudge; // extra wiggle
 
 boltExpand = boltDiam;
 
@@ -99,16 +98,10 @@ module switch(holetype){
 	}
 }
 
-module switches_fx() {
-    for(i = [5:6]) {
-        translate([switches[i][0], switches[i][1]])
-        switch(holetype);
-    }
-}
-
 module switches() {
     for(sw = switches) {
         translate([sw[0], sw[1]])
+        rotate([0,0,sw[3]])
         switch(holetype);
     }
 }
@@ -116,14 +109,16 @@ module switches() {
 module switch_models() {
     for(sw = switches) {
         translate([sw[0], sw[1]])
+        rotate([0,0,sw[3]])
         cherry_mx_model();
     }
 }
 
 module switch_keycaps() {
     for(sw = switches) {
-        color(sw[3] ? [0.1,0.1,0.1] : [1,1,1])
+        color(sw[4])
         translate([sw[0], sw[1], 11.5])
+        rotate([0,0,sw[3]])
         scale([sw[2],1,1])
         key();
     }
@@ -225,30 +220,8 @@ module led_holes() {
 module led_holes_half() {
     for(led = leds) {
         translate([led[0], led[1]])
-        rotate([0,0,led[2]]) {
-            translate([-ledDims[0]/2, -ledDims[1]/2])
-            square([ledDims[0], ledTopLength]);
-        }
-    }
-}
-
-module led_leg_holes() {
-    led_leg_holes_half();
-    mirror([1,0,0])
-    led_leg_holes_half();
-}
-
-module led_leg_holes_half() {
-    for(led = leds) {
-        translate([led[0], led[1]])
-        rotate([0,0,led[2]])
-        hull() {
-            offset = ledDims[1]/2 - ledDims[0]/2;
-            translate([offset,0])
-            circle(d=3, center = true);
-            translate([-offset,0])
-            circle(d=3, center = true);
-        }
+        translate([-ledDims[0]/2, -ledDims[1]/2])
+        square(ledDims);
     }
 }
 
@@ -363,8 +336,6 @@ module bottom_ring_outline() {
 module mcu_hole() {
     polygon([[-13.3, 3.9],
              [-13.3, -8],
-             [-20.15, -17],
-             [-28.65, -17],
              [-35.5, -8],
              [-35.5, 3.9]]);
 }
@@ -374,7 +345,6 @@ module bottom_ring() {
         bottom_ring_outline();
         bolt_spacers();
         encoder_holes();
-        led_leg_holes();
         mcu_hole();
         // Room for FX
         switches();

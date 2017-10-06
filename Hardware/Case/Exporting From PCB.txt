@@ -1,6 +1,9 @@
 Make visible only the layers you care for
+Select all art:
+(Layer = 'TopOverlay') And Not IsComponentPrimitive
+Then move to "Artwork Export" layer
 
-File -> Save as -> DXF/DWG
+File -> Export -> DXF/DWG
 Autocad 2007, DXF, Metric
 Check "Export pads" "On dedicated hole layers"
 Tracks "Export with rounded"
@@ -12,13 +15,12 @@ Open dxf in inkscape
 >Factor 1.0
 x/y axis origin 0,0
 
-Delete via layer
-
 Select the pad which is the origin
 Go to transform->move and see where it is in mm by unchecking Relative Move.
-Select all objects and relative move -(pad position - pad size / 2) in mm
-    Do this for all layers
-Select all and relative move -(pad stroke width / 2) IN PIXELS
+Offset is pad position + (pad size / 2) + (pad stroke width / 2) (in mm, often 0.1325mm)
+Reopen file and use new x/y axis origin
+
+Delete via layer
 Delete pad layer
 
 For board shape:
@@ -31,15 +33,9 @@ For board shape:
 
 Delete layer 0
 
-For tracks:
-    Select all
-    Stroke style -> Width = the track width (use mm)
-    Cap: round
-    Path->Combine
-    Path->Stroke to path
-
 For artwork laser cutting output:
     Cross reference with altium to make layers for tracks
+    Use filtering, it's fast
         1.5mm
         1.2mm
         1mm
@@ -47,19 +43,25 @@ For artwork laser cutting output:
         0.5mm
         0.254mm
         Raster Fill
-    Path->Combine each individual letter (todo: actually needed?)
-        Also do long lines in 0.75mm layer
-    
-You may need to Path->Union everything for artwork layers to render nicely
+
+For tracks:
+    Select all
+    Stroke style -> Width = the track width (use mm)
+    Cap: round
+    Path->Combine
+    Path->Stroke to path
+
+For raster:
+    Path->Combine each shape
+    Go to node tool (below mouse, left toolbar)
+    Select each shape one-by-one, select all nodes
+    Click "Join selected nodes" in toolbar
+
+Move everything into 1 layer
+Path->Union everything for artwork to render properly
     
 Extensions->Modify Path->Flatten Beziers (flatness 0.1)
 Save as -> Desktop cutting plotter dxf
 Use LWPOLYLINE
 Base unit mm
 Visible layers only
-
-Altium seems to like exporting for these offsets,
-sometimes the decimals are different, check them.
--100.579
--112.896
-Then do the 0.5px too
