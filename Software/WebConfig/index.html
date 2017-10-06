@@ -12,6 +12,7 @@
         <script type="text/javascript" src="js/jscolor.min.js"></script>
         <script type="text/javascript">
             window.addEventListener("load", function() {
+                UsbWrapper_init();
                 if(UsbWrapper.hasUSB) {
                     document.getElementById("compat-failure").classList.add("hidden");
                     document.getElementById("connectBtn").classList.remove("hidden");
