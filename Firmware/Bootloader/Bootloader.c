@@ -60,11 +60,11 @@ void Application_Jump_Check(void)
     if(!(PINC & _BV(1)))
         return;
 #else
-    /* New board - enable pullup for MACRO switch on PB6 */
-    DDRB &= ~_BV(5);
-    PORTB |= _BV(5);
+    /* New board - enable pullup for MACRO switch on PB4 */
+    DDRB &= ~_BV(4);
+    PORTB |= _BV(4);
     _delay_us(500);
-    if(!(PINB & _BV(5)))
+    if(!(PINB & _BV(4)))
         return;
 #endif
 	/* If power on boot or magic key set */

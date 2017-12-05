@@ -2,13 +2,16 @@
 #define G 1
 #define B 2
 
-#define SK9822_BRIGHTNESS 1
+// range 0-31
+#define SK9822_BRIGHTNESS 31
 
 static const uint8_t SK9822_map[] = {0, 2, 4, 6, 7, 5, 3, 1};
 
 void led_init(void) {
-    // SCLK/MOSI PB1/2
-    DDRB |= _BV(1)|_BV(2);
+    // SS/SCLK/MOSI PB0/1/2
+    // We set SS to output so it's not used for SPI things
+    // If SS = input, it can freeze SPI comms - see "SS Pin functionality"
+    DDRB |= _BV(0) | _BV(1) | _BV(2);
     
     // SPI enabled, master mode, CLK/4 speed
     SPCR = _BV(SPE)|_BV(MSTR);

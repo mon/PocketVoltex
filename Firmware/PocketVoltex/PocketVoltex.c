@@ -15,8 +15,8 @@
     // D 4,5,6,7
     #define SWITCH_MASKD 0b11110000
 #else
-    // B 0,4,5
-    #define SWITCH_MASKB 0b00110001
+    // B 4,5,6
+    #define SWITCH_MASKB 0b01110000
     // C 2
     #define SWITCH_MASKC 0b00000100
     // D 4,5,6,7
@@ -123,9 +123,9 @@ uint8_t load_switches(void) {
     LOAD_SWITCH(tmp, 1, result, 7); // PINC1, MACRO
 #else
     tmp = PINB;
-    LOAD_SWITCH(tmp, 4, result, 1); // PINB4, A
-    LOAD_SWITCH(tmp, 0, result, 5); // PINB0, FX L
-    LOAD_SWITCH(tmp, 5, result, 7); // PINB5, MACRO
+    LOAD_SWITCH(tmp, 6, result, 1); // PINB6, A
+    LOAD_SWITCH(tmp, 5, result, 5); // PINB5, FX L
+    LOAD_SWITCH(tmp, 4, result, 7); // PINB4, MACRO
     tmp = PINC;
     LOAD_SWITCH(tmp, 2, result, 0); // PINC2, START
 #endif
