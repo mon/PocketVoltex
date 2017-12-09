@@ -52,7 +52,7 @@ typedef struct {
 
 typedef struct {
     uint16_t version;
-    uint16_t serial;
+    uint16_t board;
 } version_t;
 
 typedef enum {

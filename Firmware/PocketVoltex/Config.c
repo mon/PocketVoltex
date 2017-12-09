@@ -75,7 +75,13 @@ command_response_t HandleConfig(uint8_t* buffer) {
     switch(command->command) {
         case VERSION:
             command->data.version.version = FIRMWARE_VERSION;
-            command->data.version.serial = 0xDEAD; // TODO set properly later
+#ifdef SOFT_LEDS
+            // rev 4
+            command->data.version.board = 0x4;
+#else
+            // rev 6
+            command->data.version.board = 0x6;
+#endif
             return RESPOND;
         case GETCONFIG:
             memcpy(&command->data.config, &sdvxConfig, CONFIG_SIZE);
