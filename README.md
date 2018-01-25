@@ -5,8 +5,8 @@ A tiny controller for K-Shoot MANIA/Sound Voltex or other similar games
 ![Pocket Voltex](ProductShot.jpg)
 
 ## Documentation
-[(Old version)DIY Kit assembly](Docs/Assembly.md)  
-New kit assembly docs coming shortly - like old, but no LEDs or encoders to solder.
+[DIY Kit assembly](Docs/Assembly.md)  
+[(Old version)DIY Kit assembly](Docs/Assembly_old.md)
 
 [Controller configuration](Docs/Configuration.md)
 
