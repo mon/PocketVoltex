@@ -65,3 +65,13 @@ Save as -> Desktop cutting plotter dxf
 Use LWPOLYLINE
 Base unit mm
 Visible layers only
+
+
+Finally, once it's inside RDWorks - Select all, Handle->Curve auto close, "Force to close"
+Otherwise, you will get rendering errors on some letters
+
+Best engraving - very thin circles - cut, 150mm/s, 14%
+               - POCKET VOLTEX and MACRO text - engrave, 240mm/s, 17%
+               - rest - engrave, 240mm/s, 15%
+               - cutting - 14mm/s, 70%
+               Don't forget 0.05mm interval for engrave

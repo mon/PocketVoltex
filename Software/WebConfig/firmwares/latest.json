@@ -1,5 +1,16 @@
 {
-	"version": 14,
-	"md5": "a07ab17b2ac21c9e0f165eac30f40e99",
-    "changelog" : "Add support for e-AMUSEMENT CLOUD native input"
+    "4" :
+    {
+        "version": 14,
+        "board"  : 4,
+        "md5": "a07ab17b2ac21c9e0f165eac30f40e99",
+        "changelog" : "Add support for e-AMUSEMENT CLOUD native input"
+    },
+    "6" :
+    {
+        "version": 14,
+        "board"  : 6,
+        "md5": "3fc03bf512c04e26a67825ba22a9eac2",
+        "changelog" : "Batch 2 shipping firmware"
+    }
 }

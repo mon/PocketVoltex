@@ -40,7 +40,7 @@ var configDisplay = [
             {id: 'knobR', name: 'VOL-R colour'},
         ]},
         {id: 'lightPattern', name: 'Lights pattern',
-            options : [{name: 'None',     val : 1},
+            options : [{name: 'None',     val: 1},
                        {name: 'Solid',    val: 2},
                        {name: 'Breathe',  val: 4},
                        {name: 'Follower', val: 3}]},
@@ -216,7 +216,11 @@ class Config {
         })
         .then(() => {
             if(device.deviceVersionSubminor == 2) { // bootloader
-                return this.loadFirmware();
+                if(this.board) {
+                    return this.loadFirmware();
+                } else {
+                    document.getElementById('boardSelector').classList.remove('hidden');
+                }
             } else if(device.deviceVersionSubminor == 3) { // main program
                 return this.loadConfig();
             } else {
@@ -231,9 +235,22 @@ class Config {
         });
     }
     
+    selectBoard(board) {
+        this.board = board;
+        document.getElementById('boardSelector').classList.add('hidden');
+        
+        this.loadFirmware()
+        .catch(error => {
+            //alert(error);
+            visibleLog(error);
+            if(device && device.opened)
+                device.close();
+        });
+    }
+    
     loadFirmware() {
         visibleLog("Downloading fimware...");
-        return getLatest()
+        return getLatest(this.board)
         .then(downloadLatest)
         .then(firmware => {
             visibleLog("Flashing firmware...");
@@ -252,9 +269,10 @@ class Config {
             return this.readVersion();
         })
         .then(version => {
-            this.version = version;
-            visibleLog("Found Pocket Voltex v" + version/10.0);
-            return getLatest();
+            this.version = version.fw;
+            this.board = version.board;
+            visibleLog("Found Pocket Voltex v" + this.version/10.0);
+            return getLatest(this.board);
         })
         .then(latestInfo => {
             if(latestInfo.version > this.version) {
@@ -282,7 +300,13 @@ class Config {
             console.log(result);
             console.log("Got version response of len", result.data.buffer.byteLength);
             // version int exists at offset 1
-            return result.data.getUint16(1, true);
+            let fwVersion = result.data.getUint16(1, true);
+            let boardRevision = result.data.getUint16(3, true);
+            if(boardRevision == 0xDEAD) {
+                boardRevision = 4;
+            }
+            console.log('ver:board', fwVersion, boardRevision);
+            return {fw: fwVersion, board: boardRevision};
         })
     }
     
@@ -350,6 +374,7 @@ class Config {
     disableUI() {
         visibleLog('Device disconnected');
         document.getElementById('connect').classList.remove('hidden');
+        document.getElementById('boardSelector').classList.add('hidden');
         this.optionsDiv.innerHTML = '';
     }
 };

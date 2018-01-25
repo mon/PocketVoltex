@@ -13,7 +13,7 @@ var WEBUSB_ID = 0x01;
 var MS_OS_ID = 0x02;
 var CONFIG_ID = 0x03;
 
-function getLatest() {
+function getLatest(version) {
     return new Promise ((resolve, reject) => {
         var req = new XMLHttpRequest();
         req.open("GET", "firmwares/latest.json", true);
@@ -21,11 +21,19 @@ function getLatest() {
 
         req.onload = function (oEvent) {
             if (req.response) {
-                resolve(req.response);
+                let res = req.response[version];
+                if(res) {
+                    resolve(req.response[version]);
+                } else {
+                    reject('Could not find firmwares for board rev:' + version);
+                }
             } else {
                 reject(Error(req.status + ": Could not fetch latest firmware information"));
             }
         };
+        req.onerror = function() {
+            reject(Error(req.status + ": Could not fetch latest firmware information"));
+        }
 
         req.send();
     });
@@ -34,7 +42,7 @@ function getLatest() {
 function downloadLatest(versionInfo) {
     return new Promise ((resolve, reject) => {
         var req = new XMLHttpRequest();
-        req.open("GET", "firmwares/PocketVoltex_" + versionInfo.version + ".bin", true);
+        req.open("GET", "firmwares/PocketVoltex_" + versionInfo.board + "_" + versionInfo.version + ".bin", true);
         req.responseType = "arraybuffer";
 
         req.onload = function (oEvent) {
@@ -53,6 +61,9 @@ function downloadLatest(versionInfo) {
                 reject(Error(req.status + ": Could not fetch firmware version " + versionInfo.version));
             }
         };
+        req.onerror = function() {
+            reject(Error(req.status + ": Could not fetch firmware version " + versionInfo.version));
+        }
 
         req.send();
     })

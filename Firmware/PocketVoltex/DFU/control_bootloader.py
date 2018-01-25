@@ -63,9 +63,9 @@ def get_device_handle(context):
             # because there is the pseudo-composite-parent we ignore
             try:
                 voltex = dev.open()
-                print "Open success!"
+                print("Open success!")
             except:
-                print "Open fail"
+                print("Open fail")
     return voltex
 
 def bootloader_boot(device):
@@ -93,13 +93,13 @@ def program_device(hex_data, device_info):
         # page sized chunks
         for addr in range(0, hex_data.maxaddr(), device_info['page_size']):
             # Compute the address range of the current page in the device
-            current_page_range = range(addr, addr+device_info['page_size'])
+            current_page_range = list(range(addr, addr+device_info['page_size']))
 
             # Extract the data from the hex file at the specified start page
             # address and convert it to a regular list of bytes
             page_data = [hex_data[i] for i in current_page_range]
 
-            print("Writing address 0x%04X-0x%04X" % (current_page_range[0], current_page_range[-1]))
+            print(("Writing address 0x%04X-0x%04X" % (current_page_range[0], current_page_range[-1])))
 
             # Devices with more than 64KB of flash should shift down the page
             # address so that it is 16-bit (page size is guaranteed to be

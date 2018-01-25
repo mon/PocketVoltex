@@ -88,6 +88,7 @@ module render() {
     bottom_padding();
     
     color([0.3,0.3,0.3,0.9])
+    translate([0, 0, 150]) // raise it up to see the board
     translate([0, 0, 25.5])
     linear_extrude(padding_thickness)
     padding();

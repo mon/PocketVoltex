@@ -11,11 +11,16 @@
         <script type="text/javascript" src="js/md5.min.js"></script>
         <script type="text/javascript" src="js/jscolor.min.js"></script>
         <script type="text/javascript">
+            // because I am bad
+            if (location.protocol != 'https:' && location.hostname != "localhost" && location.hostname != "127.0.0.1") {
+             location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+            }
             window.addEventListener("load", function() {
                 UsbWrapper_init();
                 if(UsbWrapper.hasUSB) {
                     document.getElementById("compat-failure").classList.add("hidden");
                     document.getElementById("connectBtn").classList.remove("hidden");
+                    document.getElementById("logview").classList.remove("hidden");
                     
                     config = new Config();
                     
@@ -35,8 +40,6 @@
                 }
             });
         </script>
-        <!-- Origin Trial Token, feature = WebUSB (For Chrome M57+), origin = https://mon.im, expires = 2017-07-17 -->
-        <meta http-equiv="origin-trial" data-feature="WebUSB (For Chrome M57+)" data-expires="2017-07-17" content="AtfCI+37VRHohPe+OASF7EuEDM1ZhH6Dr1W2je8iRI885ETbV5VT/RGnIyg06SGJiGUgNrl20HrAH47shlEyjwsAAABHeyJvcmlnaW4iOiJodHRwczovL21vbi5pbTo0NDMiLCJmZWF0dXJlIjoiV2ViVVNCMiIsImV4cGlyeSI6MTUwMDMwMjYwNn0="> 
     </head>
     <body>
         <div class="center">
@@ -44,11 +47,16 @@
             This configurator requires Javascript, Windows 7+ (or OSX/Linux) and a WebUSB capable browser (Chrome 57+). If you lack these, harass mon for an exe config app.
             </div>
             <div>
-                <div id="logview"></div>
+                <div id="logview" class="hidden"></div>
                 <!--<div id="configBox" class="configBox hidden disabled">
                 </div>-->
                 <div id="connect" class="connect">
                     <button id="connectBtn" class="hidden" onclick="config.connectNew()">Connect</button>
+                </div>
+                <div id="boardSelector" class="hidden">
+                    <div class="big">Select your board:</div>
+                    <img class="board" src="img/r6-topdown-small.png" onclick="config.selectBoard(6);">
+                    <img class="board" src="img/r4-topdown-small.png" onclick="config.selectBoard(4);">
                 </div>
                 <div id="configOptions" class="configOptions">
                 </div>

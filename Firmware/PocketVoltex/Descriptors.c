@@ -14,8 +14,8 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
         // Globals
         HID_RI_REPORT_COUNT(8, LED_TOTAL_COUNT),
         HID_RI_REPORT_SIZE(8, 8),
-        HID_RI_LOGICAL_MINIMUM(8, 0),
-        HID_RI_LOGICAL_MAXIMUM(8, BRIGHTNESS_MAX),
+        HID_RI_LOGICAL_MINIMUM(16, 0),
+        HID_RI_LOGICAL_MAXIMUM(16, BRIGHTNESS_MAX),
         HID_RI_USAGE_PAGE(8, 0x0A), // Ordinals
         
         // Locals

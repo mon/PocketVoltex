@@ -46,6 +46,10 @@ test: all
 	cat TestingApp.hex | grep -v '^:00000001FF' > TestFull.hex
 	cat DFU/BootloaderUSB.hex >> TestFull.hex
 
+$(TARGET)_WithBoot.hex: $(TARGET).hex
+	cat $(TARGET).hex | grep -v '^:00000001FF' > $(TARGET)_WithBoot.hex
+	cat DFU/BootloaderUSB.hex >> $(TARGET)_WithBoot.hex
+
 debug: CC_FLAGS += -DDEBUG
 debug: clean flash
 
@@ -55,7 +59,8 @@ rev4: clean all
 initboot: erase wfuse flashboot
 initboot_rev4: erase wfuse flashboot_rev4
 
-init: initboot flash
+init: $(TARGET)_WithBoot.hex
+	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0xda:m -U efuse:w:0xfe:m -U flash:w:$(TARGET)_WithBoot.hex:i
 init_rev4: initboot_rev4 disablereset flash
 
 erase:
@@ -79,6 +84,9 @@ flashboot:
 
 flash: all
 	cd DFU && python control_bootloader.py atmega16u2 ../$(TARGET).hex
+
+flash_with_boot: $(TARGET)_WithBoot.hex
+	$(AVRDUDE) -U flash:w:$(TARGET)_WithBoot.hex:i
 
 testflash: test wfuse
 	$(AVRDUDE) -U flash:w:TestFull.hex:i

@@ -2,7 +2,7 @@ use <imports/cherry_mx.scad>
 include <imports/mx_keycap.scad>
 key_profile_index = 11;
 
-$fn = 64;
+$fn = 512;
 
 black = [0.1,0.1,0.1];
 blue = [0,0.6,1];
@@ -55,7 +55,7 @@ wallOverlap = 1;
 boltDiam = 2;
 boltFudge = 0.1;
 boltSize = boltDiam + boltFudge;
-spacerSize = boltSize + 1 + fudge; // extra wiggle
+spacerSize = boltSize + 1.7 + fudge; // extra wiggle
 
 boltExpand = boltDiam;
 
@@ -94,6 +94,7 @@ module switch(holetype){
 			square([holesize+2*cutoutwidth,holesize-2]);
 		}
 	} else {
+        offset(delta = 0.5) // so plate clips can latch
 		square([holesize,holesize]);
 	}
 }
@@ -152,11 +153,31 @@ module bolts_expansion() {
     bolt_spacers();
 }
 
-module encoders() {
-    for(enc = encoders) {
-        translate([enc[0], enc[1]])
-        circle(r=encoderRadius, center = true);
+module enc_smooth() {
+    translate([-10, -9.777])
+    difference() {
+        rotate(-54)
+        translate([-2,0.19])
+        square([4, 2], center=true);
+        
+        circle(d=2);
     }
+}
+
+module enc_single() {
+    translate([encoders[0][0], encoders[0][1]]) {
+        circle(r=encoderRadius, center = true);
+        // smooth harsh edges
+        enc_smooth();
+        mirror([0,1])
+        enc_smooth();
+    }
+}
+
+module encoders() {
+    enc_single();
+    mirror([1,0])
+    enc_single();
 }
 
 module encoder_holes() {
@@ -440,7 +461,7 @@ module fiducials() {
     }
 }
 // override in commandline
-build = "render";
+build = "bottom_spacer";
 enable_fiducials = 0;
 if(build == "render") {
     full_stack();
