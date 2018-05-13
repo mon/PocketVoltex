@@ -2,48 +2,11 @@ use <imports/cherry_mx.scad>
 include <imports/mx_keycap.scad>
 key_profile_index = 11;
 
+include <imports/board_dimensions.scad>
+use <imports/board_shape.scad>
+
 $fn = 512;
 
-black = [0.1,0.1,0.1];
-blue = [0,0.6,1];
-// x, y, keycap width in units, rotation, colour
-switches = [[0,0, 1, 0, blue],
-            [-42.862,-37.592, 1.25, 0, "white"],
-            [ 42.862,-37.592, 1.25, 0, "white"],
-            [-14.287,-37.592, 1.25, 0, "white"],
-            [ 14.287,-37.592, 1.25, 0, "white"],
-            [-37.9,-70.8, 1.75, -22.5, black],
-            [ 37.9,-70.8, 1.75, 22.5, black]];
-bolts = [[30.025, 6.65],
-         [71, -16.925],
-         [71, 16.5],
-         [42.732, -82.791]
-         ];
-// Not the encoders themselves, but the circle that surrounds them
-encoders = [[-64,0.4],
-            [ 64,0.4]];
-encoderRadius = 13;
-
-// encoder solder points hit the case unless we cut these out
-// x, y, hole size
-encoderHoles = [[-8, 0, 4],
-                [ 8, 0, 4]];
-// the 3 A/B/Gnd connections
-// x (mirrored), y, hole size
-encoderHull = [5, -10.5, 3];
-
-// x, y
-leds = [[-39.9, -1.4],
-        [-53.6, -26.2],
-        [-54.8, -57.9],
-        [-17.3, -75.7]];
-ledDims = [6.5, 6.5];
-                
-macroHole = [0,-75.692];
-macroDiam = 3;
-
-usbWidth = 9;
-usbPos = [-21.311, 10.3];
 // bottom to top, last 2 are white/black sections of the 1 plate
 plate_thickness = [3, 3, 1.6, 3, 1.5, 0.1];
 
@@ -272,7 +235,7 @@ module usb() {
 }
 
 module board() {
-    import("imports/BOARD_SHAPE.dxf");
+    board_shape();
 }
 
 module board_encoderhole() {
@@ -461,7 +424,7 @@ module fiducials() {
     }
 }
 // override in commandline
-build = "bottom_spacer";
+build = "render";
 enable_fiducials = 0;
 if(build == "render") {
     full_stack();
