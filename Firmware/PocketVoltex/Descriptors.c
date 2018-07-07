@@ -19,8 +19,8 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM LEDReport[] =
         HID_RI_USAGE_PAGE(8, 0x0A), // Ordinals
         
         // Locals
-        0x79, STRING_ID_LED_Indiv, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_Indiv),
-        0x89, STRING_ID_LED_Indiv + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_Indiv + LED_COUNT),
+        0x89, STRING_ID_LED_Indiv, //HID_RI_STRING_MINIMUM(8, STRING_ID_LED_Indiv),
+        0x99, STRING_ID_LED_Indiv + LED_TOTAL_COUNT, //HID_RI_STRING_MAXIMUM(8, STRING_ID_LED_Indiv + LED_COUNT),
         HID_RI_USAGE_MINIMUM(8, 1), // LED 1
         HID_RI_USAGE_MAXIMUM(8, LED_TOTAL_COUNT), // LED 8 + buttons
         HID_RI_OUTPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_NON_VOLATILE),
@@ -368,38 +368,71 @@ const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"Po
 const USB_Descriptor_String_t PROGMEM LEDString = USB_STRING_DESCRIPTOR(L"Pocket Voltex LEDs");
 const USB_Descriptor_String_t PROGMEM ControlsString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Controls");
 const USB_Descriptor_String_t PROGMEM ConfigString = USB_STRING_DESCRIPTOR(L"Pocket Voltex Config");
-// There may be a better way to do this
-const USB_Descriptor_String_t PROGMEM LEDString_indiv[] = {
-    USB_STRING_DESCRIPTOR(L"L1-B"),
-    USB_STRING_DESCRIPTOR(L"L1-G"),
-    USB_STRING_DESCRIPTOR(L"L1-R"),
-    USB_STRING_DESCRIPTOR(L"L2-B"),
-    USB_STRING_DESCRIPTOR(L"L2-G"),
-    USB_STRING_DESCRIPTOR(L"L2-R"),
-    USB_STRING_DESCRIPTOR(L"L3-B"),
-    USB_STRING_DESCRIPTOR(L"L3-G"),
-    USB_STRING_DESCRIPTOR(L"L3-R"),
-    USB_STRING_DESCRIPTOR(L"L4-B"),
-    USB_STRING_DESCRIPTOR(L"L4-G"),
-    USB_STRING_DESCRIPTOR(L"L4-R"),
-    USB_STRING_DESCRIPTOR(L"L5-B"),
-    USB_STRING_DESCRIPTOR(L"L5-G"),
-    USB_STRING_DESCRIPTOR(L"L5-R"),
-    USB_STRING_DESCRIPTOR(L"L6-B"),
-    USB_STRING_DESCRIPTOR(L"L6-G"),
-    USB_STRING_DESCRIPTOR(L"L6-R"),
-    USB_STRING_DESCRIPTOR(L"L7-B"),
-    USB_STRING_DESCRIPTOR(L"L7-G"),
-    USB_STRING_DESCRIPTOR(L"L7-R"),
-    USB_STRING_DESCRIPTOR(L"L8-B"),
-    USB_STRING_DESCRIPTOR(L"L8-G"),
-    USB_STRING_DESCRIPTOR(L"L8-R"),
-    USB_STRING_DESCRIPTOR(L"BT-A"),
-    USB_STRING_DESCRIPTOR(L"BT-B"),
-    USB_STRING_DESCRIPTOR(L"BT-C"),
-    USB_STRING_DESCRIPTOR(L"BT-D"),
-    USB_STRING_DESCRIPTOR(L"FX-L"),
-    USB_STRING_DESCRIPTOR(L"FX-R"),
+
+const USB_Descriptor_String_t PROGMEM
+    LEDString_01 = USB_STRING_DESCRIPTOR(L"Top Left R"),
+    LEDString_02 = USB_STRING_DESCRIPTOR(L"Top Left G"),
+    LEDString_03 = USB_STRING_DESCRIPTOR(L"Top Left B"),
+    LEDString_04 = USB_STRING_DESCRIPTOR(L"Top Right R"),
+    LEDString_05 = USB_STRING_DESCRIPTOR(L"Top Right G"),
+    LEDString_06 = USB_STRING_DESCRIPTOR(L"Top Right B"),
+    LEDString_07 = USB_STRING_DESCRIPTOR(L"Upper Left R"),
+    LEDString_08 = USB_STRING_DESCRIPTOR(L"Upper Left G"),
+    LEDString_09 = USB_STRING_DESCRIPTOR(L"Upper Left B"),
+    LEDString_10 = USB_STRING_DESCRIPTOR(L"Upper Right R"),
+    LEDString_11 = USB_STRING_DESCRIPTOR(L"Upper Right G"),
+    LEDString_12 = USB_STRING_DESCRIPTOR(L"Upper Right B"),
+    LEDString_13 = USB_STRING_DESCRIPTOR(L"Lower Left R"),
+    LEDString_14 = USB_STRING_DESCRIPTOR(L"Lower Left G"),
+    LEDString_15 = USB_STRING_DESCRIPTOR(L"Lower Left B"),
+    LEDString_16 = USB_STRING_DESCRIPTOR(L"Lower Right R"),
+    LEDString_17 = USB_STRING_DESCRIPTOR(L"Lower Right G"),
+    LEDString_18 = USB_STRING_DESCRIPTOR(L"Lower Right B"),
+    LEDString_19 = USB_STRING_DESCRIPTOR(L"Bottom Left R"),
+    LEDString_20 = USB_STRING_DESCRIPTOR(L"Bottom Left G"),
+    LEDString_21 = USB_STRING_DESCRIPTOR(L"Bottom Left B"),
+    LEDString_22 = USB_STRING_DESCRIPTOR(L"Bottom Right R"),
+    LEDString_23 = USB_STRING_DESCRIPTOR(L"Bottom Right G"),
+    LEDString_24 = USB_STRING_DESCRIPTOR(L"Bottom Right B"),
+    LEDString_25 = USB_STRING_DESCRIPTOR(L"BT-A"),
+    LEDString_26 = USB_STRING_DESCRIPTOR(L"BT-B"),
+    LEDString_27 = USB_STRING_DESCRIPTOR(L"BT-C"),
+    LEDString_28 = USB_STRING_DESCRIPTOR(L"BT-D"),
+    LEDString_29 = USB_STRING_DESCRIPTOR(L"FX-L"),
+    LEDString_30 = USB_STRING_DESCRIPTOR(L"FX-R"),
+    LEDString_31 = USB_STRING_DESCRIPTOR(L"START");
+const USB_Descriptor_String_t *LEDString_indiv[] = {
+    &LEDString_01,
+    &LEDString_02,
+    &LEDString_03,
+    &LEDString_04,
+    &LEDString_05,
+    &LEDString_06,
+    &LEDString_07,
+    &LEDString_08,
+    &LEDString_09,
+    &LEDString_10,
+    &LEDString_11,
+    &LEDString_12,
+    &LEDString_13,
+    &LEDString_14,
+    &LEDString_15,
+    &LEDString_16,
+    &LEDString_17,
+    &LEDString_18,
+    &LEDString_19,
+    &LEDString_20,
+    &LEDString_21,
+    &LEDString_22,
+    &LEDString_23,
+    &LEDString_24,
+    &LEDString_25,
+    &LEDString_26,
+    &LEDString_27,
+    &LEDString_28,
+    &LEDString_29,
+    &LEDString_30,
+    &LEDString_31,
 };
 
 void USB_Process_BOS(void) {
@@ -499,9 +532,9 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Size    = pgm_read_byte(&ConfigString.Header.Size);
 					break;
                 default:
-                    if(DescriptorNumber >= STRING_ID_LED_Indiv) {
-                        Address = &(LEDString_indiv[STRING_ID_LED_Indiv - DescriptorNumber]);
-                        Size    = pgm_read_byte(&LEDString_indiv[STRING_ID_LED_Indiv - DescriptorNumber].Header.Size);
+                    if(DescriptorNumber >= STRING_ID_LED_Indiv && DescriptorNumber < (STRING_ID_LED_Indiv + LED_TOTAL_COUNT)) {
+                        Address = LEDString_indiv[DescriptorNumber - STRING_ID_LED_Indiv];
+                        Size    = pgm_read_byte(&(LEDString_indiv[DescriptorNumber - STRING_ID_LED_Indiv]->Header.Size));
                     }
 			}
 			break;
