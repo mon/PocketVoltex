@@ -1,0 +1,1 @@
+avrdude -c usbasp -p atmega16u2 -U lfuse:w:0xde:m -U hfuse:w:0xda:m -U efuse:w:0xfe:m -U flash:w:PocketVoltex_WithBoot.hex:i

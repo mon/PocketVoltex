@@ -11,10 +11,6 @@
         <script type="text/javascript" src="js/md5.min.js"></script>
         <script type="text/javascript" src="js/jscolor.min.js"></script>
         <script type="text/javascript">
-            // because I am bad
-            if (location.protocol != 'https:' && location.hostname != "localhost" && location.hostname != "127.0.0.1") {
-             location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
-            }
             window.addEventListener("load", function() {
                 UsbWrapper_init();
                 if(UsbWrapper.hasUSB) {

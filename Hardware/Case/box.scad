@@ -1,4 +1,6 @@
 use <case.scad>;
+use <board_primitives.scad>
+use <board_shape.scad>
 
 $fn=128;
 
@@ -13,48 +15,54 @@ else if(produce == 2)
 else if(produce == 3)
     padding();
 
-knobOffset = 74;
+knobOffset = 83;
 knobY = -83;
-main_thickness = 37.5;
+main_thickness = 42;
 bottom_thickness = 5;
-padding_thickness = 12;
+padding_thickness = 14;
 
-encoders = [[-64,0.4],
-            [ 64,0.4]];
 encoderShaftHole = 5.5;
 
-finger = 20;
-fingerX = -75;
-fingerY = -25;
+// to work out viewports for render
+//echo(str($vpt[0],",",$vpt[1],",",$vpt[2],",",$vpr[0],",",$vpr[1],",",$vpr[2],",",$vpd));
 
-squeeze = 0; // so things are held tight
+// x, y, size
+finger_holes = [
+    [85,  -25, 20],
+    [-85, -25, 20],
+    [0,    5,   20],
+    [0, -85,   20],
+];
+
+loosen = 3; // so things aren't impossible to remove
 gap = 1; // for the top cover
 
-size = [180, 140];
+size = [200, 140];
 
 module mainCuts() {
     difference() {
         translate([0,-30])
         square(size, center = true);
         
-        offset(delta = -squeeze)
+        offset(delta = loosen)
         board();
         
         translate([-knobOffset, knobY])
-            circle(d = 25 - squeeze);
+            circle(d = 25 + loosen);
         translate([knobOffset,knobY])
-            circle(d = 25 - squeeze);
+            circle(d = 25 + loosen);
 
-        translate([0, 15])
-        square([80, 3], center = true);
+        // not needed any more
+        //translate([0, 15])
+        //square([80, 3], center = true);
         
         translate([0, 28])
         square([100, 13], center = true);
         
-        translate([fingerX,fingerY])
-        circle(d=finger);
-        translate([-fingerX,fingerY])
-        circle(d=finger);
+        for(f = finger_holes) {
+            translate([f.x,f.y])
+            circle(d=f[2]);
+        }
     }
 }
 
@@ -63,10 +71,8 @@ module padding() {
         offset(delta = -gap)
         board();
         
-        for(e = encoders) {
-            translate(e)
-            circle(d=encoderShaftHole);
-        }
+        encoders()
+        circle(d=encoderShaftHole);
     }
 }
 
