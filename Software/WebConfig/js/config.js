@@ -14,9 +14,10 @@ var CONFIG_IN_EPADDR  = 2;
 var packetSize = 64;
 
 var commands = {
-    GETCONFIG : 1,
-    SETCONFIG : 2,
-    VERSION   : 3,
+    GETCONFIG     : 1,
+    SETCONFIG     : 2,
+    VERSION       : 3,
+    DEFAULTCONFIG : 4,
     RESET :     42
 };
 
@@ -30,10 +31,12 @@ var configDisplay = [
     {id: 'macroHold', name: 'Macro longpress'},
     {id: 'macroPin', name: 'Macro PIN'},
     {id: 'lightsOn', name: 'Enable LEDs', children: [
+        {id: 'ledBrightness', name: 'LED Brightness', min: 1, max: 31},
         {id: 'hidLights', name: 'HID Lights'},
         {id: 'keyLights', name: 'Key lights', children: [        
             {id: 'btColour', name: 'BT colour'},
             {id: 'fxColour', name: 'FX colour'},
+            {id: 'startColour', name: 'START colour'},
         ]},
         {id: 'knobLights', name: 'Knob lights', children: [
             {id: 'knobL', name: 'VOL-L colour'},
@@ -67,14 +70,9 @@ var settingOrder = [
     'macroHold',
     'macroLen',
     'macroPin',
+    'ledBrightness',
+    'startColour',
 ];
-
-var defaultConfig = {
-    switches   : [],
-    ledsOn     : true,
-    //macroClick : KP_PLUS,
-    macroPin   : [0,0,0,0],
-}
 
 var visibleLog = function(html) {
     console.log(html);
@@ -126,10 +124,12 @@ class ConfigValues {
         this.controlMode   = new SettingRadio();
         this.btColour      = new SettingRGB(BRIGHTNESS_MAX);
         this.fxColour      = new SettingRGB(BRIGHTNESS_MAX);
+        this.startColour   = new SettingRGB(BRIGHTNESS_MAX);
         this.breatheColour = new SettingRGB(BRIGHTNESS_MAX);
         this.knobL         = new SettingRGB(BRIGHTNESS_MAX);
         this.knobR         = new SettingRGB(BRIGHTNESS_MAX);
         this.lightsOn      = new SettingBool();
+        this.ledBrightness = new SettingSlider();
         this.hidLights     = new SettingBool();
         this.keyLights     = new SettingBool();
         this.knobLights    = new SettingBool();
@@ -333,6 +333,17 @@ class Config {
         return device.transferOut(CONFIG_OUT_EPADDR, data);
     }
     
+    loadDefaults() {
+        if(!device || !device.opened)
+            return Promise.reject("Device not opened");
+        if(!confirm('Loading defaults cannot be undone. Are you sure?'))
+            return Promise.resolve('Cancelled');
+        var data = new Uint8Array(packetSize);
+        data[0] = commands.DEFAULTCONFIG;
+        return device.transferOut(CONFIG_OUT_EPADDR, data)
+        .then(this.readConfig.bind(this));
+    }
+    
     close() {
         if(!device || !device.opened)
             return Promise.reject("Device not opened");
@@ -368,6 +379,13 @@ class Config {
     enableUI() {
         //document.getElementById('configBox').classList.remove('hidden', 'disabled');
         document.getElementById('connect').classList.add('hidden');
+        
+        var defaults = document.createElement('input');
+        defaults.type = 'button';
+        defaults.value = 'Load defaults';
+        defaults.onclick = this.loadDefaults.bind(this);
+        this.optionsDiv.appendChild(defaults);
+        
         this.populateSettings(this.optionsDiv, configDisplay);
     }
     

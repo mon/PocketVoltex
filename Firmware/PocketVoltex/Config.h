@@ -14,7 +14,7 @@
 // divide by 10 for actual version
 #define FIRMWARE_VERSION 14
 // increment whenever config structure has breaking changes
-#define CONFIG_VERSION 2
+#define CONFIG_VERSION 3
 
 // not configurable since they're all the same switches
 #define SWITCH_DEBOUNCE 30
@@ -46,6 +46,10 @@ typedef struct {
     // Reused for both tap or hold, at the end in case I decide to extend
     uint8_t macroLen; // placeholder not used yet
     uint8_t macroPin[4];
+    
+    // added in firmware 1.5
+    uint8_t ledBrightness; // rev6 and up
+    RGB_t startColour;
 } ATTR_PACKED sdvx_config_t;
 
 #define CONFIG_SIZE sizeof(sdvx_config_t)
@@ -59,6 +63,7 @@ typedef enum {
     GETCONFIG = 1,
     SETCONFIG = 2,
     VERSION = 3, // synced with bootloader, DO NOT CHANGE
+    DEFAULTCONFIG = 4,
     RESET = MAGIC_RESET_NUMBER
 } command_action_t;
 

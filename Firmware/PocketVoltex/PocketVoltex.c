@@ -210,6 +210,10 @@ int main(void)
                             led_set_rgb(ledMap[i-1], &sdvxConfig.fxColour);
                         }
                     }
+                    // START
+                    if(switches[0].state) {
+                        led_set_all_rgb(&sdvxConfig.startColour);
+                    }
                 }
             }
             // knob lights go above all
@@ -408,6 +412,9 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
             if(LEDReport->btFx[i]) {
                 led_set_rgb(ledMap[i], &sdvxConfig.fxColour);
             }
+        }
+        if(LEDReport->btFx[6]) { // start
+            led_set_all_rgb(&sdvxConfig.startColour);
         }
     }
 }

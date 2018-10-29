@@ -60,6 +60,35 @@ class SettingBool extends Setting {
     }
 }
 
+class SettingSlider extends Setting {
+    read(buffer) {
+        this.slider.value = buffer.read(1);
+    }
+    
+    write(buffer) {
+        buffer.write(this.slider.value);
+    }
+    
+    createUI(setting) {
+        var container = document.createElement('div');
+        var slider = document.createElement('input');
+        slider.type = 'range';
+        slider.id = 'slider-' + setting.id;
+        slider.min = setting.min;
+        slider.max = setting.max;
+        slider.oninput = this.fireCallback.bind(this);
+        this.slider = slider;
+        
+        var label = document.createElement('label');
+        label.htmlFor = slider.id;
+        label.textContent = setting.name;
+        
+        container.appendChild(slider);
+        container.appendChild(label);
+        return container;
+    }
+}
+
 class SettingRGB extends Setting {
     constructor(maxBright) {
         super();
@@ -362,6 +391,7 @@ var scancodes = [
 
 window.SettingPlaceholder = SettingPlaceholder;
 window.SettingBool = SettingBool;
+window.SettingSlider = SettingSlider;
 window.SettingRGB = SettingRGB;
 window.SettingRadio = SettingRadio;
 window.SettingKeys = SettingKeys;

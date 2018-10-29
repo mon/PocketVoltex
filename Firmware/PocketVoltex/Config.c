@@ -45,11 +45,16 @@ static const PROGMEM sdvx_config_t defaults = {
                  HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
                  HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,
                  HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT},
+    .ledBrightness = 31,
+    .startColour = {0, BRIGHTNESS_MAX, 0}, // green
 };
 
 void InitConfig(void) {
-    // TODO: if config version changes, migrate settings
+    // if config version changes, migrate settings
     switch(eeprom_read_word(&eeConfig.configVersion)) {
+        // all of these fall through to upgrade each bit as we go
+        case 2:
+            eeprom_write_byte(&eeConfig.ledBrightness, defaults.ledBrightness);
         case CONFIG_VERSION: // nothing needs to change
             break;
         default:
@@ -67,6 +72,11 @@ void SetConfig(sdvx_config_t* config) {
 }
 
 void UpdateConfig(void) {
+    eeprom_update_block(&sdvxConfig, &eeConfig, CONFIG_SIZE);
+}
+
+void LoadDefaults(void) {
+    memcpy_P(&sdvxConfig, &defaults, CONFIG_SIZE);
     eeprom_update_block(&sdvxConfig, &eeConfig, CONFIG_SIZE);
 }
 
@@ -88,6 +98,9 @@ command_response_t HandleConfig(uint8_t* buffer) {
             return RESPOND;
         case SETCONFIG:
             SetConfig(&command->data.config);
+            return IGNORE;
+        case DEFAULTCONFIG:
+            LoadDefaults();
             return IGNORE;
         case RESET:
             return REBOOT;

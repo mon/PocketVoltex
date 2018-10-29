@@ -9,8 +9,8 @@
 
 #define LED_COUNT 8
 #define LED_PHYSICAL_COUNT (LED_COUNT*3)
-// BT + FX
-#define LED_VIRTUAL_COUNT 6
+// BT + FX + START
+#define LED_VIRTUAL_COUNT 7
 #define LED_TOTAL_COUNT (LED_PHYSICAL_COUNT + LED_VIRTUAL_COUNT)
 // Internally how many brightness levels you can use - for higher res fades
 #define BRIGHTNESS_LEVELS    256
