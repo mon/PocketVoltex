@@ -1,16 +1,16 @@
 {
     "4" :
     {
-        "version": 14,
+        "version": 15,
         "board"  : 4,
-        "md5": "a07ab17b2ac21c9e0f165eac30f40e99",
-        "changelog" : "Add support for e-AMUSEMENT CLOUD native input"
+        "md5": "fdeec31cc936124b7f21d2bb616c02db",
+        "changelog" : "Add START lights, defaults reset, fix LED strings"
     },
     "6" :
     {
-        "version": 14,
+        "version": 15,
         "board"  : 6,
-        "md5": "3fc03bf512c04e26a67825ba22a9eac2",
-        "changelog" : "Batch 2 shipping firmware"
+        "md5": "4e12a16e0ca24441f68b1162a09d27be",
+        "changelog" : "Add START lights, LED brightness, defaults reset, fix LED strings"
     }
 }
