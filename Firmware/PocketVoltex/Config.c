@@ -54,7 +54,11 @@ void InitConfig(void) {
     switch(eeprom_read_word(&eeConfig.configVersion)) {
         // all of these fall through to upgrade each bit as we go
         case 2:
-            eeprom_write_byte(&eeConfig.ledBrightness, defaults.ledBrightness);
+            // load in our defaults
+            memcpy_P(&sdvxConfig, &defaults, CONFIG_SIZE);
+            // update the ones that actually need upgrade
+            eeprom_write_byte(&eeConfig.ledBrightness, sdvxConfig.ledBrightness);
+            eeprom_update_block(&sdvxConfig.startColour, &eeConfig.startColour, sizeof(sdvxConfig.startColour));
         case CONFIG_VERSION: // nothing needs to change
             break;
         default:
