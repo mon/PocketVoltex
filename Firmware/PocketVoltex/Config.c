@@ -59,6 +59,7 @@ void InitConfig(void) {
             // update the ones that actually need upgrade
             eeprom_write_byte(&eeConfig.ledBrightness, sdvxConfig.ledBrightness);
             eeprom_update_block(&sdvxConfig.startColour, &eeConfig.startColour, sizeof(sdvxConfig.startColour));
+            eeprom_write_word(&eeConfig.configVersion, CONFIG_VERSION);
         case CONFIG_VERSION: // nothing needs to change
             break;
         default:

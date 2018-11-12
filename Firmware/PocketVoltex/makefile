@@ -20,7 +20,7 @@ OPTIMIZATION = s
 TARGET       = PocketVoltex
 SRC          = $(TARGET).c asciihid.c Descriptors.c Config.c Encoder.c LED.c LEDPatterns.c Macro.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -Werror
 LD_FLAGS     =
 
 AVRDUDE      = avrdude -c usbasp -p $(MCU)
@@ -72,7 +72,7 @@ rfuse:
 wfuse:
 	# no more HWB, boot directly to bootloader
 	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0xda:m -U efuse:w:0xfe:m
-	
+
 disablereset:
 	$(AVRDUDE) -U lfuse:w:0xde:m -U hfuse:w:0x9a:m -U efuse:w:0xfe:m
 
