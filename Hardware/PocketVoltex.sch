@@ -6,8 +6,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Pocket Voltex"
-Date ""
-Rev "7"
+Date "2019-07-07"
+Rev "8"
 Comp "mon.im"
 Comment1 ""
 Comment2 ""
@@ -86,7 +86,7 @@ U 1 1 5A9D95F5
 P 1350 3450
 F 0 "J2" H 950 4200 50  0000 L CNN
 F 1 "USB_C_Receptacle" H 1750 4200 50  0000 R CNN
-F 2 "Connector_USB:USB_C_Receptacle_GCT_USB4085" H 1500 3450 50  0001 C CNN
+F 2 "Pocket Voltex:USB_C_Receptacle_GCT_USB4085" H 1500 3450 50  0001 C CNN
 F 3 "" H 1500 3450 50  0001 C CNN
 	1    1350 3450
 	1    0    0    -1  
@@ -1126,10 +1126,10 @@ Connection ~ 4400 4700
 Wire Wire Line
 	4400 4700 4500 4700
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H1
 U 1 1 5D2D8B25
 P 9550 1050
-F 0 "H?" H 9650 1096 50  0000 L CNN
+F 0 "H1" H 9650 1096 50  0000 L CNN
 F 1 "MountingHole" H 9650 1005 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 1050 50  0001 C CNN
 F 3 "~" H 9550 1050 50  0001 C CNN
@@ -1137,10 +1137,10 @@ F 3 "~" H 9550 1050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H2
 U 1 1 5D2D9A3B
 P 9550 1250
-F 0 "H?" H 9650 1296 50  0000 L CNN
+F 0 "H2" H 9650 1296 50  0000 L CNN
 F 1 "MountingHole" H 9650 1205 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 1250 50  0001 C CNN
 F 3 "~" H 9550 1250 50  0001 C CNN
@@ -1148,10 +1148,10 @@ F 3 "~" H 9550 1250 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H3
 U 1 1 5D2DA64A
 P 9550 1450
-F 0 "H?" H 9650 1496 50  0000 L CNN
+F 0 "H3" H 9650 1496 50  0000 L CNN
 F 1 "MountingHole" H 9650 1405 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 1450 50  0001 C CNN
 F 3 "~" H 9550 1450 50  0001 C CNN
@@ -1159,10 +1159,10 @@ F 3 "~" H 9550 1450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H4
 U 1 1 5D2DA650
 P 9550 1650
-F 0 "H?" H 9650 1696 50  0000 L CNN
+F 0 "H4" H 9650 1696 50  0000 L CNN
 F 1 "MountingHole" H 9650 1605 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 1650 50  0001 C CNN
 F 3 "~" H 9550 1650 50  0001 C CNN
@@ -1170,10 +1170,10 @@ F 3 "~" H 9550 1650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H5
 U 1 1 5D2DE57C
 P 9550 1850
-F 0 "H?" H 9650 1896 50  0000 L CNN
+F 0 "H5" H 9650 1896 50  0000 L CNN
 F 1 "MountingHole" H 9650 1805 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 1850 50  0001 C CNN
 F 3 "~" H 9550 1850 50  0001 C CNN
@@ -1181,10 +1181,10 @@ F 3 "~" H 9550 1850 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H6
 U 1 1 5D2DE582
 P 9550 2050
-F 0 "H?" H 9650 2096 50  0000 L CNN
+F 0 "H6" H 9650 2096 50  0000 L CNN
 F 1 "MountingHole" H 9650 2005 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 2050 50  0001 C CNN
 F 3 "~" H 9550 2050 50  0001 C CNN
@@ -1192,10 +1192,10 @@ F 3 "~" H 9550 2050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H7
 U 1 1 5D2E2506
 P 9550 2250
-F 0 "H?" H 9650 2296 50  0000 L CNN
+F 0 "H7" H 9650 2296 50  0000 L CNN
 F 1 "MountingHole" H 9650 2205 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 2250 50  0001 C CNN
 F 3 "~" H 9550 2250 50  0001 C CNN
@@ -1203,10 +1203,10 @@ F 3 "~" H 9550 2250 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:MountingHole H?
+L Mechanical:MountingHole H8
 U 1 1 5D2E250C
 P 9550 2450
-F 0 "H?" H 9650 2496 50  0000 L CNN
+F 0 "H8" H 9650 2496 50  0000 L CNN
 F 1 "MountingHole" H 9650 2405 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 9550 2450 50  0001 C CNN
 F 3 "~" H 9550 2450 50  0001 C CNN
@@ -1214,10 +1214,10 @@ F 3 "~" H 9550 2450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Mechanical:Fiducial LOGO
+L Mechanical:Fiducial LOGO1
 U 1 1 5D2EBA8F
 P 9550 2850
-F 0 "LOGO" H 9635 2896 50  0000 L CNN
+F 0 "LOGO1" H 9635 2896 50  0000 L CNN
 F 1 "Rasis" H 9635 2805 50  0000 L CNN
 F 2 "Pocket Voltex:Rasis" H 9550 2850 50  0001 C CNN
 F 3 "~" H 9550 2850 50  0001 C CNN
