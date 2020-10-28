@@ -1,16 +1,16 @@
 {
     "4" :
     {
-        "version": 15,
+        "version": 16,
         "board"  : 4,
-        "md5": "fdeec31cc936124b7f21d2bb616c02db",
-        "changelog" : "Add START lights, defaults reset, fix LED strings"
+        "md5": "827129485f67cea692d56ed53d199bb5",
+        "changelog" : "Fix broken config upgrade"
     },
     "6" :
     {
-        "version": 15,
+        "version": 16,
         "board"  : 6,
-        "md5": "4e12a16e0ca24441f68b1162a09d27be",
-        "changelog" : "Add START lights, LED brightness, defaults reset, fix LED strings"
+        "md5": "5a4eb9356f47febd5fb39e951f7cd75f",
+        "changelog" : "Fix broken config upgrade"
     }
 }

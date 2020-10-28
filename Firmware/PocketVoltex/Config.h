@@ -12,7 +12,7 @@
 #define JOYSTICK_PPR (24 * 4)
 #define MAGIC_RESET_NUMBER 42
 // divide by 10 for actual version
-#define FIRMWARE_VERSION 15
+#define FIRMWARE_VERSION 16
 // increment whenever config structure has breaking changes
 #define CONFIG_VERSION 3
 
@@ -46,7 +46,7 @@ typedef struct {
     // Reused for both tap or hold, at the end in case I decide to extend
     uint8_t macroLen; // placeholder not used yet
     uint8_t macroPin[4];
-    
+
     // added in firmware 1.5
     uint8_t ledBrightness; // rev6 and up
     RGB_t startColour;

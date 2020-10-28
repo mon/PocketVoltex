@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:PocketVoltex-cache
-EELAYER 29 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -33,29 +32,32 @@ F 0 "C2" H 2725 4650 50  0000 L CNN
 F 1 "10uF" H 2725 4450 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0603_1608Metric" H 2738 4400 50  0001 C CNN
 F 3 "" H 2700 4550 50  0001 C CNN
+F 4 "CC0603MRX5R5BB106" H 2700 4550 50  0001 C CNN "Part number"
 	1    2700 4550
 	1    0    0    -1  
 $EndComp
 $Comp
 L Device:Rotary_Encoder ENC1
 U 1 1 5A9D6825
-P 7800 1300
-F 0 "ENC1" H 7800 1560 50  0000 C CNN
-F 1 "VOL_L" H 7800 1040 50  0000 C CNN
-F 2 "Pocket Voltex:Encoder_Bourns_PEC16" H 7700 1460 50  0001 C CNN
-F 3 "" H 7800 1560 50  0001 C CNN
-	1    7800 1300
+P 8250 1300
+F 0 "ENC1" H 8250 1560 50  0000 C CNN
+F 1 "VOL_L" H 8250 1040 50  0000 C CNN
+F 2 "Pocket Voltex:Encoder_Bourns_PEC16_hotswap" H 8150 1460 50  0001 C CNN
+F 3 "" H 8250 1560 50  0001 C CNN
+	1    8250 1300
 	1    0    0    -1  
 $EndComp
 $Comp
 L Switch:SW_Push SW8
 U 1 1 5A9D74BE
-P 7700 5600
-F 0 "SW8" H 7750 5700 50  0000 L CNN
-F 1 "SW_Push" H 7700 5540 50  0000 C CNN
-F 2 "Pocket Voltex:SW_SPST_KSC-J" H 7700 5800 50  0001 C CNN
-F 3 "" H 7700 5800 50  0001 C CNN
-	1    7700 5600
+P 7700 6100
+F 0 "SW8" H 7750 6200 50  0000 L CNN
+F 1 "SW_Push" H 7700 6040 50  0000 C CNN
+F 2 "Pocket Voltex:SW_SPST_KSC-J" H 7700 6300 50  0001 C CNN
+F 3 "" H 7700 6300 50  0001 C CNN
+F 4 "KSC521J" H 7700 6100 50  0001 C CNN "Part number"
+F 5 "https://www.mouser.com/ProductDetail/CK/KSC521J-ROHS" H 7700 6100 50  0001 C CNN "Link"
+	1    7700 6100
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -66,6 +68,8 @@ F 0 "D1" H 1800 6000 60  0000 C CNN
 F 1 "SK9822" H 1800 5900 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 1800 5900 60  0001 C CNN
 F 3 "" H 1800 5900 60  0001 C CNN
+F 4 "SK9822" H 1800 5900 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 1800 5900 50  0001 C CNN "Link"
 	1    1800 5900
 	1    0    0    -1  
 $EndComp
@@ -77,6 +81,8 @@ F 0 "D2" H 1800 7050 60  0000 C CNN
 F 1 "SK9822" H 1800 6950 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 1800 6950 60  0001 C CNN
 F 3 "" H 1800 6950 60  0001 C CNN
+F 4 "SK9822" H 1800 6950 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 1800 6950 50  0001 C CNN "Link"
 	1    1800 6950
 	-1   0    0    1   
 $EndComp
@@ -88,6 +94,8 @@ F 0 "J2" H 950 4200 50  0000 L CNN
 F 1 "USB_C_Receptacle" H 1750 4200 50  0000 R CNN
 F 2 "Pocket Voltex:USB_C_Receptacle_GCT_USB4085" H 1500 3450 50  0001 C CNN
 F 3 "" H 1500 3450 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/gct/USB4085-GF-A/2073-USB4085-GF-ACT-ND/9859733" H 1350 3450 50  0001 C CNN "Link"
+F 5 "USB4085-GF-A" H 1350 3450 50  0001 C CNN "Part number"
 	1    1350 3450
 	1    0    0    -1  
 $EndComp
@@ -123,6 +131,7 @@ F 0 "R3" V 3430 2200 50  0000 C CNN
 F 1 "10k" V 3350 2200 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" V 3280 2200 50  0001 C CNN
 F 3 "" H 3350 2200 50  0001 C CNN
+F 4 "RC0603JR-0710KL" H 3350 2200 50  0001 C CNN "Part number"
 	1    3350 2200
 	0    -1   -1   0   
 $EndComp
@@ -181,6 +190,7 @@ F 0 "C3" H 7250 1200 50  0000 L CNN
 F 1 "10nF" H 6900 1200 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0603_1608Metric" H 7150 1200 50  0001 C CNN
 F 3 "" H 7150 1200 50  0001 C CNN
+F 4 "CC0603KRX7R9BB103" H 7150 1200 50  0001 C CNN "Part number"
 	1    7150 1200
 	1    0    0    -1  
 $EndComp
@@ -192,6 +202,7 @@ F 0 "C4" H 7250 1400 50  0000 L CNN
 F 1 "10nF" H 6900 1400 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0603_1608Metric" H 7150 1400 50  0001 C CNN
 F 3 "" H 7150 1400 50  0001 C CNN
+F 4 "CC0603KRX7R9BB103" H 7150 1400 50  0001 C CNN "Part number"
 	1    7150 1400
 	1    0    0    -1  
 $EndComp
@@ -213,76 +224,78 @@ ENC1B
 $Comp
 L Device:Rotary_Encoder ENC2
 U 1 1 5A9F2BB5
-P 7800 2000
-F 0 "ENC2" H 7800 2260 50  0000 C CNN
-F 1 "VOL_R" H 7800 1740 50  0000 C CNN
-F 2 "Pocket Voltex:Encoder_Bourns_PEC16" H 7700 2160 50  0001 C CNN
-F 3 "" H 7800 2260 50  0001 C CNN
-	1    7800 2000
+P 8250 2500
+F 0 "ENC2" H 8250 2760 50  0000 C CNN
+F 1 "VOL_R" H 8250 2240 50  0000 C CNN
+F 2 "Pocket Voltex:Encoder_Bourns_PEC16_hotswap" H 8150 2660 50  0001 C CNN
+F 3 "" H 8250 2760 50  0001 C CNN
+	1    8250 2500
 	1    0    0    -1  
 $EndComp
 $Comp
 L Device:C_Small C5
 U 1 1 5A9F2BBB
-P 7150 1900
-F 0 "C5" H 7250 1900 50  0000 L CNN
-F 1 "10nF" H 6900 1900 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 7150 1900 50  0001 C CNN
-F 3 "" H 7150 1900 50  0001 C CNN
-	1    7150 1900
+P 7150 2400
+F 0 "C5" H 7250 2400 50  0000 L CNN
+F 1 "10nF" H 6900 2400 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 7150 2400 50  0001 C CNN
+F 3 "" H 7150 2400 50  0001 C CNN
+F 4 "CC0603KRX7R9BB103" H 7150 2400 50  0001 C CNN "Part number"
+	1    7150 2400
 	1    0    0    -1  
 $EndComp
 $Comp
 L Device:C_Small C6
 U 1 1 5A9F2BC1
-P 7150 2100
-F 0 "C6" H 7250 2100 50  0000 L CNN
-F 1 "10nF" H 6900 2100 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 7150 2100 50  0001 C CNN
-F 3 "" H 7150 2100 50  0001 C CNN
-	1    7150 2100
+P 7150 2600
+F 0 "C6" H 7250 2600 50  0000 L CNN
+F 1 "10nF" H 6900 2600 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 7150 2600 50  0001 C CNN
+F 3 "" H 7150 2600 50  0001 C CNN
+F 4 "CC0603KRX7R9BB103" H 7150 2600 50  0001 C CNN "Part number"
+	1    7150 2600
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR011
 U 1 1 5A9F2BC7
-P 7000 2000
-F 0 "#PWR011" H 7000 1750 50  0001 C CNN
-F 1 "GND" H 7000 1850 50  0000 C CNN
-F 2 "" H 7000 2000 50  0001 C CNN
-F 3 "" H 7000 2000 50  0001 C CNN
-	1    7000 2000
+P 7000 2500
+F 0 "#PWR011" H 7000 2250 50  0001 C CNN
+F 1 "GND" H 7000 2350 50  0000 C CNN
+F 2 "" H 7000 2500 50  0001 C CNN
+F 3 "" H 7000 2500 50  0001 C CNN
+	1    7000 2500
 	0    1    1    0   
 $EndComp
-Text Label 7500 1800 2    60   ~ 0
+Text Label 7500 2300 2    60   ~ 0
 ENC2A
-Text Label 7500 2250 2    60   ~ 0
+Text Label 7500 2750 2    60   ~ 0
 ENC2B
-Text Label 6950 2650 0    60   ~ 0
+Text Label 6950 3150 0    60   ~ 0
 SW_START
-Text Label 7150 3050 0    60   ~ 0
+Text Label 7150 3550 0    60   ~ 0
 SW_A
-Text Label 7150 3450 0    60   ~ 0
+Text Label 7150 3950 0    60   ~ 0
 SW_B
-Text Label 7150 3850 0    60   ~ 0
+Text Label 7150 4350 0    60   ~ 0
 SW_C
-Text Label 7150 4250 0    60   ~ 0
+Text Label 7150 4750 0    60   ~ 0
 SW_D
-Text Label 7050 4650 0    60   ~ 0
+Text Label 7050 5150 0    60   ~ 0
 SW_FXL
-Text Label 7050 5050 0    60   ~ 0
+Text Label 7050 5550 0    60   ~ 0
 SW_FXR
-Text Label 6950 5600 0    60   ~ 0
+Text Label 6950 6100 0    60   ~ 0
 SW_MACRO
 $Comp
 L power:GND #PWR012
 U 1 1 5A9F9807
-P 7900 5600
-F 0 "#PWR012" H 7900 5350 50  0001 C CNN
-F 1 "GND" H 7900 5450 50  0000 C CNN
-F 2 "" H 7900 5600 50  0001 C CNN
-F 3 "" H 7900 5600 50  0001 C CNN
-	1    7900 5600
+P 7900 6100
+F 0 "#PWR012" H 7900 5850 50  0001 C CNN
+F 1 "GND" H 7900 5950 50  0000 C CNN
+F 2 "" H 7900 6100 50  0001 C CNN
+F 3 "" H 7900 6100 50  0001 C CNN
+	1    7900 6100
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -315,6 +328,8 @@ F 0 "D3" H 2900 6000 60  0000 C CNN
 F 1 "SK9822" H 2900 5900 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 2900 5900 60  0001 C CNN
 F 3 "" H 2900 5900 60  0001 C CNN
+F 4 "SK9822" H 2900 5900 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 2900 5900 50  0001 C CNN "Link"
 	1    2900 5900
 	1    0    0    -1  
 $EndComp
@@ -326,6 +341,8 @@ F 0 "D4" H 2900 7050 60  0000 C CNN
 F 1 "SK9822" H 2900 6950 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 2900 6950 60  0001 C CNN
 F 3 "" H 2900 6950 60  0001 C CNN
+F 4 "SK9822" H 2900 6950 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 2900 6950 50  0001 C CNN "Link"
 	1    2900 6950
 	-1   0    0    1   
 $EndComp
@@ -337,6 +354,8 @@ F 0 "D5" H 4000 6000 60  0000 C CNN
 F 1 "SK9822" H 4000 5900 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 4000 5900 60  0001 C CNN
 F 3 "" H 4000 5900 60  0001 C CNN
+F 4 "SK9822" H 4000 5900 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 4000 5900 50  0001 C CNN "Link"
 	1    4000 5900
 	1    0    0    -1  
 $EndComp
@@ -348,6 +367,8 @@ F 0 "D6" H 4000 7050 60  0000 C CNN
 F 1 "SK9822" H 4000 6950 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 4000 6950 60  0001 C CNN
 F 3 "" H 4000 6950 60  0001 C CNN
+F 4 "SK9822" H 4000 6950 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 4000 6950 50  0001 C CNN "Link"
 	1    4000 6950
 	-1   0    0    1   
 $EndComp
@@ -359,6 +380,8 @@ F 0 "D7" H 5100 6000 60  0000 C CNN
 F 1 "SK9822" H 5100 5900 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 5100 5900 60  0001 C CNN
 F 3 "" H 5100 5900 60  0001 C CNN
+F 4 "SK9822" H 5100 5900 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 5100 5900 50  0001 C CNN "Link"
 	1    5100 5900
 	1    0    0    -1  
 $EndComp
@@ -370,6 +393,8 @@ F 0 "D8" H 5100 7050 60  0000 C CNN
 F 1 "SK9822" H 5100 6950 60  0000 C CNN
 F 2 "Pocket Voltex:LED_SK9822" H 5100 6950 60  0001 C CNN
 F 3 "" H 5100 6950 60  0001 C CNN
+F 4 "SK9822" H 5100 6950 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32829381843.html" H 5100 6950 50  0001 C CNN "Link"
 	1    5100 6950
 	-1   0    0    1   
 $EndComp
@@ -423,34 +448,34 @@ Wire Wire Line
 Wire Wire Line
 	7150 1550 7150 1500
 Wire Wire Line
-	7000 2000 7150 2000
-Connection ~ 7150 2000
+	7000 2500 7150 2500
+Connection ~ 7150 2500
 Wire Wire Line
-	7500 2100 7500 2250
+	7500 2600 7500 2750
 Wire Wire Line
-	7500 2250 7150 2250
+	7500 2750 7150 2750
 Wire Wire Line
-	7500 1900 7500 1800
+	7500 2400 7500 2300
 Wire Wire Line
-	7500 1800 7150 1800
+	7500 2300 7150 2300
 Wire Wire Line
-	7150 2250 7150 2200
+	7150 2750 7150 2700
 Wire Wire Line
-	6950 2650 7450 2650
+	6950 3150 7450 3150
 Wire Wire Line
-	7450 3050 7150 3050
+	7450 3550 7150 3550
 Wire Wire Line
-	7450 3450 7150 3450
+	7450 3950 7150 3950
 Wire Wire Line
-	7450 3850 7150 3850
+	7450 4350 7150 4350
 Wire Wire Line
-	7450 4250 7150 4250
+	7450 4750 7150 4750
 Wire Wire Line
-	7450 4650 7050 4650
+	7450 5150 7050 5150
 Wire Wire Line
-	7450 5050 7050 5050
+	7450 5550 7050 5550
 Wire Wire Line
-	7500 5600 6950 5600
+	7500 6100 6950 6100
 Wire Wire Line
 	2250 6850 2450 6850
 Wire Wire Line
@@ -685,155 +710,169 @@ $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW1
 U 1 1 5AA04426
-P 7650 2650
-F 0 "SW1" H 7650 2750 50  0000 C CNN
-F 1 "MX socket" H 7650 2450 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_1.00u_PCB_Socket" H 7650 2650 50  0001 C CNN
-F 3 "" H 7650 2650 50  0001 C CNN
-	1    7650 2650
+P 7650 3150
+F 0 "SW1" H 7650 3250 50  0000 C CNN
+F 1 "MX socket" H 7650 2950 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_1.00u_PCB_Socket" H 7650 3150 50  0001 C CNN
+F 3 "" H 7650 3150 50  0001 C CNN
+F 4 "PG151101S11" H 7650 3150 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 3150 50  0001 C CNN "Link"
+	1    7650 3150
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW2
 U 1 1 5AA048F5
-P 7650 3050
-F 0 "SW2" H 7650 3150 50  0000 C CNN
-F 1 "MX socket" H 7650 2850 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 3050 50  0001 C CNN
-F 3 "" H 7650 3050 50  0001 C CNN
-	1    7650 3050
+P 7650 3550
+F 0 "SW2" H 7650 3650 50  0000 C CNN
+F 1 "MX socket" H 7650 3350 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 3550 50  0001 C CNN
+F 3 "" H 7650 3550 50  0001 C CNN
+F 4 "PG151101S11" H 7650 3550 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 3550 50  0001 C CNN "Link"
+	1    7650 3550
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW3
 U 1 1 5AA04B53
-P 7650 3450
-F 0 "SW3" H 7650 3550 50  0000 C CNN
-F 1 "MX socket" H 7650 3250 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 3450 50  0001 C CNN
-F 3 "" H 7650 3450 50  0001 C CNN
-	1    7650 3450
+P 7650 3950
+F 0 "SW3" H 7650 4050 50  0000 C CNN
+F 1 "MX socket" H 7650 3750 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 3950 50  0001 C CNN
+F 3 "" H 7650 3950 50  0001 C CNN
+F 4 "PG151101S11" H 7650 3950 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 3950 50  0001 C CNN "Link"
+	1    7650 3950
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW4
 U 1 1 5AA05186
-P 7650 3850
-F 0 "SW4" H 7650 3950 50  0000 C CNN
-F 1 "MX socket" H 7650 3650 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 3850 50  0001 C CNN
-F 3 "" H 7650 3850 50  0001 C CNN
-	1    7650 3850
+P 7650 4350
+F 0 "SW4" H 7650 4450 50  0000 C CNN
+F 1 "MX socket" H 7650 4150 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 4350 50  0001 C CNN
+F 3 "" H 7650 4350 50  0001 C CNN
+F 4 "PG151101S11" H 7650 4350 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 4350 50  0001 C CNN "Link"
+	1    7650 4350
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW5
 U 1 1 5AA051F2
-P 7650 4250
-F 0 "SW5" H 7650 4350 50  0000 C CNN
-F 1 "MX socket" H 7650 4050 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 4250 50  0001 C CNN
-F 3 "" H 7650 4250 50  0001 C CNN
-	1    7650 4250
+P 7650 4750
+F 0 "SW5" H 7650 4850 50  0000 C CNN
+F 1 "MX socket" H 7650 4550 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_1.25u_PCB_Socket" H 7650 4750 50  0001 C CNN
+F 3 "" H 7650 4750 50  0001 C CNN
+F 4 "PG151101S11" H 7650 4750 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 4750 50  0001 C CNN "Link"
+	1    7650 4750
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW6
 U 1 1 5AA05280
-P 7650 4650
-F 0 "SW6" H 7650 4750 50  0000 C CNN
-F 1 "MX socket" H 7650 4450 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_2.25u_PCB_Socket" H 7650 4650 50  0001 C CNN
-F 3 "" H 7650 4650 50  0001 C CNN
-	1    7650 4650
+P 7650 5150
+F 0 "SW6" H 7650 5250 50  0000 C CNN
+F 1 "MX socket" H 7650 4950 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_2.25u_PCB_Socket" H 7650 5150 50  0001 C CNN
+F 3 "" H 7650 5150 50  0001 C CNN
+F 4 "PG151101S11" H 7650 5150 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 5150 50  0001 C CNN "Link"
+	1    7650 5150
 	1    0    0    -1  
 $EndComp
 $Comp
 L Connector:Conn_01x02_Female SW7
 U 1 1 5AA052F4
-P 7650 5050
-F 0 "SW7" H 7650 5150 50  0000 C CNN
-F 1 "MX socket" H 7650 4850 50  0000 C CNN
-F 2 "Pocket Voltex:SW_Cherry_MX1A_2.25u_PCB_Socket" H 7650 5050 50  0001 C CNN
-F 3 "" H 7650 5050 50  0001 C CNN
-	1    7650 5050
+P 7650 5550
+F 0 "SW7" H 7650 5650 50  0000 C CNN
+F 1 "MX socket" H 7650 5350 50  0000 C CNN
+F 2 "Pocket Voltex:SW_Cherry_MX1A_2.25u_PCB_Socket" H 7650 5550 50  0001 C CNN
+F 3 "" H 7650 5550 50  0001 C CNN
+F 4 "PG151101S11" H 7650 5550 50  0001 C CNN "Part number"
+F 5 "https://www.aliexpress.com/item/32875065054.html" H 7650 5550 50  0001 C CNN "Link"
+	1    7650 5550
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR032
 U 1 1 5AA062AF
-P 7450 5150
-F 0 "#PWR032" H 7450 4900 50  0001 C CNN
-F 1 "GND" H 7450 5000 50  0000 C CNN
-F 2 "" H 7450 5150 50  0001 C CNN
-F 3 "" H 7450 5150 50  0001 C CNN
-	1    7450 5150
+P 7450 5650
+F 0 "#PWR032" H 7450 5400 50  0001 C CNN
+F 1 "GND" H 7450 5500 50  0000 C CNN
+F 2 "" H 7450 5650 50  0001 C CNN
+F 3 "" H 7450 5650 50  0001 C CNN
+	1    7450 5650
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR033
 U 1 1 5AA0631E
-P 7450 4750
-F 0 "#PWR033" H 7450 4500 50  0001 C CNN
-F 1 "GND" H 7450 4600 50  0000 C CNN
-F 2 "" H 7450 4750 50  0001 C CNN
-F 3 "" H 7450 4750 50  0001 C CNN
-	1    7450 4750
+P 7450 5250
+F 0 "#PWR033" H 7450 5000 50  0001 C CNN
+F 1 "GND" H 7450 5100 50  0000 C CNN
+F 2 "" H 7450 5250 50  0001 C CNN
+F 3 "" H 7450 5250 50  0001 C CNN
+	1    7450 5250
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR034
 U 1 1 5AA06386
-P 7450 4350
-F 0 "#PWR034" H 7450 4100 50  0001 C CNN
-F 1 "GND" H 7450 4200 50  0000 C CNN
-F 2 "" H 7450 4350 50  0001 C CNN
-F 3 "" H 7450 4350 50  0001 C CNN
-	1    7450 4350
+P 7450 4850
+F 0 "#PWR034" H 7450 4600 50  0001 C CNN
+F 1 "GND" H 7450 4700 50  0000 C CNN
+F 2 "" H 7450 4850 50  0001 C CNN
+F 3 "" H 7450 4850 50  0001 C CNN
+	1    7450 4850
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR035
 U 1 1 5AA063EE
-P 7450 3950
-F 0 "#PWR035" H 7450 3700 50  0001 C CNN
-F 1 "GND" H 7450 3800 50  0000 C CNN
-F 2 "" H 7450 3950 50  0001 C CNN
-F 3 "" H 7450 3950 50  0001 C CNN
-	1    7450 3950
+P 7450 4450
+F 0 "#PWR035" H 7450 4200 50  0001 C CNN
+F 1 "GND" H 7450 4300 50  0000 C CNN
+F 2 "" H 7450 4450 50  0001 C CNN
+F 3 "" H 7450 4450 50  0001 C CNN
+	1    7450 4450
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR036
 U 1 1 5AA06BDE
-P 7450 3550
-F 0 "#PWR036" H 7450 3300 50  0001 C CNN
-F 1 "GND" H 7450 3400 50  0000 C CNN
-F 2 "" H 7450 3550 50  0001 C CNN
-F 3 "" H 7450 3550 50  0001 C CNN
-	1    7450 3550
+P 7450 4050
+F 0 "#PWR036" H 7450 3800 50  0001 C CNN
+F 1 "GND" H 7450 3900 50  0000 C CNN
+F 2 "" H 7450 4050 50  0001 C CNN
+F 3 "" H 7450 4050 50  0001 C CNN
+	1    7450 4050
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR037
 U 1 1 5AA06C46
-P 7450 3150
-F 0 "#PWR037" H 7450 2900 50  0001 C CNN
-F 1 "GND" H 7450 3000 50  0000 C CNN
-F 2 "" H 7450 3150 50  0001 C CNN
-F 3 "" H 7450 3150 50  0001 C CNN
-	1    7450 3150
+P 7450 3650
+F 0 "#PWR037" H 7450 3400 50  0001 C CNN
+F 1 "GND" H 7450 3500 50  0000 C CNN
+F 2 "" H 7450 3650 50  0001 C CNN
+F 3 "" H 7450 3650 50  0001 C CNN
+	1    7450 3650
 	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR038
 U 1 1 5AA06CAE
-P 7450 2750
-F 0 "#PWR038" H 7450 2500 50  0001 C CNN
-F 1 "GND" H 7450 2600 50  0000 C CNN
-F 2 "" H 7450 2750 50  0001 C CNN
-F 3 "" H 7450 2750 50  0001 C CNN
-	1    7450 2750
+P 7450 3250
+F 0 "#PWR038" H 7450 3000 50  0001 C CNN
+F 1 "GND" H 7450 3100 50  0000 C CNN
+F 2 "" H 7450 3250 50  0001 C CNN
+F 3 "" H 7450 3250 50  0001 C CNN
+	1    7450 3250
 	0    1    1    0   
 $EndComp
 $Comp
@@ -898,10 +937,6 @@ Wire Wire Line
 Wire Wire Line
 	2050 3400 2050 3450
 Wire Wire Line
-	7150 1300 7500 1300
-Wire Wire Line
-	7150 2000 7500 2000
-Wire Wire Line
 	1050 4350 1050 4450
 Wire Wire Line
 	1050 4450 1200 4450
@@ -937,6 +972,8 @@ F 0 "X1" V 3100 2650 50  0000 C CNN
 F 1 "16MHz" V 3000 2700 50  0000 C CNN
 F 2 "Pocket Voltex:murata-resonator_SMD_CSTCE16M0V53-R0" H 3075 2500 50  0001 C CNN
 F 3 "" H 3075 2500 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/murata-electronics/CSTCE16M0V53-R0/490-1198-1-ND/584635" H 3100 2500 50  0001 C CNN "Link"
+F 5 "CSTCE16M0V53-R0" H 3100 2500 50  0001 C CNN "Part number"
 	1    3100 2500
 	0    1    1    0   
 $EndComp
@@ -970,6 +1007,7 @@ F 0 "R1" V 3280 2800 50  0000 C CNN
 F 1 "22R" V 3200 2800 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" V 3130 2800 50  0001 C CNN
 F 3 "" H 3200 2800 50  0001 C CNN
+F 4 "RC0603JR-0722RL" H 3200 2800 50  0001 C CNN "Part number"
 	1    3200 2800
 	0    -1   -1   0   
 $EndComp
@@ -981,6 +1019,7 @@ F 0 "R2" V 3280 2900 50  0000 C CNN
 F 1 "22R" V 3200 2900 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" V 3130 2900 50  0001 C CNN
 F 3 "" H 3200 2900 50  0001 C CNN
+F 4 "RC0603JR-0722RL" H 3200 2900 50  0001 C CNN "Part number"
 	1    3200 2900
 	0    1    1    0   
 $EndComp
@@ -1016,6 +1055,7 @@ F 0 "C1" H 3025 3350 50  0000 L CNN
 F 1 "1uF" H 3025 3150 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0603_1608Metric" H 3038 3100 50  0001 C CNN
 F 3 "" H 3000 3250 50  0001 C CNN
+F 4 "CC0603KRX5R5BB105" H 3000 3250 50  0001 C CNN "Part number"
 	1    3000 3250
 	-1   0    0    1   
 $EndComp
@@ -1105,19 +1145,9 @@ F 0 "R4" V 2004 3150 50  0000 C CNN
 F 1 "5.1k" V 2095 3150 50  0000 C CNN
 F 2 "Resistor_SMD:R_0603_1608Metric" H 2200 3150 50  0001 C CNN
 F 3 "~" H 2200 3150 50  0001 C CNN
+F 4 "RC0603JR-075K1L" H 2200 3150 50  0001 C CNN "Part number"
 	1    2200 3150
 	0    1    1    0   
-$EndComp
-$Comp
-L MCU_Microchip_ATmega:ATmega16U2-MU U1
-U 1 1 5D2CB60A
-P 4400 3300
-F 0 "U1" H 4400 1811 50  0000 C CNN
-F 1 "ATmega16U2-MU" H 4400 1720 50  0000 C CNN
-F 2 "Package_DFN_QFN:QFN-32-1EP_5x5mm_P0.5mm_EP3.1x3.1mm" H 4400 3300 50  0001 C CIN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc7799.pdf" H 4400 3300 50  0001 C CNN
-	1    4400 3300
-	1    0    0    -1  
 $EndComp
 Connection ~ 3700 2200
 Wire Wire Line
@@ -1222,6 +1252,189 @@ F 1 "Rasis" H 9635 2805 50  0000 L CNN
 F 2 "Pocket Voltex:Rasis" H 9550 2850 50  0001 C CNN
 F 3 "~" H 9550 2850 50  0001 C CNN
 	1    9550 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole EH2
+U 1 1 5E9786EF
+P 8550 1400
+F 0 "EH2" H 8650 1446 50  0000 L CNN
+F 1 "Encoder nut" H 8650 1355 50  0000 L CNN
+F 2 "Pocket Voltex:SMD_Standoff_M2_Wurth" H 8550 1400 50  0001 C CNN
+F 3 "https://katalog.we-online.de/em/datasheet/9774020243R.pdf" H 8550 1400 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/w-rth-elektronik/9774020243R/732-7073-1-ND/5320678" H 8550 1400 50  0001 C CNN "Link"
+F 5 "9774020243R" H 8550 1400 50  0001 C CNN "Part number"
+	1    8550 1400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole EH1
+U 1 1 5E978C67
+P 8550 1200
+F 0 "EH1" H 8650 1246 50  0000 L CNN
+F 1 "Encoder nut" H 8650 1155 50  0000 L CNN
+F 2 "Pocket Voltex:SMD_Standoff_M2_Wurth" H 8550 1200 50  0001 C CNN
+F 3 "https://katalog.we-online.de/em/datasheet/9774020243R.pdf" H 8550 1200 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/w-rth-elektronik/9774020243R/732-7073-1-ND/5320678" H 8550 1200 50  0001 C CNN "Link"
+F 5 "9774020243R" H 8550 1200 50  0001 C CNN "Part number"
+	1    8550 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole EH4
+U 1 1 5E979C9D
+P 8550 2600
+F 0 "EH4" H 8650 2646 50  0000 L CNN
+F 1 "Encoder nut" H 8650 2555 50  0000 L CNN
+F 2 "Pocket Voltex:SMD_Standoff_M2_Wurth" H 8550 2600 50  0001 C CNN
+F 3 "https://katalog.we-online.de/em/datasheet/9774020243R.pdf" H 8550 2600 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/w-rth-elektronik/9774020243R/732-7073-1-ND/5320678" H 8550 2600 50  0001 C CNN "Link"
+F 5 "9774020243R" H 8550 2600 50  0001 C CNN "Part number"
+	1    8550 2600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole EH3
+U 1 1 5E979CA3
+P 8550 2400
+F 0 "EH3" H 8650 2446 50  0000 L CNN
+F 1 "Encoder nut" H 8650 2355 50  0000 L CNN
+F 2 "Pocket Voltex:SMD_Standoff_M2_Wurth" H 8550 2400 50  0001 C CNN
+F 3 "https://katalog.we-online.de/em/datasheet/9774020243R.pdf" H 8550 2400 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/w-rth-elektronik/9774020243R/732-7073-1-ND/5320678" H 8550 2400 50  0001 C CNN "Link"
+F 5 "9774020243R" H 8550 2400 50  0001 C CNN "Part number"
+	1    8550 2400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 EJ1
+U 1 1 5E984BF0
+P 7600 800
+F 0 "EJ1" V 7700 850 50  0000 R CNN
+F 1 "Hotswap" V 7600 1200 50  0000 R CNN
+F 2 "Pocket Voltex:Harwin-SMD-Socket-S9091-46R" H 7600 800 50  0001 C CNN
+F 3 "" H 7600 800 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/harwin-inc/S9091-46R/952-2639-1-ND/5175732" H 7600 800 50  0001 C CNN "Link"
+F 5 "S9091-46R" H 7600 800 50  0001 C CNN "Part number"
+	1    7600 800 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 EJ2
+U 1 1 5E98652C
+P 7750 800
+F 0 "EJ2" V 7850 850 50  0000 R CNN
+F 1 "Hotswap" V 7750 1200 50  0001 R CNN
+F 2 "Pocket Voltex:Harwin-SMD-Socket-S9091-46R" H 7750 800 50  0001 C CNN
+F 3 "" H 7750 800 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/harwin-inc/S9091-46R/952-2639-1-ND/5175732" H 7750 800 50  0001 C CNN "Link"
+F 5 "S9091-46R" H 7750 800 50  0001 C CNN "Part number"
+	1    7750 800 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 EJ3
+U 1 1 5E986959
+P 7900 800
+F 0 "EJ3" V 8000 850 50  0000 R CNN
+F 1 "Hotswap" V 7900 1200 50  0001 R CNN
+F 2 "Pocket Voltex:Harwin-SMD-Socket-S9091-46R" H 7900 800 50  0001 C CNN
+F 3 "" H 7900 800 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/harwin-inc/S9091-46R/952-2639-1-ND/5175732" H 7900 800 50  0001 C CNN "Link"
+F 5 "S9091-46R" H 7900 800 50  0001 C CNN "Part number"
+	1    7900 800 
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	7600 1000 7600 1200
+Connection ~ 7600 1200
+Wire Wire Line
+	7600 1200 7500 1200
+Wire Wire Line
+	7600 1200 7950 1200
+Wire Wire Line
+	7500 2400 7600 2400
+$Comp
+L Connector_Generic:Conn_01x01 EJ4
+U 1 1 5E9CC55B
+P 7600 2000
+F 0 "EJ4" V 7700 2050 50  0000 R CNN
+F 1 "Hotswap" V 7600 2400 50  0000 R CNN
+F 2 "Pocket Voltex:Harwin-SMD-Socket-S9091-46R" H 7600 2000 50  0001 C CNN
+F 3 "" H 7600 2000 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/harwin-inc/S9091-46R/952-2639-1-ND/5175732" H 7600 2000 50  0001 C CNN "Link"
+F 5 "S9091-46R" H 7600 2000 50  0001 C CNN "Part number"
+	1    7600 2000
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 EJ5
+U 1 1 5E9CC561
+P 7750 2000
+F 0 "EJ5" V 7850 2050 50  0000 R CNN
+F 1 "Hotswap" V 7750 2400 50  0001 R CNN
+F 2 "Pocket Voltex:Harwin-SMD-Socket-S9091-46R" H 7750 2000 50  0001 C CNN
+F 3 "" H 7750 2000 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/harwin-inc/S9091-46R/952-2639-1-ND/5175732" H 7750 2000 50  0001 C CNN "Link"
+F 5 "S9091-46R" H 7750 2000 50  0001 C CNN "Part number"
+	1    7750 2000
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 EJ6
+U 1 1 5E9CC567
+P 7900 2000
+F 0 "EJ6" V 8000 2050 50  0000 R CNN
+F 1 "Hotswap" V 7900 2400 50  0001 R CNN
+F 2 "Pocket Voltex:Harwin-SMD-Socket-S9091-46R" H 7900 2000 50  0001 C CNN
+F 3 "" H 7900 2000 50  0001 C CNN
+F 4 "https://www.digikey.com/product-detail/en/harwin-inc/S9091-46R/952-2639-1-ND/5175732" H 7900 2000 50  0001 C CNN "Link"
+F 5 "S9091-46R" H 7900 2000 50  0001 C CNN "Part number"
+	1    7900 2000
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	7600 2200 7600 2400
+Connection ~ 7600 2400
+Wire Wire Line
+	7600 2400 7950 2400
+Wire Wire Line
+	7150 2500 7900 2500
+Wire Wire Line
+	7500 2600 7750 2600
+Wire Wire Line
+	7750 2200 7750 2600
+Connection ~ 7750 2600
+Wire Wire Line
+	7750 2600 7950 2600
+Wire Wire Line
+	7900 2200 7900 2500
+Connection ~ 7900 2500
+Wire Wire Line
+	7900 2500 7950 2500
+Wire Wire Line
+	7150 1300 7900 1300
+Wire Wire Line
+	7500 1400 7750 1400
+Wire Wire Line
+	7750 1000 7750 1400
+Connection ~ 7750 1400
+Wire Wire Line
+	7750 1400 7950 1400
+Wire Wire Line
+	7900 1000 7900 1300
+Connection ~ 7900 1300
+Wire Wire Line
+	7900 1300 7950 1300
+$Comp
+L MCU_Microchip_ATmega:ATmega32U2-AU U1
+U 1 1 5E9879FF
+P 4400 3300
+F 0 "U1" H 4400 1811 50  0000 C CNN
+F 1 "ATmega32U2-AU" H 4400 1720 50  0000 C CNN
+F 2 "Package_QFP:TQFP-32_7x7mm_P0.8mm" H 4400 3300 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc7799.pdf" H 4400 3300 50  0001 C CNN
+	1    4400 3300
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC

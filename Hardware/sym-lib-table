@@ -1,3 +1,5 @@
 (sym_lib_table
   (lib (name PocketVoltex)(type Legacy)(uri ${KIPRJMOD}/PocketVoltex.lib)(options "")(descr ""))
+  (lib (name PocketVoltex-rescue)(type Legacy)(uri ${KIPRJMOD}/PocketVoltex-rescue.lib)(options "")(descr ""))
+  (lib (name led_parts)(type Legacy)(uri C:/Users/Will/Dropbox/Projects/SDVX/Hardware/led_parts.lib)(options "")(descr ""))
 )
