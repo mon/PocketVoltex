@@ -17,10 +17,6 @@ I recommend using the mouse+keyboard mode, as I have noticed slight jitter when 
 
 However, if you would like to use gamepad mode, simply bind the keys as normal (page 3 of the input selection) and select `Analog X/Y` as the knob input. I find sensitivity at 100 works best.
 
-## HID Lighting fix
-By default, HID lighting will crash after a few minutes of gameplay. To fix
-this, simply patch libinput.dll using [this tool](https://mon.im/bemanipatcher/pocketvoltex.html).
-
 ## NetworkError: Unable to claim interface.
 This seems to be caused by broken drivers. Give Zadig a try!
 - Download and run [Zadig](http://zadig.akeo.ie/)
